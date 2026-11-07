@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ▼ 관리자 Google 이메일 (바꾸려면 따옴표 안만 고치세요)
+    function isAdmin() { return signedIn() && myEmail() in ['quswpdnr@gmail.com']; }
+
+    function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function myEmail() { return request.auth.token.email.lower(); }
+    function isMember() { return isAdmin() || (signedIn() && exists(/databases/$(database)/documents/members/$(myEmail()))); }
+
+    match /members/{email} {
+      allow read: if isAdmin() || (signedIn() && email == myEmail());
+      allow write: if isAdmin();
+    }
+    match /meta/{id} { allow read: if isMember(); allow write: if isAdmin(); }
+    match /snap/{id} { allow read: if isMember(); allow write: if isAdmin(); }
+    match /users/{uid} {
+      allow read: if isMember();
+      allow write: if isAdmin() || (isMember() && uid == request.auth.uid);
+    }
+    match /{col}/{id} {
+      allow read, write: if isMember() && col in ['prod', 'ord', 'ovr', 'fac', 'fchg', 'pfix', 'stock', 'log'];
+    }
+  }
+}
