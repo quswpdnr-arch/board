@@ -2172,7 +2172,7 @@ function viewResv(){
       '<select id="rvSt"><option value="">노출 상태 전체</option>'+RV_ST.map(s=>'<option'+(s===X.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+
       '<select id="rvCat"><option value="">전체 분류</option>'+catList().map(c=>'<option value="'+esc(c.n)+'"'+(c.n===X.cat?' selected':'')+'>'+esc(c.n)+(c.owner?' · '+esc(c.owner):'')+' ('+c.c+')</option>').join('')+'</select>'+
       '<select id="rvFac"><option value="">전체 공장</option>'+activeFacs().map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
-      (anyF?'<button class="btn sm" data-act="rvClear">‹ 검색 필터 해제</button>':'')+(X.act?'':'<label class="chk"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'> 판매 · 입고 없는 상품도 보기</label>')+
+      (anyF?'<button class="btn sm" data-act="rvClear">‹ 검색 필터 해제</button>':'')+(X.act?'':'<label class="chk"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'> 전체 상품 보기</label>')+
       '<span class="note">'+nf(a.length)+'개</span></div>';
   h += '<div class="panel tw"><table class="rvtbl"><thead><tr>'+sth('prod','상품 · 컬러,사이즈 · 바코드')+sth('st','노출 상태')+sth('act','할 일')+sth('wk','주간 판매','num','<small class="thsub">'+esc(salesLabel())+'</small>')+sth('stock','재고','num','<small class="thsub">출고 가능 / 실 보유</small>')+sth('eta','입고 예정')+sth('round','예약 차수')+sth('ch','채널 반영','','<small class="thsub">'+esc(chList().join(' · '))+'</small>')+sth('memo','메모')+'</tr></thead><tbody>';
   if(!a.length) h += '<tr><td colspan="9" class="empty">조건에 맞는 상품이 없습니다.</td></tr>';
