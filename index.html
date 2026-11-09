@@ -316,6 +316,41 @@ td.spc>small{display:block;font-size:10px}
 a.plink,a.flink{color:inherit;text-decoration:none;cursor:pointer}a.plink:hover,a.flink:hover{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
 .odsub{display:block;font-size:11px;color:var(--muted);font-weight:400}
 .qback{flex:none;white-space:nowrap}
+.whs{display:block;font-size:10.5px;color:var(--muted);font-weight:400;white-space:nowrap}
+.mstk span small+small{font-size:10px}
+.catsel{display:block;margin-top:4px;font-size:11px;padding:1px 18px 1px 6px;min-height:0;height:auto;width:auto;border-radius:6px;color:var(--muted);background-color:var(--sunk)}
+.rvc.all{width:auto;padding:0 6px}
+.brandsw{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--panel);margin-left:auto}
+.bsw{font:inherit;font-size:12.5px;font-weight:600;border:0;background:transparent;color:var(--muted);padding:5px 12px;border-radius:999px;cursor:pointer}
+.bsw.on{background:var(--fg);color:var(--bg)}
+.brandsw + .acct{margin-left:12px}
+.wordmark{font-family:"Didot","Bodoni 72","Playfair Display","Times New Roman",serif;font-weight:500;letter-spacing:.02em;font-size:17px;line-height:1;color:var(--fg)}
+.wm-tid{font-stretch:condensed;letter-spacing:-.01em;transform:scaleX(.82);transform-origin:left;display:inline-block}
+.wm-frv{letter-spacing:.04em}
+.bcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:980px){.bcards{grid-template-columns:1fr}}
+.bcard{display:grid;gap:12px}.bcard.off{opacity:.6}
+.bchead{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:30px}
+.bchead .wordmark{font-size:21px}.blogo{width:150px;height:16px}
+.bcnums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.bcnums div{display:grid;gap:2px;min-width:0;background:var(--sunk);border-radius:10px;padding:8px 9px}
+.bcnums span{font-size:11px;color:var(--muted)}.bcnums b{font-size:17px;white-space:nowrap;letter-spacing:-.01em;font-variant-numeric:tabular-nums}.bcnums b small{font-size:11px;font-weight:500;margin-left:1px;color:var(--muted)}
+.bcnums em{font-style:normal;font-size:11px;color:var(--muted)}.bcnums .bad b{color:var(--bad)}.bcnums .soon b{color:var(--warn)}
+.bcmeta{margin:0;font-size:11.5px}
+body.mode-all #tabs{display:none}
+.alltbl{min-width:780px}.alltbl td:first-child,.alltbl td:nth-child(2){white-space:nowrap}
+.bempty{display:grid;gap:10px;justify-items:center;text-align:center;padding:48px 20px}.bempty h2{margin:6px 0 0;font-size:17px}
+@media (max-width:640px){.hrow{flex-wrap:wrap;gap:8px}.brandsw{margin-left:0;order:3;width:100%;justify-content:space-between}.bsw{flex:1;padding:5px 6px}}
+.rvcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(134px,1fr));gap:8px;margin-bottom:12px}
+.rvcard{display:grid;grid-template-columns:1fr auto;gap:2px 6px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 11px;cursor:pointer;font:inherit;color:inherit}.rvcard small{grid-column:1/-1}
+.rvcard b{font-size:18px}.rvcard small{font-size:11px;color:var(--muted);line-height:1.3}.rvcard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.rvtbl td{vertical-align:top}.rvtbl td:first-child{min-width:220px}.rvtbl td.rvmemo{min-width:140px}.rvtbl tr.rvneed td:first-child{box-shadow:3px 0 0 var(--accent) inset}
+.rvsel{font-size:12.5px;padding:3px 22px 3px 8px;min-height:0;height:auto;width:auto;border-radius:8px;font-weight:600}
+.rvround{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--sunk);border:1px solid var(--line);margin:0 4px 4px 0;white-space:nowrap}.rvround.bad{border-color:var(--bad);color:var(--bad)}
+.rvch{display:inline-flex;gap:2px;flex-wrap:nowrap}.rvc{font:inherit;font-size:10.5px;width:21px;height:21px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;padding:0}.rvc.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.rvmemo small{display:block;font-size:11.5px;max-width:180px;line-height:1.4}
+a.rvinc{cursor:pointer;color:inherit;text-decoration:none;white-space:nowrap}a.rvinc:hover{color:var(--accent)}
+.rvrows{display:grid;gap:6px}.rvr{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.rvr.done{opacity:.55}.rvr input[data-k=memo]{flex:1;min-width:140px}.rvr .bad{color:var(--bad);font-size:11.5px}
 .tchips{display:flex;flex-wrap:wrap;gap:6px}.tchip{font-size:12.5px;padding:3px 10px;border-radius:999px;background:var(--sunk);border:1px solid var(--line)}.tchip.dup{opacity:.55;text-decoration:line-through}
 .tperm{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px}.tperm label{display:inline-flex;gap:5px;align-items:center}
 .ttbl td.c,.ttbl th.c{text-align:center}.ttbl .tname{width:120px}.ttbl .tname.need{border-color:var(--accent)}.ttbl tr.tadmin td{color:var(--muted)}
@@ -369,6 +404,7 @@ a.plink,a.flink{color:inherit;text-decoration:none;cursor:pointer}a.plink:hover,
   <div class="wrap">
     <div class="hrow">
       <div class="brand" data-act="goHome" role="link" tabindex="0" title="대시보드로">노운베러 오더·입고 보드<span class="logo" role="img" aria-label="KNOWN BETTER"></span></div>
+      <div id="brandSw" class="brandsw" role="tablist" aria-label="브랜드"></div>
       <div id="acct" class="acct"></div>
     </div>
     <nav class="tabs" role="tablist" id="tabs">
@@ -377,6 +413,7 @@ a.plink,a.flink{color:inherit;text-decoration:none;cursor:pointer}a.plink:hover,
       <button role="tab" data-tab="fac">공장별 조회</button>
       <button role="tab" data-tab="find">상품 조회</button>
       <button role="tab" data-tab="reg">등록·입고처리</button>
+      <button role="tab" data-tab="resv">예약배송</button>
     </nav>
   </div>
 </header>
@@ -384,11 +421,22 @@ a.plink,a.flink{color:inherit;text-decoration:none;cursor:pointer}a.plink:hover,
 <footer class="wrap foot" id="foot"></footer>
 <div id="modalRoot"></div>
 
+<script type="application/json" id="snap_frv"></script>
+<script type="application/json" id="snap_tid"></script>
+<script type="application/json" id="sums"></script>
 <script type="application/json" id="snap"></script>
 <script type="text/plain" id="app-src">
 (function(){
 'use strict';
-const SNAP = JSON.parse(document.getElementById('snap').textContent);
+const BRAND_KEYS = ['all','tid','kb','frv'];
+let BRAND = 'kb';
+try{ BRAND = localStorage.getItem('kb_brand') || 'kb'; }catch(e){ const m = /kbb=(\w+)/.exec(window.name||''); if(m) BRAND = m[1]; }
+if(window.__BRAND) BRAND = window.__BRAND;
+if(!BRAND_KEYS.includes(BRAND)) BRAND = 'kb';
+const snapEl = id => { const e = document.getElementById(id); const t = e ? e.textContent.trim() : ''; return t && (t[0]==='{' || t[0]==='[') ? t : null; };
+const SUMS = window.__BRAND_SUMS || JSON.parse(snapEl('sums') || '{}');
+const SNAP_TXT = snapEl('snap_'+BRAND) || snapEl('snap');
+const SNAP = JSON.parse(SNAP_TXT);
 const LEAD = SNAP.lead;
 const FMETA = SNAP.facMeta || {};
 const INACTIVE = new Set(Object.keys(FMETA).filter(f=>FMETA[f].inactive)); // 원본의 '(진행안함)' 시트
@@ -407,7 +455,8 @@ const ST = {late:'지연',over:'예상일 경과',soon:'7일 내 입고',open:'�
 const REASONS = ['원단 수급 지연','공장 생산 지연','검수/불량 재작업','부자재 지연','물류/통관 지연','오더 수량 변경','기타'];
 
 // ---------- state ----------
-let DB = null, USER = null, MYID = null, dbState = 'connecting';
+let DB = null, RAWDB = null, USER = null, MYID = null, dbState = 'connecting';
+function brandDB(raw){ if(BRAND==='kb' || BRAND==='all') return raw; const P = p => /^(members|users)(\/|$)/.test(p) ? p : 'brands/'+BRAND+'/'+p; return {collection: p => raw.collection(P(p)), doc: p => raw.doc(P(p))}; }
 let newProds = {}, newOrds = {}, ovr = {}, logs = [], facDocs = {}, fchgs = [], pfixDocs = {}, stockDoc = null;
 let PRODS, ORDERS, BYID, FACTORIES;
 const S = {
@@ -423,7 +472,8 @@ const S = {
   rcv: {q:'', fac:'', paste:'', res:null},
   pl: {text:'', res:null},
   sm: {},
-  team: {add:'', perms:{reorder:true,recv:true,reg:true,stock:true,fix:true,fac:true}},
+  rv: {q:'', st:'', fac:'', cat:'', act:'', all:false, n:150},
+  team: {add:'', perms:{reorder:true,recv:true,reg:true,stock:true,resv:true,fix:true,fac:true}},
   reg: {mode:'sync', newRows:[{opt:'',b:'',qty:'',eta:''}], ro:{q:'', style:null, sel:{}}, bulk:''},
   showMore: 0
 };
@@ -497,6 +547,7 @@ function rebuild(){
     if((pfixDocs[pp[0]]||{}).deleted || (ovr['s'+i]||{}).deleted) return;
     const p = getProd(AB(pp[0]), pp[1], {contact:pp[2], n:pp[3], en:pp[4], opt:pp[5], cat:pp[6]});
     if(pp[7]){ p.sysFac = pp[7]; p.stock = pp[8]; p.avail = pp[9]; }
+    const W = (SNAP.wh||{})[pp[0]]; if(W){ p.trans = W[0]; p.hq = W[1]; p.unsent = W[2]; }
     p.origBs.add(pp[0]);
     facs.add(pp[1]);
     addOrder({id:'s'+i, p, f:pp[1], round:r[1], od:r[2], qty:r[3], eta0:r[4], etaText:r[5], recv0:r[6], rem0:r[7],
@@ -518,7 +569,7 @@ function rebuild(){
   const SI = stockLive() ? stockDoc.items : null;
   for(const p of PRODS.values()){
     for(const ob of p.origBs){ const d = pfixDocs[ob]; if(!d) continue; for(const k of ['n','en','opt','cat','country']) if(d[k]) p[k] = d[k]; }
-    if(SI){ const it = SI[p.b] || [...p.origBs].map(b=>SI[b]).find(Boolean); if(it){ p.stock = it[0]; p.avail = it[1]; } }
+    if(SI){ const it = SI[p.b] || [...p.origBs].map(b=>SI[b]).find(Boolean); if(it){ p.stock = it[0]; p.avail = it[1]; if(it.length>2){ p.trans = it[2]; p.hq = it[3]; p.unsent = it[4]; } } }
   }
   buildLead();
   for(const o of ORDERS) if(o.etaKind==='est'){ const li = leadInfo(o.p, o.f); o.eta = addDays(o.od, li.d); o.leadSrc = li.src; o.status = statusOf(o); }
@@ -600,13 +651,14 @@ async function initCaps(){
   if(!window.claude || !window.claude.use){ dbState='off'; render(); return; }
   const timer = setTimeout(()=>{ if(dbState==='connecting'){ dbState='off'; render(); } }, 10000);
   try{
-    DB = await window.claude.use('db');
+    RAWDB = await window.claude.use('db'); DB = RAWDB ? brandDB(RAWDB) : null;
     USER = await window.claude.use('user');
     if(USER){ try{ MYID = await USER.id(); }catch(e){}
       try{ ME.admin = !!(USER.isOwner && USER.isOwner()); }catch(e){}
       try{ const m = await USER.me(); ME.email = String((m && m.email) || '').toLowerCase(); ME.name = (m && m.name) || ''; }catch(e){} }
   }catch(e){ DB = null; }
   if(!DB){ clearTimeout(timer); dbState='off'; render(); return; }
+  if(BRAND==='all') watchSums();
   let got = 0; const need = 8;
   const ready = () => { got++; if(got>=need){ clearTimeout(timer); dbState='on'; } refresh(); };
   const fail = e => { clearTimeout(timer); dbState='err'; toast('저장소 연결 오류: '+(e&&e.message||'')); render(); };
@@ -618,6 +670,10 @@ async function initCaps(){
   DB.doc('stock/current').onSnapshot(d => { stockDoc = d.exists ? d.data() : null; if(first.s){first.s=false;ready();} else refresh(); }, fail);
   DB.collection('pfix').onSnapshot(s => { pfixDocs={}; s.docs.forEach(d=>{ const x=d.data(); if(x&&x.orig) pfixDocs[x.orig]=x; }); if(first.x){first.x=false;ready();} else refresh(); }, fail);
   DB.collection('fchg').onSnapshot(s => { fchgs = s.docs.map(d=>Object.assign({id:d.id}, d.data())); if(first.c){first.c=false;ready();} else refresh(); }, fail);
+  DB.collection('resv').onSnapshot(s => { resvDocs = {}; s.docs.forEach(d=>{ const x = d.data(); if(x) resvDocs[d.id] = x; }); refresh(); }, ()=>{});
+  DB.doc('sales/current').onSnapshot(d => { salesDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
+  DB.doc('cfg/channels').onSnapshot(d => { cfgCh = d.exists ? d.data() : null; refresh(); }, ()=>{});
+  DB.doc('cfg/rvcat').onSnapshot(d => { cfgCat = d.exists ? d.data() : null; refresh(); }, ()=>{});
   if(ME.admin) DB.collection('members').onSnapshot(s => { members = {}; s.docs.forEach(d=>{ const x = d.data(); if(x) members[d.id] = x; }); refresh(); }, ()=>{});
   else if(ME.email) DB.doc('members/'+ME.email).onSnapshot(d => { myMember = d.exists ? d.data() : null; refresh(); }, ()=>{});
   DB.collection('log').orderBy('at','desc').limit(80).onSnapshot(s => { logs = s.docs.map(d=>d.data()); if(first.l){first.l=false;ready();} else refresh(); }, fail);
@@ -662,12 +718,12 @@ function etaCell(o){
 const IMG = SNAP.img || {}; const NCH = window.__IMGURL ? 0 : (SNAP.imgChunks || 0);
 const imgCache = Object.assign({}, window.__IMGURL || {}); const chunkState = {};
 function imgOf(p){ if(!p) return ''; if(IMG[p.b]) return IMG[p.b]; if(p.origBs) for(const b of p.origBs) if(IMG[b]) return IMG[b];
-  const SI = (stockDoc && stockDoc.imgs) || {}; const u = SI[p.b] || (p.origBs ? [...p.origBs].map(b=>SI[b]).find(Boolean) : '') || p.img;
+  const SI = (stockDoc && stockDoc.imgs) || {}; const U = SNAP.imgu || {}; const u = SI[p.b] || (p.origBs ? [...p.origBs].map(b=>SI[b]).find(Boolean) : '') || p.img || U[p.b] || (p.origBs ? [...p.origBs].map(b=>U[b]).find(Boolean) : '');
   if(u){ const id = 'u:'+p.b; imgCache[id] = u; return id; } return ''; }
-function thumb(p, size){ const id = imgOf(p); return '<span class="th th-'+(size||'s')+(id?'':' none')+'"'+(id?' data-img="'+id+'"':'')+'>'+(id&&imgCache[id]?'<img src="'+esc(imgCache[id])+'" alt="" loading="lazy" onerror="this.parentNode.classList.add(\'none\');this.remove()">':'')+'</span>'; }
+function thumb(p, size){ const id = imgOf(p); return '<span class="th th-'+(size||'s')+(id?'':' none')+'"'+(id?' data-img="'+id+'"':'')+'>'+(id&&imgCache[id]?'<img src="'+esc(imgCache[id])+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.classList.add(\'none\');this.remove()">':'')+'</span>'; }
 function styleThumb(st, size){ const p = st.prods.find(q=>imgOf(q)) || st.prods[0]; return thumb(p, size); }
 function fillThumbs(){
-  document.querySelectorAll('.th[data-img]:not(.ok)').forEach(el=>{ const d = imgCache[el.dataset.img]; if(d){ if(!el.firstChild){ const i = new Image(); i.alt=''; i.onerror = () => { i.remove(); el.classList.add('none'); }; i.src = d; el.appendChild(i); } el.classList.add('ok'); } });
+  document.querySelectorAll('.th[data-img]:not(.ok)').forEach(el=>{ const d = imgCache[el.dataset.img]; if(d){ if(!el.firstChild){ const i = new Image(); i.alt=''; i.referrerPolicy='no-referrer'; i.loading='lazy'; i.onerror = () => { i.remove(); el.classList.add('none'); }; i.src = d; el.appendChild(i); } el.classList.add('ok'); } });
 }
 function loadThumbs(){
   if(!NCH){ fillThumbs(); return; }
@@ -676,7 +732,7 @@ function loadThumbs(){
   fillThumbs();
   for(const c of need){
     if(chunkState[c]) continue; chunkState[c] = 'loading';
-    fetch('thumbs/c'+pad(c)+'.json').then(r=>r.ok?r.json():{}).then(o=>{ Object.assign(imgCache, o); chunkState[c] = 'ok'; fillThumbs(); }).catch(()=>{ chunkState[c] = 'err'; });
+    fetch((SNAP.imgDir||'thumbs/')+'c'+pad(c)+'.json').then(r=>r.ok?r.json():{}).then(o=>{ Object.assign(imgCache, o); chunkState[c] = 'ok'; fillThumbs(); }).catch(()=>{ chunkState[c] = 'err'; });
   }
 }
 // ---------- 재고: 가용(오더 포함) / 실 보유재고 ----------
@@ -685,7 +741,8 @@ const incomingOf = p => p.orders.filter(isOpen).reduce((s,o)=>s+o.remain,0);
 const availIn = p => (Number(p.avail)||0) + incomingOf(p);
 const stkTip = () => '가용(오더 포함) = 셀메이트 가용재고 + 보드에 걸린 오더 중 아직 안 들어온 수량 · 실 보유재고 = 셀메이트 현재재고 (셀메이트 '+stockAtLabel()+' 기준)';
 const stockTh = () => '<th class="num" title="'+esc(stkTip())+'">가용<small class="thsub">(오더 포함)</small> / 실 보유재고</th>';
-function stockCell(p){ if(!hasStock(p)) return '<span class="muted">—</span>'; return '<span class="stk2"><b>'+nf(availIn(p))+'</b> <span>/ '+nf(p.stock)+'</span></span>'; }
+const whTxt = p => p && p.trans!=null ? '트랜쇼 '+nf(p.trans)+' · 본사 '+nf(p.hq) : '';
+function stockCell(p){ if(!hasStock(p)) return '<span class="muted">—</span>'; return '<span class="stk2"><b>'+nf(availIn(p))+'</b> <span>/ '+nf(p.stock)+'</span>'+(p.trans!=null?'<small class="whs">'+whTxt(p)+'</small>':'')+'</span>'; }
 const flink = f => '<a class="flink" data-act="goFac" data-f="'+esc(f)+'" title="공장별 조회로 이동">'+esc(f)+'</a>';
 function pcell(o){
   const p = o.p;
@@ -819,7 +876,7 @@ async function exportAll(){
   const fac = {}; for(const [n,d] of Object.entries(facDocs)) fac[facDocId(n)] = d;
   const pfix = {}; for(const [o,d] of Object.entries(pfixDocs)) pfix[pfixId(o)] = d;
   const fchg = {}; for(const c of fchgs){ const d = Object.assign({}, c); delete d.id; fchg[c.id] = d; }
-  const backup = {kind:'knownbetter-board-backup', v:1, at:new Date().toISOString(), snap: JSON.parse(document.getElementById('snap').textContent),
+  const backup = {kind:'knownbetter-board-backup', v:1, at:new Date().toISOString(), brand:BRAND, snap: JSON.parse(SNAP_TXT),
     db:{prod:newProds, ord:newOrds, ovr, fac, pfix, fchg, stock: stockDoc ? {current:stockDoc} : {}, log:logs}};
   // 기록에 남은 사람 이름도 함께 저장 (새 홈페이지에서 '누가' 표시용)
   const ids = new Set(); const grab = o => { if(!o || typeof o!=='object') return; for(const [k,v] of Object.entries(o)){ if(/^(by|delBy|restBy)$/.test(k) && typeof v==='string' && v) ids.add(v); else if(v && typeof v==='object') grab(v); } };
@@ -829,7 +886,7 @@ async function exportAll(){
   backup.db.users = names;
   const n = Object.values(backup.db).reduce((t,c)=>t+Object.keys(c).length,0);
   const data = JSON.stringify(backup);
-  const name = 'knownbetter-backup-'+TODAY.replace(/-/g,'')+'.json';
+  const name = 'knownbetter-'+(BRAND==='kb'?'':BRAND+'-')+'backup-'+TODAY.replace(/-/g,'')+'.json';
   let dl = null; try{ dl = await window.claude.use('downloads'); }catch(e){}
   if(!dl){ toast('이 보기에서는 파일 저장이 안 됩니다'); return; }
   try{ await dl.save({filename:name, data}); toast('백업 저장 완료 · 공유 기록 '+n+'건'); }catch(e){ if(e && e.code!=='declined') toast('저장하지 못했습니다: '+(e.message||e.code)); }
@@ -958,7 +1015,7 @@ function dueCards(a){
   return '<div class="results">'+L.map(x=>{ const p = x.p;
     return '<button class="panel res img'+(x.late?' late':'')+'" data-act="dueStyle" data-n="'+esc(p.b)+'">'+thumb(p,'l')+'<span class="rtx"><span class="t">'+esc(p.n||p.en)+'</span><span class="copt">'+esc(p.opt)+'</span>'+
       '<span class="s">'+esc(p.curFac)+(x.n>1?' · 차수 '+x.n+'개':'')+' · <b style="color:var(--info)">입고 예정 '+nf(x.rem)+'</b></span>'+
-      (hasStock(p)?'<span class="mstk" title="'+esc(stkTip())+'"><span><small>가용(오더 포함)</small><b>'+nf(availIn(p))+'</b></span><span><small>실 보유재고</small><b>'+nf(p.stock)+'</b></span></span>':'')+
+      (hasStock(p)?'<span class="mstk" title="'+esc(stkTip())+'"><span><small>가용(오더 포함)</small><b>'+nf(availIn(p))+'</b></span><span><small>실 보유재고</small><b>'+nf(p.stock)+'</b>'+(p.trans!=null?'<small>'+whTxt(p)+'</small>':'')+'</span></span>':'')+
       '<span class="s dline">'+(x.eta?fmtD(x.eta)+' <span class="muted" style="font-weight:400">'+(x.fixed?'확정':'예상')+'</span>'+(x.late?' · <b style="color:var(--bad)">지연·경과</b>':''):'일정 미정')+'</span></span></button>'; }).join('')+'</div>';
 }
 function styleDetail(st){
@@ -1464,7 +1521,7 @@ function roPlan(text){
 }
 function regSync(){
   const Y = S.sync;
-  let h = '<div class="sec"><div class="sechead"><h2>리오더 시트 붙여넣기</h2><span class="sub">구글 시트 "노운베러" 탭을 통째로 복사해 붙여넣으면 바뀐 내용만 골라 반영합니다</span></div><div class="panel pad step">'+
+  let h = '<div class="sec"><div class="sechead"><h2>리오더 시트 붙여넣기</h2><span class="sub">구글 시트 "'+esc(brandName())+'" 탭을 머리글 줄까지 통째로 복사해 붙여넣으면 바뀐 내용만 골라 반영합니다</span></div><div class="panel pad step">'+
     '<ol class="note" style="margin:0;padding-left:18px;display:grid;gap:2px"><li>리오더 시트에서 <b>전체 선택(Ctrl+A) → 복사</b> (머리글 줄이 같이 들어가도, 값만 복사해도 됩니다)</li><li>아래 칸에 붙여넣고 <b>바뀐 내용 확인</b></li><li>목록을 보고 <b>반영</b>. 같은 시트를 하루에 몇 번 붙여넣어도 이미 반영된 줄은 건너뜁니다.</li></ol>'+
     '<textarea id="syncT" rows="6" placeholder="리오더 날짜&#9;바코드&#9;담당 디자이너&#9;공장&#9;…&#9;합계&#9;입고일정&#9;일정 변경 사유&#9;…&#9;비고">'+esc(Y.text||'')+'</textarea>'+
     '<div class="filters"><button class="btn pri" data-act="syncPreview">바뀐 내용 확인</button>'+(Y.text?'<button class="btn" data-act="syncClear">비우기</button>':'')+'</div>';
@@ -1539,11 +1596,13 @@ function plParse(text){
   const col = (...ks) => { for(const k of ks){ const i = H.findIndex(h=>h===k); if(i>=0) return i; } for(const k of ks){ const i = H.findIndex(h=>h.startsWith(k)); if(i>=0) return i; } return -1; };
   const C = {b:col('바코드번호','바코드'), en:col('상품명'), n:col('사입상품명','제작품명'), opt:col('옵션명','옵션'), cat:col('상품분류','분류'), sup:col('공급처'), reg:col('상품등록일자','등록일'), stock:col('현재재고'), avail:col('가용재고'), sold:col('품절여부'), img:col('대표이미지주소','이미지주소')};
   const g = (r,k) => C[k]>=0 ? unwrapX(r[C[k]]) : '';
+  const iT = H.map((h,i)=>/트랜쇼/.test(h)&&!/오프라인/.test(h)?i:-1).filter(i=>i>=0), iH = H.map((h,i)=>/본사/.test(h)&&/창고|재고/.test(h)?i:-1).filter(i=>i>=0), iU = H.findIndex(h=>/미발송/.test(h));
+  const num = v => parseInt(String(unwrapX(v)||'0').replace(/[^\d-]/g,''),10) || 0;
   const out = []; const seen = new Set(); let dupIn = 0;
   for(const r of rows.slice(hi+1)){
     const b = g(r,'b'); if(!b) continue;
     if(seen.has(b)){ dupIn++; continue; } seen.add(b);
-    out.push({b, en:g(r,'en'), n:g(r,'n'), opt:g(r,'opt').replace(/\s*,\s*/g,','), cat:g(r,'cat'), sup:g(r,'sup'), f:facFromSupplier(g(r,'sup')), reg:(g(r,'reg').match(/\d{4}-\d{2}-\d{2}/)||[''])[0], stock:g(r,'stock'), avail:g(r,'avail'), sold:g(r,'sold'), img:cleanUrl(g(r,'img'))});
+    out.push({b, en:g(r,'en'), n:g(r,'n'), opt:g(r,'opt').replace(/\s*,\s*/g,','), cat:g(r,'cat'), sup:g(r,'sup'), f:facFromSupplier(g(r,'sup')), reg:(g(r,'reg').match(/\d{4}-\d{2}-\d{2}/)||[''])[0], stock:g(r,'stock'), avail:(C.avail>=0 ? g(r,'avail') : (iU>=0 && g(r,'stock')!=='' ? String(num(r[C.stock]) - num(r[iU])) : '')), wh: iT.length ? [iT.reduce((t,i)=>t+num(r[i]),0), iH.reduce((t,i)=>t+num(r[i]),0), iU>=0 ? num(r[iU]) : 0] : null, sold:g(r,'sold'), img:cleanUrl(g(r,'img'))});
   }
   return {rows:out, dupIn};
 }
@@ -1735,10 +1794,10 @@ function stockPlan(text){
   for(const x of r.rows){
     const st = parseInt(String(x.stock).replace(/[^\d-]/g,''),10), av = parseInt(String(x.avail).replace(/[^\d-]/g,''),10);
     if(isNaN(st) && isNaN(av)) continue;
-    items[x.b] = [isNaN(st)?0:st, isNaN(av)?(isNaN(st)?0:st):av];
+    items[x.b] = [isNaN(st)?0:st, isNaN(av)?(isNaN(st)?0:st):av].concat(x.wh || []);
     const p = byB.get(x.b);
     if(!p){ notIn++; continue; }
-    if(String(p.stock)===String(items[x.b][0]) && String(p.avail)===String(items[x.b][1])) same++;
+    if(String(p.stock)===String(items[x.b][0]) && String(p.avail)===String(items[x.b][1]) && (!x.wh || (p.trans===x.wh[0] && p.hq===x.wh[1]))) same++;
     else { changed++; if(diffs.length<300) diffs.push({p, from:[p.stock, p.avail], to:items[x.b]}); }
   }
   return {items, n:Object.keys(items).length, same, changed, notIn, diffs};
@@ -1848,7 +1907,7 @@ function regNew(){
 }
 
 // ---------- 팀원 · 권한 ----------
-const PERMS = [{k:'reorder',t:'리오더'},{k:'recv',t:'입고 처리'},{k:'reg',t:'상품 등록'},{k:'stock',t:'재고 업데이트'},{k:'fix',t:'정보 보정 · 공장 변경'},{k:'fac',t:'공장 관리'}];
+const PERMS = [{k:'reorder',t:'리오더'},{k:'recv',t:'입고 처리'},{k:'reg',t:'상품 등록'},{k:'stock',t:'재고 업데이트'},{k:'resv',t:'예약배송'},{k:'fix',t:'정보 보정 · 공장 변경'},{k:'fac',t:'공장 관리'}];
 const ALLP = () => Object.fromEntries(PERMS.map(p=>[p.k,true]));
 let ME = {email:'', name:'', admin:false}; let members = {}; let myMember = null;
 const isAdmin = () => ME.admin;
@@ -1881,7 +1940,7 @@ function regTeam(){
           '<td><button class="btn sm ghost" data-act="tmDel" data-e="'+esc(m.email)+'">삭제</button></td></tr>'; }).join('')
         : '<tr><td colspan="'+(PERMS.length+3)+'" class="empty">아직 등록된 팀원이 없습니다.</td></tr>')+
     '</tbody></table></div><p class="note">이름은 칸을 벗어나면 저장됩니다. 권한 체크는 바로 저장되고, 그 사람이 다음에 보드를 열거나 새로고침하면 적용됩니다.</p>'+
-    (window.__boardAdmin ? '<div class="panel pad step"><h3>시트 기준 데이터 교체</h3><p class="note" style="margin:0">오더 체크 엑셀을 새로 정리해 Claude에게 받은 데이터 파일(knownbetter-sheet-….json)이 있을 때만 쓰세요. 팀원이 보드에서 입력한 기록은 그대로 유지됩니다. 현재: 시트 기준 '+esc(SNAP.asof)+'</p><div class="filters"><label class="btn" for="snapFile" style="cursor:pointer">데이터 파일 선택</label><input type="file" id="snapFile" accept=".json" hidden><span class="note" id="snapProg"></span></div></div>' : '')+
+    (window.__boardAdmin ? '<div class="panel pad step"><h3>시트 기준 데이터 교체</h3><p class="note" style="margin:0">오더 체크 엑셀을 새로 정리해 Claude에게 받은 데이터 파일(knownbetter-sheet-브랜드-….json)이 있을 때만 쓰세요. 파일에 적힌 브랜드로 들어가고, 팀원이 보드에서 입력한 기록은 그대로 유지됩니다. 현재 '+esc(brandName())+' 시트 기준 '+esc(SNAP.asof)+'</p><div class="filters"><label class="btn" for="snapFile" style="cursor:pointer">데이터 파일 선택</label><input type="file" id="snapFile" accept=".json" hidden><span class="note" id="snapProg"></span></div></div>' : '')+
     '</div>';
   return h;
 }
@@ -1915,10 +1974,10 @@ function stockPlanRows(rows){
     if(x.img) imgs[x.b] = x.img;
     const st = parseInt(String(x.stock).replace(/[^\d-]/g,''),10), av = parseInt(String(x.avail).replace(/[^\d-]/g,''),10);
     if(isNaN(st) && isNaN(av)) continue;
-    items[x.b] = [isNaN(st)?0:st, isNaN(av)?(isNaN(st)?0:st):av];
+    items[x.b] = [isNaN(st)?0:st, isNaN(av)?(isNaN(st)?0:st):av].concat(x.wh || []);
     const p = byB.get(x.b);
     if(!p){ notIn++; continue; }
-    if(String(p.stock)===String(items[x.b][0]) && String(p.avail)===String(items[x.b][1])) same++;
+    if(String(p.stock)===String(items[x.b][0]) && String(p.avail)===String(items[x.b][1]) && (!x.wh || (p.trans===x.wh[0] && p.hq===x.wh[1]))) same++;
     else { changed++; if(diffs.length<300) diffs.push({p, from:[p.stock, p.avail], to:items[x.b]}); }
   }
   return {items, imgs, n:Object.keys(items).length, same, changed, notIn, diffs};
@@ -1973,6 +2032,321 @@ function unifyFactories(){
   }
 }
 
+// ---------- 예약배송 ----------
+const RV_ST = ['일반배송','예약배송','품절','단종'];
+const CHANNELS = ['29CM','W컨셉','무신사','롯데온','하고','네이버','SSG'];
+const CH_S = {'29CM':'29','W컨셉':'W','무신사':'무','롯데온':'롯','하고':'하','네이버':'N','SSG':'S'};
+const QC_DAYS = 2;   // 입고 후 검수 (평일 기준)
+function bizAdd(d, n){ let x = d; let k = 0; while(k < n){ x = addDays(x, 1); const w = new Date(x+'T00:00:00').getDay(); if(w!==0 && w!==6) k++; } return x; }
+function rvSuggest(p, k){
+  const opens = p.orders.filter(isOpen).sort((a,b)=>(a.eta||'9').localeCompare(b.eta||'9'));
+  const o = opens[k];
+  if(o) return {d: bizAdd(o.eta && o.eta > TODAY ? o.eta : TODAY, QC_DAYS), q:o.remain, memo:(o.round||'')+' 입고분'+(o.eta?'':' (입고일 미정)'), done:false};
+  const li = leadInfo(p, p.curFac);
+  return {d: bizAdd(addDays(TODAY, li.d), QC_DAYS), q:0, memo:'임시 · 오더 없음 (예상 리드타임 '+li.d+'일 + 검수)', done:false};
+}
+let resvDocs = {}, salesDoc = null;
+const RV0 = SNAP.resv0 || {}, SL0 = SNAP.sales0 || null;
+const RV_ACT = {
+  toResv:   {t:'예약 전환 필요', d:'재고 0 · 입고 예정 있음', c:'st-soon'},
+  risk:     {t:'예약일 확인',   d:'출고일이 입고보다 빠름', c:'st-late'},
+  noRound:  {t:'예약 차수 입력', d:'출고일 · 수량 없음', c:'st-soon'},
+  qc:       {t:'검수 필요',     d:'본사 재고 → 트랜쇼 이동', c:'st-soon'},
+  toNormal: {t:'일반 전환 가능', d:'재고 입고 완료', c:'st-done'},
+  toSold:   {t:'품절 처리 필요', d:'재고 · 입고 예정 없음', c:'st-late'},
+  reopen:   {t:'판매 재개 검토', d:'재고나 입고 예정 생김', c:'st-open'}
+};
+function rvOf(b){
+  const s = RV0[b] || [];
+  const base = {st:s[0]||'', sale:s[1]||'', cmt:s[2]||'', memo:s[3]||'', rounds:(s[4]||[]).map(r=>({d:r[0]||'', q:+r[1]||0, memo:r[2]||'', done:false})), ch:{}};
+  const d = resvDocs[safeId(b)];
+  return d ? Object.assign(base, d, {rounds: Array.isArray(d.rounds) ? d.rounds : base.rounds, ch: d.ch || {}}) : base;
+}
+function salesSrc(){ return salesDoc && salesDoc.items ? salesDoc : SL0; }
+function salesOf(b){ const S1 = salesSrc(); const x = S1 && S1.items && S1.items[b]; return x ? {wk:+x[0]||0, unsent:+x[1]||0} : {wk:0, unsent:0}; }
+function salesLabel(){ const S1 = salesSrc(); return S1 ? fmtD(S1.from).slice(0,5)+' ~ '+fmtD(S1.to).slice(0,5) : ''; }
+const saleOff = r => /중지|종료|단종 완료/.test(r.sale||'');
+function rvCalc(p){
+  const r = rvOf(p.b), s = salesOf(p.b);
+  const opens = p.orders.filter(isOpen).sort((a,b)=>(a.eta||'9').localeCompare(b.eta||'9'));
+  const inc = opens.reduce((t,o)=>t+o.remain,0), next = opens[0] || null;
+  const known = hasStock(p);
+  const wh = p.trans!=null;
+  const rest = known ? (wh ? p.trans - (p.unsent||0) : (Number(p.avail)||0)) : null;
+  const live = r.rounds.filter(x=>!x.done);
+  const rq = live.reduce((t,x)=>t+(+x.q||0),0);
+  const total = (rest||0) + rq;
+  const st = r.st || (known && rest>0 ? '일반배송' : '');
+  let lvl = '';
+  if(s.wk>0 && st!=='단종'){ if(total < s.wk*0.3) lvl = '긴급'; else if(total < s.wk*0.6) lvl = '주의'; }
+  const acts = [];
+  const shipFrom = next && next.eta ? bizAdd(next.eta > TODAY ? next.eta : TODAY, QC_DAYS) : '';
+  if(st!=='단종' && !saleOff(r)){
+    if((st==='일반배송' || !st) && known && rest<=0 && inc>0) acts.push('toResv');
+    if(st==='예약배송'){
+      if(!live.length && inc>0) acts.push('noRound');
+      if(shipFrom && live.some(x=>x.d && x.d < shipFrom)) acts.push('risk');
+      if(known && rest>0 && (!live.length || live.every(x=>x.d && x.d<=TODAY))) acts.push('toNormal');
+    }
+    if((st==='일반배송' || st==='예약배송') && known && rest<=0 && inc===0 && rq===0 && !(wh && (p.hq||0)>0)) acts.push('toSold');
+    if(st==='품절' && ((known && rest>0) || inc>0)) acts.push('reopen');
+    if(wh && (p.hq||0)>0 && rest<=0 && (st==='예약배송' || s.wk>0)) acts.push('qc');
+  }
+  return {p, r, s, st, opens, inc, next, known, rest, rq, total, lvl, acts, shipFrom, live, wh, cat:rvCatOf(p)};
+}
+function rvRows(){
+  const out = [];
+  for(const p of PRODS.values()){ if(!p.b || isNoB(p.b)) continue; out.push(rvCalc(p)); }
+  return out;
+}
+function viewResv(){
+  const X = S.rv; const all = rvRows();
+  const cnt = {}; for(const k in RV_ACT) cnt[k] = 0; let urg = 0, warn = 0, inResv = 0;
+  for(const x of all){ x.acts.forEach(a=>cnt[a]++); if(x.lvl==='긴급') urg++; if(x.lvl==='주의') warn++; if(x.st==='예약배송') inResv++; }
+  const q = X.q.trim().toLowerCase();
+  let a = all;
+  if(X.act==='lvl') a = a.filter(x=>x.lvl); else if(X.act==='resv') a = a.filter(x=>x.st==='예약배송'); else if(X.act) a = a.filter(x=>x.acts.includes(X.act));
+  else if(!X.all && !q) a = a.filter(x=>x.st!=='단종' && (x.acts.length || x.lvl || x.st==='예약배송' || x.s.wk>0 || x.inc>0));
+  if(X.st) a = a.filter(x=>x.st===X.st);
+  if(X.fac) a = a.filter(x=>x.p.curFac===X.fac);
+  if(X.cat) a = a.filter(x=>x.cat===X.cat);
+  if(q) a = a.filter(x=>(x.p.b+' '+x.p.n+' '+x.p.en+' '+x.p.opt+' '+x.p.curFac).toLowerCase().includes(q));
+  const lw = {긴급:0, 주의:1, '':2};
+  a.sort((x,y)=> (y.acts.length?1:0)-(x.acts.length?1:0) || lw[x.lvl]-lw[y.lvl] || y.s.wk-x.s.wk || (x.next&&x.next.eta||'9').localeCompare(y.next&&y.next.eta||'9'));
+  const card = (k,t,n,c,d) => '<button class="rvcard'+(X.act===k?' on':'')+'" data-act="rvAct" data-k="'+k+'"><span class="chip '+c+'">'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
+  let h = '<div class="sec"><div class="sechead"><h2>예약배송</h2><span class="sub">재고 · 입고 예정 · 판매 추이를 합쳐 오늘 처리할 것만 골라 보여드립니다 · 판매 추이 '+esc(salesLabel())+' · 재고 '+esc(stockAtLabel())+'</span>'+
+    '<span class="right"><button class="btn sm" data-act="rvSales">판매 추이 업데이트</button> <button class="btn sm" data-act="catMng">분류 · 담당자</button> <button class="btn sm" data-act="chMng">판매 채널</button></span></div>'+
+    '<div class="rvcards">'+
+      Object.entries(RV_ACT).map(([k,v])=>card(k, v.t, cnt[k], v.c, v.d)).join('')+
+      card('lvl','재고 부족', urg+warn, 'st-late', '긴급 '+urg+' · 주의 '+warn)+
+      card('resv','예약배송 중', inResv, 'st-open', '예약 판매 중')+
+    '</div>'+
+    '<div class="filters"><input type="search" id="rvQ" placeholder="바코드 · 제작품명 · 컬러 · 공장 검색" value="'+esc(X.q)+'">'+
+      '<select id="rvSt"><option value="">노출 상태 전체</option>'+RV_ST.map(s=>'<option'+(s===X.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+
+      '<select id="rvCat"><option value="">전체 분류</option>'+catList().map(c=>'<option value="'+esc(c.n)+'"'+(c.n===X.cat?' selected':'')+'>'+esc(c.n)+(c.owner?' · '+esc(c.owner):'')+' ('+c.c+')</option>').join('')+'</select>'+
+      '<select id="rvFac"><option value="">전체 공장</option>'+activeFacs().map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
+      (X.act?'<button class="btn sm" data-act="rvAct" data-k="">‹ 할 일 필터 해제</button>':'<label class="chk"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'> 판매 · 입고 없는 상품도 보기</label>')+
+      '<span class="note">'+nf(a.length)+'개</span></div>';
+  h += '<div class="panel tw"><table class="rvtbl"><thead><tr><th>상품 · 컬러,사이즈 · 바코드</th><th>노출 상태</th><th>할 일</th><th class="num">주간 판매<small class="thsub">'+esc(salesLabel())+'</small></th><th class="num">재고<small class="thsub">출고 가능 / 실 보유</small></th><th>입고 예정</th><th>예약 차수</th><th>채널 반영<small class="thsub">'+esc(chList().join(' · '))+'</small></th><th>메모</th></tr></thead><tbody>';
+  if(!a.length) h += '<tr><td colspan="9" class="empty">조건에 맞는 상품이 없습니다.</td></tr>';
+  const lock = !canDo('resv'); const CATS = catList().map(c=>c.n);
+  for(const x of a.slice(0, X.n)){
+    const p = x.p, r = x.r;
+    h += '<tr'+(x.acts.length?' class="rvneed"':'')+'><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(p.key)+'">'+esc(p.n||p.en)+'</a><small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+flink(p.curFac)+'</small><select class="catsel" data-rvcat="'+esc(normK(p.n||p.b))+'" title="분류 (담당 분담)"'+(lock?' disabled':'')+'>'+CATS.map(c=>'<option'+(c===x.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="__new">+ 분류 관리…</option></select></div></div></td>'+
+      '<td><select class="rvsel st-'+(x.st==='예약배송'?'open':x.st==='품절'?'late':x.st==='단종'?'none':'done')+'" data-rvst="'+esc(p.b)+'"'+(lock?' disabled':'')+'>'+(x.st?'':'<option value="">미지정</option>')+RV_ST.map(s=>'<option'+(s===x.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+(r.sale&&r.sale!=='판매중'?'<small class="odsub">'+esc(r.sale)+'</small>':'')+'</td>'+
+      '<td>'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d)+'">'+RV_ACT[k].t+'</span>').join(' ')+(x.lvl?' <span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
+      '<td class="num">'+(x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')+(x.s.unsent?'<small class="odsub">미발송 '+nf(x.s.unsent)+'</small>':'')+'</td>'+
+      '<td class="num">'+(x.known?'<b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b> <span class="muted">/ '+nf(p.stock)+'</span>'+(x.wh?'<small class="odsub">트랜쇼 '+nf(p.trans)+' · 본사 '+nf(p.hq)+(p.hq>0?' (검수)':'')+'</small>':''):'<span class="muted">—</span>')+'</td>'+
+      '<td>'+(x.next?'<a class="rvinc" data-act="openOrder" data-id="'+x.next.id+'">'+(x.next.eta?fmtD(x.next.eta).slice(0,5)+' <small>'+(x.next.etaKind==='fixed'?'확정':'예상')+'</small>':'미정')+' · '+nf(x.next.remain)+'장</a>'+(x.opens.length>1?'<small class="odsub">전체 '+x.opens.length+'건 · '+nf(x.inc)+'장</small>':'')+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':''):'<span class="muted">없음</span>')+'</td>'+
+      '<td>'+(x.live.length?x.live.map(o=>'<span class="rvround'+(x.shipFrom&&o.d&&o.d<x.shipFrom?' bad':'')+'">'+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+(o.q?' · '+nf(o.q)+'장':'')+'</span>').join(''):'')+'<button class="btn sm ghost" data-act="rvEdit" data-b="'+esc(p.b)+'">'+(x.live.length?'수정':'+ 차수')+'</button></td>'+
+      '<td><span class="rvch">'+chList().map(c=>'<button class="rvc'+(r.ch[c]?' on':'')+'" data-act="rvCh" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" title="'+esc(c)+(r.ch[c]?' 반영 완료':' 미반영')+'"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'<button class="rvc all'+(chList().every(c=>r.ch[c])?' on':'')+'" data-act="rvChAll" data-b="'+esc(p.b)+'" title="전체 반영 / 해제"'+(lock?' disabled':'')+'>전체</button></span></td>'+
+      '<td class="rvmemo">'+(r.cmt?'<small>'+esc(r.cmt).replace(/\n/g,' ')+'</small>':'')+(r.memo?'<small class="muted">'+esc(r.memo)+'</small>':'')+'</td></tr>';
+  }
+  h += '</tbody></table></div>'+(a.length>X.n?'<div class="more"><button class="btn" data-act="rvMore">'+nf(a.length-X.n)+'개 더 보기</button></div>':'')+
+    '<p class="note">재고 = 셀메이트 가용재고(미발송 제외) / 실 보유재고 · 재고 부족 = 가용 + 예약 수량이 주간 판매의 30% 미만이면 긴급, 60% 미만이면 주의 · 출고 가능일 = 입고 예정일 + 검수 '+QC_DAYS+'영업일 · 재고 = 트랜쇼(바로 출고) − 미발송 / 실 보유 (본사 재고는 검수 후 출고)</p></div>';
+  return h;
+}
+function rvModal(b, preset){
+  const p = [...PRODS.values()].find(x=>x.b===b); if(!p) return;
+  const x = rvCalc(p); const r = x.r;
+  const rounds = (S.rvEdit && S.rvEdit.b===b) ? S.rvEdit.rounds : r.rounds.map(o=>Object.assign({}, o));
+  if(preset==='resv' && !rounds.some(o=>!o.done)) rounds.push(rvSuggest(p, 0));
+  S.rvEdit = {b, rounds, st: preset==='resv' ? '예약배송' : (S.rvEdit && S.rvEdit.b===b ? S.rvEdit.st : x.st)};
+  let h = '<div class="mh">'+thumb(p,'l')+'<div><h2>'+esc(p.n||p.en)+'</h2><div class="muted" style="font-size:12.5px">'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+esc(p.curFac)+'</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
+    '<dl class="kv"><dt>주간 판매</dt><dd>'+nf(x.s.wk)+'장 <span class="muted">('+esc(salesLabel())+(x.s.unsent?' · 미발송 '+nf(x.s.unsent):'')+')</span></dd><dt>재고</dt><dd>'+(x.known?'출고 가능 <b>'+nf(x.rest)+'</b> / 실 보유 '+nf(p.stock)+(x.wh?' <span class="muted">(트랜쇼 '+nf(p.trans)+' · 본사 '+nf(p.hq)+(p.unsent?' · 미발송 '+nf(p.unsent):'')+')</span>':''):'—')+'</dd>'+
+    '<dt>입고 예정</dt><dd>'+(x.opens.length?x.opens.map(o=>esc(o.round)+' '+(o.eta?fmtD(o.eta).slice(0,5)+(o.etaKind==='fixed'?' 확정':' 예상'):'미정')+' · '+nf(o.remain)+'장').join('<br>'):'없음')+'</dd></dl>'+
+    '<div class="panel pad step"><div class="formgrid"><label class="f">노출 상태<select id="rv_st">'+RV_ST.map(s=>'<option'+(s===S.rvEdit.st?' selected':'')+'>'+s+'</option>').join('')+'</select></label><label class="f">판매 상태<input id="rv_sale" value="'+esc(r.sale||'')+'" placeholder="판매중"></label></div>'+
+    '<h3 style="margin:6px 0 0">예약 차수</h3><p class="note" style="margin:0">한 차수 수량이 다 팔리면 <b>차수 마감</b>을 체크하고 <b>+ 차수 추가</b>를 누르세요. 다음 입고 오더 기준으로 출고일(입고 + 검수 '+QC_DAYS+'영업일) · 수량이 채워집니다.</p>'+(x.next?'<p class="note" style="margin:0">추천 출고일 = 입고 예정일 + 검수 '+QC_DAYS+'영업일 · 다음 입고 '+(x.next.eta?fmtDY(x.next.eta):'미정')+' · '+nf(x.next.remain)+'장 → 출고 가능 '+(x.shipFrom?fmtDY(x.shipFrom):'미정')+' <button class="btn sm" data-act="rvAddNext" data-b="'+esc(b)+'">다음 입고로 차수 추가</button></p>':'<p class="note" style="margin:0">입고 예정 오더가 없어요. 임시로 예약배송을 열면 예상 리드타임('+leadInfo(p,p.curFac).d+'일) + 검수로 출고일을 추천합니다. <button class="btn sm" data-act="rvAddNext" data-b="'+esc(b)+'">임시 차수 추가</button></p>')+
+    '<div class="rvrows">'+rounds.map((o,i)=>'<div class="rvr'+(o.done?' done':'')+'"><span class="nnum">'+(i+1)+'</span><input type="date" data-rvr="'+i+'" data-k="d" value="'+esc(o.d||'')+'"><input type="number" min="0" data-rvr="'+i+'" data-k="q" value="'+(o.q||'')+'" placeholder="수량" style="width:80px"><input data-rvr="'+i+'" data-k="memo" value="'+esc(o.memo||'')+'" placeholder="메모 (예: 3차 예약배송)"><label class="chk"><input type="checkbox" data-rvr="'+i+'" data-k="done"'+(o.done?' checked':'')+'> 차수 마감</label><button class="btn sm ghost" data-act="rvDelRound" data-i="'+i+'">✕</button>'+(x.shipFrom&&o.d&&!o.done&&o.d<x.shipFrom?'<small class="bad">입고 예정보다 빨라요</small>':'')+'</div>').join('')+'</div>'+
+    '<div><button class="btn sm" data-act="rvAddRound">+ 차수 추가</button></div>'+
+    '<h3 style="margin:6px 0 0">채널 반영</h3><div class="tperm"><label><b><input type="checkbox" id="rvChAllM"'+(chList().every(c=>r.ch[c])?' checked':'')+'> 전체</b></label>'+chList().map(c=>'<label><input type="checkbox" data-rvch="'+esc(c)+'"'+(r.ch[c]?' checked':'')+'> '+esc(c)+'</label>').join('')+'</div>'+
+    '<label class="f">상품 코멘트<input id="rv_cmt" value="'+esc(r.cmt||'')+'" placeholder="예: 라이브 · 주미니 착장"></label><label class="f">추가 사항<input id="rv_memo" value="'+esc(r.memo||'')+'" placeholder="예: 11/16 출고 · 19일 예배"></label>'+
+    '<div class="filters"><button class="btn pri" data-act="rvSave" data-b="'+esc(b)+'"'+(canDo('resv')?'':' disabled')+'>저장</button><button class="btn" data-act="close">취소</button></div></div>';
+  openModal(h);
+}
+function rvKeep(){
+  const E = S.rvEdit; if(!E) return;
+  document.querySelectorAll('[data-rvr]').forEach(i=>{ const o = E.rounds[+i.dataset.rvr]; if(!o) return; const k = i.dataset.k; o[k] = k==='done' ? i.checked : (k==='q' ? (parseInt(i.value,10)||0) : i.value); });
+  const s = document.getElementById('rv_st'); if(s) E.st = s.value;
+}
+async function rvSave(b){
+  if(!need('resv')) return;
+  rvKeep(); const E = S.rvEdit; const p = [...PRODS.values()].find(x=>x.b===b); if(!E || !p) return;
+  const ch = {}; document.querySelectorAll('[data-rvch]').forEach(i=>{ if(i.checked) ch[i.dataset.rvch] = true; });
+  const rounds = E.rounds.filter(o=>o.d || o.q).map(o=>({d:o.d||'', q:+o.q||0, memo:o.memo||'', done:!!o.done}));
+  const prev = rvOf(b);
+  const doc = {st:E.st, sale:val('rv_sale'), cmt:val('rv_cmt'), memo:val('rv_memo'), rounds, ch, b, at:new Date().toISOString(), by:MYID||''};
+  const ok = await guard(async()=>{ await DB.doc('resv/'+safeId(b)).set(doc);
+    await writeLog((p.n||p.en)+' '+p.opt+' 예약배송: '+(prev.st!==E.st?(prev.st||'미지정')+' → '+E.st+' · ':'')+(rounds.filter(o=>!o.done).map(o=>(o.d?fmtD(o.d).slice(0,5):'')+(o.q?' '+o.q+'장':'')).join(', ')||'차수 없음')); }, '예약배송 정보를 저장했습니다');
+  if(ok){ S.rvEdit = null; closeModal(); }
+}
+async function rvQuick(b, patch, msg){
+  if(!need('resv')) return;
+  const r = rvOf(b); const p = [...PRODS.values()].find(x=>x.b===b);
+  const doc = {st:r.st, sale:r.sale, cmt:r.cmt, memo:r.memo, rounds:r.rounds, ch:r.ch||{}, b};
+  Object.assign(doc, patch, {at:new Date().toISOString(), by:MYID||''});
+  await guard(async()=>{ await DB.doc('resv/'+safeId(b)).set(doc); if(msg) await writeLog((p?(p.n||p.en)+' '+p.opt+' ':'')+msg); }, msg || '저장했습니다');
+}
+// 판매 추이 (셀메이트 옵션별추이현황) 붙여넣기
+function salesParse(text){
+  const rows = parseTSV(text).map(r=>r.map(x=>unwrapX(String(x||'').trim())));
+  const hi = rows.findIndex(r=>r.some(x=>/바코드/.test(x)) && r.some(x=>/주문수/.test(x)));
+  if(hi<0) return {err:'머리글(바코드번호 · 주문수)을 찾지 못했습니다. 셀메이트 옵션별추이현황을 머리글까지 복사해 주세요.'};
+  const H = rows[hi]; const ib = H.findIndex(x=>/바코드/.test(x)), io = H.findIndex(x=>x==='주문수'||/^주문수/.test(x)), iu = H.findIndex(x=>/미발송/.test(x));
+  const dates = H.map(x=>x.replace(/[^\d]/g,'')).filter(x=>/^20\d{6}$/.test(x)).sort();
+  const items = {}; let n = 0;
+  for(const r of rows.slice(hi+1)){ const b = (r[ib]||'').trim(); if(!/^1-\d{10}$/.test(b)) continue; n++; const o = parseInt((r[io]||'0').replace(/,/g,''),10)||0, u = iu>=0 ? (parseInt((r[iu]||'0').replace(/,/g,''),10)||0) : 0; if(o||u) items[b] = [o,u]; }
+  const fd = d => d ? d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8) : '';
+  return {items, n, from: fd(dates[0]) || addDays(TODAY,-7), to: fd(dates[dates.length-1]) || TODAY};
+}
+function rvSalesModal(){
+  const X = S.rvs || (S.rvs = {});
+  let h = '<div class="mh"><div><h2>판매 추이 업데이트</h2><div class="muted" style="font-size:12.5px">지금: '+esc(salesLabel()||'없음')+'</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
+    '<div class="panel pad step"><p class="note" style="margin:0">셀메이트 <b>옵션별추이현황</b>을 일주일로 지정해 내려받은 뒤(본사요청출고 · 이구갤러리 · 협찬&amp;시딩 · 홀세일 제외) 머리글까지 붙여넣거나 CSV를 올리세요. 바코드별 <b>주문수 · 미발송수</b>만 읽습니다.</p>'+
+    '<textarea id="rvSalesT" rows="4" placeholder="바코드번호&#9;상품명&#9;옵션내용&#9;사입상품명&#9;미발송수&#9;…&#9;주문수 …">'+esc(X.text||'')+'</textarea>'+
+    '<div class="filters"><button class="btn pri" data-act="rvsCheck">읽기</button><label class="btn" for="rvSalesFile" style="cursor:pointer">CSV 파일 올리기</label><input type="file" id="rvSalesFile" accept=".csv,.tsv,.txt" hidden></div>'+
+    (X.err?'<p class="note" style="color:var(--bad);margin:0">'+esc(X.err)+'</p>':'')+
+    (X.res?'<div class="stats"><span>읽은 바코드 <b>'+nf(X.res.n)+'</b></span><span>판매 · 미발송 있는 바코드 <b>'+nf(Object.keys(X.res.items).length)+'</b></span><span>기간 <b>'+esc(fmtD(X.res.from).slice(0,5)+' ~ '+fmtD(X.res.to).slice(0,5))+'</b></span></div><div><button class="btn pri" data-act="rvsApply"'+(canDo('resv')?'':' disabled')+'>판매 추이 반영</button></div>':'')+'</div>';
+  openModal(h);
+}
+function rvsRun(text, fileName){ const r = salesParse(text); S.rvs = r.err ? {text:fileName?'':text, err:r.err} : {text:fileName?'':text, res:r, file:fileName||'붙여넣기'}; rvSalesModal(); }
+async function rvsApply(){
+  if(!need('resv')) return; const X = S.rvs; if(!X || !X.res) return;
+  const ok = await guard(async()=>{ await DB.doc('sales/current').set({from:X.res.from, to:X.res.to, items:X.res.items, file:X.file||'', at:new Date().toISOString(), by:MYID||''}); await writeLog('판매 추이 업데이트 '+X.res.from+' ~ '+X.res.to+' · 바코드 '+X.res.n+'개'); }, '판매 추이를 반영했습니다');
+  if(ok){ S.rvs = {}; closeModal(); }
+}
+
+// ---------- 판매 채널 (브랜드마다 다름 · 편집 가능) ----------
+let cfgCh = null, cfgCat = null;
+const chList = () => (cfgCh && Array.isArray(cfgCh.list) && cfgCh.list.length) ? cfgCh.list : CHANNELS;
+const chShort = c => CH_S[c] || String(c).replace(/[^가-힣A-Za-z0-9]/g,'').slice(0,1).toUpperCase();
+function chModal(){
+  const L = (S.chEdit = S.chEdit || chList().slice());
+  let h = '<div class="mh"><div><h2>판매 채널 관리</h2><div class="muted" style="font-size:12.5px">예약배송을 설정해야 하는 판매처 목록 · 브랜드마다 다르게 쓸 수 있어요</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
+    '<div class="panel pad step"><div class="tchips">'+L.map((c,i)=>'<span class="tchip">'+esc(c)+' <button class="btn sm ghost" data-act="chDel" data-i="'+i+'" aria-label="'+esc(c)+' 빼기">✕</button></span>').join('')+'</div>'+
+    '<div class="filters"><input id="chNew" placeholder="채널 이름 (예: 에이블리, 카카오 선물하기)"><button class="btn" data-act="chAdd">추가</button></div>'+
+    '<div class="filters"><button class="btn pri" data-act="chSave"'+(canDo('resv')?'':' disabled')+'>저장</button><button class="btn" data-act="close">취소</button></div></div>';
+  openModal(h);
+}
+async function chSave(){
+  if(!need('resv')) return;
+  const list = (S.chEdit||[]).map(x=>String(x).trim()).filter(Boolean);
+  const ok = await guard(async()=>{ await DB.doc('cfg/channels').set({list, at:new Date().toISOString(), by:MYID||''}); await writeLog('판매 채널 변경: '+list.join(', ')); }, '판매 채널을 저장했습니다');
+  if(ok){ S.chEdit = null; closeModal(); }
+}
+// ---------- 분류 (예약배송 담당 분담용 · 편집 가능) ----------
+const baseCat = p => String(p.cat||'').replace(/^\d{2}\s*[A-Za-z]+\d*\s+/,'').trim() || '미분류';
+function rvCatOf(p){ const m = (cfgCat && cfgCat.map) || {}; return m[normK(p.n||p.b)] || baseCat(p); }
+function catList(){
+  const cnt = new Map();
+  for(const p of PRODS.values()){ if(!p.b || isNoB(p.b)) continue; const c = rvCatOf(p); cnt.set(c, (cnt.get(c)||0)+1); }
+  const extra = ((cfgCat && cfgCat.cats) || []).map(x=>x.n);
+  for(const c of extra) if(!cnt.has(c)) cnt.set(c, 0);
+  return [...cnt.entries()].sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0],'ko')).map(([n,c])=>({n, c, owner:catOwner(n)}));
+}
+function catOwner(n){ const x = ((cfgCat && cfgCat.cats) || []).find(c=>c.n===n); return x ? (x.owner||'') : ''; }
+function catModal(){
+  const E = (S.catEdit = S.catEdit || {cats: JSON.parse(JSON.stringify((cfgCat && cfgCat.cats) || [])), map: Object.assign({}, (cfgCat && cfgCat.map) || {})});
+  const all = catList(); const names = new Set(all.map(x=>x.n)); E.cats.forEach(c=>names.add(c.n));
+  const rows = [...names].map(n=>({n, c:(all.find(x=>x.n===n)||{}).c||0, owner:(E.cats.find(c=>c.n===n)||{}).owner||'', custom:E.cats.some(c=>c.n===n && c.custom)}));
+  let h = '<div class="mh"><div><h2>분류 · 담당자 관리</h2><div class="muted" style="font-size:12.5px">기본 분류는 셀메이트 상품분류의 품목(재킷, 스웨터…)이에요. 무스탕 · 레더처럼 새 분류를 만들고, 예약배송 화면에서 제작품명마다 옮길 수 있어요.</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
+    '<div class="panel tw"><table><thead><tr><th>분류</th><th class="num">상품</th><th>예약배송 담당자</th><th></th></tr></thead><tbody>'+
+    rows.map(r=>'<tr><td><b>'+esc(r.n)+'</b>'+(r.custom?' <span class="chip st-open">직접 만든 분류</span>':'')+'</td><td class="num">'+nf(r.c)+'</td><td><input data-catown="'+esc(r.n)+'" value="'+esc(r.owner)+'" placeholder="담당자 이름" style="width:130px"></td><td>'+(r.custom?'<button class="btn sm ghost" data-act="catDel" data-n="'+esc(r.n)+'">삭제</button>':'')+'</td></tr>').join('')+
+    '</tbody></table></div><div class="panel pad step"><div class="filters"><input id="catNew" placeholder="새 분류 이름 (예: 무스탕, 레더)"><button class="btn" data-act="catAdd">분류 추가</button></div>'+
+    '<div class="filters"><button class="btn pri" data-act="catSave"'+(canDo('resv')?'':' disabled')+'>저장</button><button class="btn" data-act="close">취소</button></div></div>';
+  openModal(h);
+}
+function catKeep(){ const E = S.catEdit; if(!E) return; document.querySelectorAll('[data-catown]').forEach(i=>{ const n = i.dataset.catown; let c = E.cats.find(x=>x.n===n); if(!c){ if(!i.value.trim()) return; c = {n, owner:'', custom:false}; E.cats.push(c); } c.owner = i.value.trim(); }); }
+async function catSave(){
+  if(!need('resv')) return; catKeep(); const E = S.catEdit;
+  const ok = await guard(async()=>{ await DB.doc('cfg/rvcat').set({cats:E.cats.filter(c=>c.custom || c.owner), map:E.map, at:new Date().toISOString(), by:MYID||''}); await writeLog('예약배송 분류 · 담당자 변경'); }, '분류를 저장했습니다');
+  if(ok){ S.catEdit = null; closeModal(); }
+}
+async function setStyleCat(key, cat){
+  if(!need('resv')) return;
+  const cur = cfgCat || {cats:[], map:{}}; const map = Object.assign({}, cur.map||{}); map[key] = cat;
+  await guard(async()=>{ await DB.doc('cfg/rvcat').set(Object.assign({}, cur, {map, at:new Date().toISOString(), by:MYID||''})); }, '분류를 옮겼습니다');
+}
+// ---------- 브랜드 전환 ----------
+const BRANDS = [
+  {k:'all', t:'전체', title:'통합 오더·입고 보드'},
+  {k:'tid', t:'틸아이다이', title:'틸아이다이 오더·입고 보드', mark:'TILL I DIE'},
+  {k:'kb',  t:'노운베러',  title:'노운베러 오더·입고 보드', mark:'KNOWN BETTER'},
+  {k:'frv', t:'프리버',    title:'프리버 오더·입고 보드', mark:'FRIVER'}
+];
+const BRAND_DATA = {kb:true}; for(const k of ['tid','frv']) if(SUMS[k]) BRAND_DATA[k] = true;
+const brandName = k => (BRANDS.find(b=>b.k===(k||BRAND))||{}).t || '';
+function setBrand(k){
+  if(!BRAND_KEYS.includes(k) || k===BRAND) return;
+  try{ localStorage.setItem('kb_brand', k); }catch(e){}
+  try{ window.name = 'kbb='+k; }catch(e){}
+  document.getElementById('app').innerHTML = '<div class="sec"><div class="panel pad bempty"><p class="note">'+esc(brandName(k))+' 보드를 여는 중…</p></div></div>';
+  setTimeout(()=>location.reload(), 30);
+}
+// 전체 현황: 브랜드 화면을 연 사람이 최신 요약을 저장해 둠 (없으면 시트 기준)
+let liveSums = {}, sumLast = '', sumAt = 0, sumTimer = null;
+function sumRows(){
+  return ORDERS.filter(isOpen).map(o=>[o.eta||'', o.remain, o.p.n||'', o.p.opt||'', o.f||'', o.status||'', o.od||'', o.etaKind==='est'?1:0]);
+}
+function pushSum(){
+  if(!RAWDB || !canWrite() || dbState!=='on' || BRAND==='all') return;
+  clearTimeout(sumTimer);
+  sumTimer = setTimeout(async ()=>{
+    const open = sumRows(); const k = JSON.stringify(open);
+    if(k===sumLast || Date.now()-sumAt < 60000) return;
+    sumLast = k; sumAt = Date.now();
+    try{ await DB.doc('sum/current').set({at:new Date().toISOString(), asof:SNAP.asof, stockAt:stockAtFull()||'', prods:PRODS.size, open:JSON.stringify(open), today:TODAY}); }catch(e){}
+  }, 4000);
+}
+function watchSums(){
+  if(!RAWDB) return;
+  for(const k of ['tid','kb','frv']){
+    RAWDB.doc((k==='kb'?'':'brands/'+k+'/')+'sum/current').onSnapshot(d=>{ liveSums[k] = d.exists ? d.data() : null; render(); }, ()=>{});
+  }
+}
+function viewAll(){
+  const add7 = addDays(TODAY, 7);
+  const cards = []; const rows = [];
+  for(const k of ['tid','kb','frv']){
+    const B = BRANDS.find(b=>b.k===k); const L = liveSums[k], Sm = SUMS[k];
+    if(!L && !Sm){ cards.push('<div class="panel pad bcard off"><div class="bchead">'+brandMark(k)+'</div><p class="note">아직 데이터가 없어요</p></div>'); continue; }
+    const live = !!L; let open = (L ? L.open : Sm.open) || []; if(typeof open==='string'){ try{ open = JSON.parse(open); }catch(e){ open = []; } }
+    const st = r => r[5] || (!r[0] ? 'none' : r[0] < TODAY ? 'late' : r[0] <= add7 ? 'soon' : 'wait');
+    const sumQ = a => a.reduce((t,r)=>t+(+r[1]||0),0);
+    const late = open.filter(r=>st(r)==='late'||st(r)==='over'), soon = open.filter(r=>st(r)==='soon'), none = open.filter(r=>st(r)==='none');
+    open.forEach(r=>rows.push({k, r, s:st(r)}));
+    cards.push('<div class="panel pad bcard"><div class="bchead">'+brandMark(k)+'<button class="btn sm pri" data-act="brand" data-k="'+k+'">'+esc(B.t)+' 보드 열기 ›</button></div>'+
+      '<div class="bcnums"><div><span>입고 예정</span><b>'+nf(sumQ(open))+'<small>장</small></b><em>'+open.length+'개 오더</em></div>'+
+      '<div class="soon"><span>7일 내 입고</span><b>'+nf(sumQ(soon))+'<small>장</small></b><em>'+soon.length+'건</em></div>'+
+      '<div class="bad"><span>지연</span><b>'+late.length+'<small>건</small></b><em>'+nf(sumQ(late))+'장</em></div>'+
+      '<div><span>일정 미정</span><b>'+none.length+'<small>건</small></b><em>&nbsp;</em></div></div>'+
+      '<p class="note bcmeta">'+(live ? '보드 기준 '+esc(fmtStamp(L.at)) : '시트 기준 '+esc(Sm.asof||''))+' · 상품 '+nf(live?L.prods:Sm.prods)+'개'+((live?L.stockAt:Sm.stockAt)?' · 재고 '+esc(live?L.stockAt:Sm.stockAt):'')+'</p></div>');
+  }
+  const pri = {late:0, over:0, soon:1, none:2, wait:3};
+  rows.sort((a,b)=>(pri[a.s]??3)-(pri[b.s]??3) || (a.r[0]||'9').localeCompare(b.r[0]||'9'));
+  const top = rows.filter(x=>x.s==='late'||x.s==='over'||x.s==='soon').slice(0, 60);
+  const lab = {late:['지연','st-late'], over:['예상일 경과','st-late'], soon:['7일 내','st-soon'], none:['미정','st-open'], wait:['예정','st-open']};
+  let h = '<div class="sec"><div class="sechead"><h2>전체 브랜드 현황</h2><span class="sub">브랜드를 누르면 그 브랜드 보드로 들어갑니다 · 입고 처리 · 리오더 등록은 브랜드 보드에서 해요</span></div><div class="bcards">'+cards.join('')+'</div></div>';
+  h += '<div class="sec"><div class="sechead"><h2>지연 · 7일 내 입고</h2><span class="sub">세 브랜드를 한 번에 · 예정일 순</span></div><div class="panel tw"><table class="alltbl"><thead><tr><th>브랜드</th><th>상태</th><th>제작품명</th><th>옵션</th><th>공장</th><th>오더일</th><th>입고 예정</th><th class="num">남은 수량</th></tr></thead><tbody>'+
+    (top.length ? top.map(x=>{ const r = x.r, L2 = lab[x.s]||lab.wait; return '<tr><td><a class="flink" data-act="brand" data-k="'+x.k+'">'+esc(brandName(x.k))+'</a></td><td><span class="chip '+L2[1]+'">'+L2[0]+'</span></td><td><b>'+esc(r[2])+'</b></td><td>'+esc(r[3])+'</td><td>'+esc(r[4])+'</td><td class="num">'+(r[6]?fmtD(r[6]):'—')+'</td><td class="num">'+(r[0]?fmtD(r[0])+(r[7]?' <span class="kind">예상</span>':''):'—')+'</td><td class="num">'+nf(r[1])+'</td></tr>'; }).join('')
+      : '<tr><td colspan="8" class="empty">지연되거나 7일 안에 들어올 오더가 없습니다.</td></tr>')+'</tbody></table></div></div>';
+  return h;
+}
+function brandMark(k){ return k==='kb' ? '<span class="logo blogo" role="img" aria-label="KNOWN BETTER"></span>' : '<span class="wordmark wm-'+k+'">'+esc((BRANDS.find(b=>b.k===k)||{}).mark||k)+'</span>'; }
+function fmtStamp(s){ if(!s) return ''; const d = new Date(s); if(isNaN(d)) return String(s); return (d.getMonth()+1)+'/'+d.getDate()+' '+pad(d.getHours())+':'+pad(d.getMinutes()); }
+function brandHeader(){
+  const B = BRANDS.find(b=>b.k===BRAND);
+  const el = document.querySelector('header .brand'); if(!el) return;
+  el.innerHTML = esc(B.title) + (BRAND==='kb' ? '<span class="logo" role="img" aria-label="KNOWN BETTER"></span>' : B.mark ? '<span class="wordmark wm-'+B.k+'">'+esc(B.mark)+'</span>' : '');
+  const sw = document.getElementById('brandSw');
+  if(sw) sw.innerHTML = BRANDS.map(b=>'<button class="bsw'+(b.k===BRAND?' on':'')+'" data-act="brand" data-k="'+b.k+'">'+esc(b.t)+'</button>').join('');
+  document.title = B.title;
+}
+function brandEmpty(){
+  const B = BRANDS.find(b=>b.k===BRAND);
+  return '<div class="sec"><div class="panel pad bempty"><span class="wordmark wm-'+B.k+'" style="font-size:30px">'+esc(B.mark||B.t)+'</span><h2>'+esc(B.t)+' 데이터는 아직 연결 전이에요</h2><p class="note">오더 체크 시트 · 리오더 시트 · 셀메이트 재고(창고별)를 받으면 노운베러와 같은 화면으로 열립니다. 재고 파일의 양식 · 이름이 달라도 머리글로 맞춰 읽어요.</p><button class="btn" data-act="brand" data-k="kb">노운베러 보기</button></div></div>';
+}
+
 // ---------- order modal ----------
 function openModal(html){ document.getElementById('modalRoot').innerHTML = '<div class="overlay" data-act="bg"><div class="modal" role="dialog" aria-modal="true">'+html+'</div></div>'; loadThumbs(); const f = document.querySelector('.modal input,.modal select'); if(f) f.focus(); }
 function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
@@ -1985,14 +2359,15 @@ function orderModal(id, mode){
   if(o.changes.length) h += '<div><h3 style="margin-bottom:6px">변경 기록</h3><div class="panel loglist">'+o.changes.slice().reverse().map(c=>'<div><span class="muted">'+esc(String(c.at||'').slice(5,10).replace('-','.'))+'</span><span>'+esc(c.msg||'')+' <span class="muted">· '+esc(who(c.by))+'</span></span></div>').join('')+'</div></div>';
   const dis = canWrite() ? '' : ' disabled';
   if(!mode){
-    h += '<div class="filters"><button class="btn pri" data-act="mRecv" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>입고 처리</button><button class="btn" data-act="mEta" data-id="'+o.id+'"'+dis+'>일정 변경 · 지연 등록</button><button class="btn" data-act="mClose" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>마감 (미달·취소)</button><button class="btn" data-act="mCancel" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>수량 빼기 (불량 · 취소)</button><button class="btn danger" data-act="mDel" data-id="'+o.id+'"'+dis+'>이 차수 삭제</button></div>';
+    h += '<div class="filters"><button class="btn pri" data-act="mRecv" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>입고 처리</button><button class="btn" data-act="mEta" data-id="'+o.id+'"'+dis+'>일정 변경 · 지연</button><button class="btn" data-act="mClose" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>마감 (미달·취소)</button><button class="btn" data-act="mCancel" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>수량 빼기 (불량 · 취소)</button><button class="btn danger" data-act="mDel" data-id="'+o.id+'"'+dis+'>이 차수 삭제</button></div>';
     const ed = o.rcAdd.map((r,i)=>'<div><span class="rc add">'+nf(r.q)+' · '+fmtDY(r.d)+'</span><span>입고 · '+esc(who(r.by))+'</span><button class="btn sm" data-act="undoRecv" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></div>').concat((o.cancels||[]).map((r,i)=>'<div><span class="rc cx">−'+nf(r.q)+'</span><span>'+esc(r.r||'빼기')+' · '+esc(fmtDY(r.d))+' · '+esc(who(r.by))+'</span><button class="btn sm" data-act="undoCancel" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></div>'));
     if(ed.length) h += '<div><h3 style="margin-bottom:6px">보드에서 입력한 입고 · 빼기</h3><div class="panel undolist">'+ed.join('')+'</div><p class="note" style="margin:4px 0 0">잘못 누른 입고나 빼기는 되돌리기로 취소할 수 있습니다.</p></div>';
     if(!canWrite()) h += '<p class="note" style="margin:0">저장이 켜진 보기에서만 처리할 수 있습니다.</p>';
   }
   if(mode==='recv') h += '<div class="panel pad step"><h3>입고 처리</h3><div class="formgrid"><label class="f">입고 수량<input type="number" id="m_q" min="1" value="'+o.remain+'"></label><label class="f">입고일 (출고일)<input type="date" id="m_d" value="'+TODAY+'"></label></div><div class="filters"><button class="btn pri" data-act="doRecv" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
   if(mode==='delay'){ const base = o.eta && o.eta > TODAY ? o.eta : TODAY;
-    h += '<div class="panel pad step"><h3>입고 지연 설정</h3><p class="note" style="margin:0">지금 예정일 '+(o.eta?fmtDY(o.eta)+' ('+(o.etaKind==='fixed'?'확정':'예상')+')':'미정')+' · 남은 '+nf(o.remain)+'장</p>'+
+    const rvw = rvOf(p.b); const rvl = (rvw.rounds||[]).filter(x=>!x.done && x.d);
+    h += '<div class="panel pad step"><h3>일정 변경 · 지연</h3>'+(rvw.st==='예약배송' && rvl.length ? '<p class="note" style="margin:0;color:var(--bad)">이 상품은 예약배송 중이에요 (출고 '+rvl.map(x=>fmtD(x.d).slice(0,5)+(x.q?' · '+x.q+'장':'')).join(', ')+'). 지연 저장 후 예약배송 탭에서 출고일도 바꿔주세요.</p>' : '')+'<p class="note" style="margin:0">지금 예정일 '+(o.eta?fmtDY(o.eta)+' ('+(o.etaKind==='fixed'?'확정':'예상')+')':'미정')+' · 남은 '+nf(o.remain)+'장</p>'+
       '<div class="filters">'+[3,7,14,21].map(n=>'<button class="btn sm" data-act="dPlus" data-base="'+base+'" data-n="'+n+'">+'+n+'일</button>').join('')+'</div>'+
       '<div class="formgrid"><label class="f">새 예정일<input type="date" id="m_eta" value="'+addDays(base,7)+'"></label><label class="f">사유<select id="m_r">'+REASONS.map(r=>'<option>'+r+'</option>').join('')+'</select></label></div><label class="f">메모<input id="m_memo" placeholder="예: 원단 입고 늦어짐 · 공장 재확인 11/15"></label>'+
       '<div class="filters"><button class="btn pri" data-act="doEta" data-id="'+o.id+'">지연 저장</button><button class="btn" data-act="close">취소</button></div></div>'; }
@@ -2042,8 +2417,29 @@ async function act(a, el){
     case 'openOrder': orderModal(id); break;
     case 'close': closeModal(); break;
     case 'mRecv': orderModal(id,'recv'); break;
-    case 'mEta': orderModal(id,'eta'); break;
+    case 'mEta': orderModal(id,'delay'); break;
     case 'mDelay': orderModal(id,'delay'); break;
+    case 'rvAct': S.rv.act = (S.rv.act===el.dataset.k ? '' : el.dataset.k); S.rv.n = 150; render(); break;
+    case 'rvMore': S.rv.n += 150; render(); break;
+    case 'rvEdit': S.rvEdit = null; rvModal(el.dataset.b); break;
+    case 'rvAddRound': { rvKeep(); const p = [...PRODS.values()].find(x=>x.b===S.rvEdit.b); S.rvEdit.rounds.push(p ? rvSuggest(p, S.rvEdit.rounds.filter(o=>!o.done).length) : {d:'', q:0, memo:'', done:false}); rvModal(S.rvEdit.b); break; }
+    case 'rvAddNext': { rvKeep(); const p = [...PRODS.values()].find(x=>x.b===el.dataset.b); if(p) S.rvEdit.rounds.push(rvSuggest(p, S.rvEdit.rounds.filter(o=>!o.done).length)); rvModal(S.rvEdit.b); break; }
+    case 'rvDelRound': rvKeep(); S.rvEdit.rounds.splice(+el.dataset.i, 1); rvModal(S.rvEdit.b); break;
+    case 'rvSave': await rvSave(el.dataset.b); break;
+    case 'rvCh': { const r = rvOf(el.dataset.b); const ch = Object.assign({}, r.ch||{}); ch[el.dataset.c] = !ch[el.dataset.c]; await rvQuick(el.dataset.b, {ch}, el.dataset.c+(ch[el.dataset.c]?' 반영 완료':' 반영 해제')); break; }
+    case 'rvSales': rvSalesModal(); break;
+    case 'chMng': S.chEdit = null; chModal(); break;
+    case 'chAdd': { const v = val('chNew'); if(v && !S.chEdit.includes(v)) S.chEdit.push(v); chModal(); break; }
+    case 'chDel': S.chEdit.splice(+el.dataset.i, 1); chModal(); break;
+    case 'chSave': await chSave(); break;
+    case 'catMng': S.catEdit = null; catModal(); break;
+    case 'catAdd': { catKeep(); const v = val('catNew'); if(v && !S.catEdit.cats.some(c=>c.n===v)) S.catEdit.cats.push({n:v, owner:'', custom:true}); catModal(); break; }
+    case 'catDel': { catKeep(); const n = el.dataset.n; S.catEdit.cats = S.catEdit.cats.filter(c=>c.n!==n); for(const k in S.catEdit.map) if(S.catEdit.map[k]===n) delete S.catEdit.map[k]; catModal(); break; }
+    case 'catSave': await catSave(); break;
+    case 'rvChAll': { const r = rvOf(el.dataset.b); const on = !chList().every(c=>r.ch[c]); const ch = Object.assign({}, r.ch||{}); chList().forEach(c=>{ ch[c] = on; }); await rvQuick(el.dataset.b, {ch}, '채널 전체 '+(on?'반영 완료':'반영 해제')); break; }
+    case 'brand': closeModal(); setBrand(el.dataset.k); break;
+    case 'rvsCheck': { const t = val('rvSalesT'); if(!t.trim()){ toast('옵션별추이현황을 붙여넣어 주세요'); break; } rvsRun(t, ''); break; }
+    case 'rvsApply': await rvsApply(); break;
     case 'dPlus': { const i = document.getElementById('m_eta'); if(i) i.value = addDays(el.dataset.base, +el.dataset.n); break; }
     case 'goProd': { const p = PRODS.get(el.dataset.k); if(!p) break; closeModal(); S.find = Object.assign({}, S.find, {q: p.n||p.en||p.b, style: styleKey(p), view:'list'}); setTab('find'); setTimeout(()=>{ const d = document.getElementById('detail'); if(d) d.scrollIntoView({block:'start'}); }, 30); break; }
     case 'goFac': closeModal(); S.fac.view='list'; S.fac.f = el.dataset.f; S.fac.q=''; S.fac.n=15; setTab('fac'); break;
@@ -2209,7 +2605,12 @@ function render(){
   document.getElementById('foot').innerHTML = '<span>시트 기준 '+esc(SNAP.asof)+'</span>'+(stockAtFull()?'<span>재고 반영 '+esc(stockAtFull())+'</span>':'')+'<span>개발자 변제욱</span>'+(dbState==='err'?'<span style="color:var(--bad)">저장소 연결 오류 · 새로고침 해주세요</span>':'');
   const app = document.getElementById('app');
   const ae = document.activeElement; const fid = ae && ae.id; const pos = fid && ae.selectionStart;
-  app.innerHTML = ({home:viewHome, mng:()=>{ S.tab='fac'; S.fac.view='mng'; return viewFac(); }, fac:viewFac, due:viewDue, cal:viewCal, find:viewFind, reg:viewReg, mng:viewMng, fix:viewFix}[S.tab]||viewHome)();
+  brandHeader();
+  document.body.classList.toggle('mode-all', BRAND==='all');
+  if(BRAND==='all'){ app.innerHTML = viewAll(); navSync(); return; }
+  if(!BRAND_DATA[BRAND]){ app.innerHTML = brandEmpty(); navSync(); return; }
+  pushSum();
+  app.innerHTML = ({home:viewHome, resv:viewResv, mng:()=>{ S.tab='fac'; S.fac.view='mng'; return viewFac(); }, fac:viewFac, due:viewDue, cal:viewCal, find:viewFind, reg:viewReg, mng:viewMng, fix:viewFix}[S.tab]||viewHome)();
   if(fid){ const e = document.getElementById(fid); if(e){ e.focus(); try{ if(pos!=null) e.setSelectionRange(pos,pos); }catch(x){} } }
   addBackButtons();
   navSync();
@@ -2225,14 +2626,14 @@ function addBackButtons(){
 }
 // 브라우저 뒤로가기 · 앞으로가기
 let navLast = '', navPopping = false;
-function navState(){ return {tab:S.tab, reg:S.reg.mode, fv:S.find.view, st:S.find.style||'', fq:S.find.q||'', fac:S.fac.f||'', facv:S.fac.view, dq:S.due.q||'', rq:S.rcv.q||'', xq:S.fix.q||'', xt:S.fix.type||'all'}; }
+function navState(){ return {br:BRAND, rvc:S.rv.cat||'', rvq:S.rv.q||'', rva:S.rv.act||'', tab:S.tab, reg:S.reg.mode, fv:S.find.view, st:S.find.style||'', fq:S.find.q||'', fac:S.fac.f||'', facv:S.fac.view, dq:S.due.q||'', rq:S.rcv.q||'', xq:S.fix.q||'', xt:S.fix.type||'all'}; }
 function navSync(){
   const st = navState(); const k = JSON.stringify(st);
   if(k === navLast) return;
   try{
     if(!navLast || navPopping) history.replaceState({kb:st}, '');
     else {
-      const prev = JSON.parse(navLast); const qs = ['fq','dq','rq','xq'];
+      const prev = JSON.parse(navLast); const qs = ['fq','dq','rq','xq','rvq'];
       const onlyQ = Object.keys(st).every(x => qs.includes(x) || st[x]===prev[x]);
       const typing = onlyQ && qs.every(x => !st[x] || !prev[x] || st[x]===prev[x] || st[x].startsWith(prev[x]) || prev[x].startsWith(st[x])) && qs.some(x => prev[x] && st[x]);
       if(typing) history.replaceState({kb:st}, ''); else history.pushState({kb:st}, '');
@@ -2243,7 +2644,7 @@ function navSync(){
 window.addEventListener('popstate', e => {
   const st = e.state && e.state.kb; if(!st) return;
   closeModal();
-  S.tab = st.tab; S.reg.mode = st.reg; S.find.view = st.fv; S.find.style = st.st || null; S.find.q = st.fq; S.fac.f = st.fac; S.fac.view = st.facv; S.due.q = st.dq; S.rcv.q = st.rq; S.fix.q = st.xq; S.fix.type = st.xt;
+  S.tab = st.tab; S.reg.mode = st.reg; S.find.view = st.fv; S.find.style = st.st || null; S.find.q = st.fq; S.fac.f = st.fac; S.fac.view = st.facv; S.due.q = st.dq; S.rcv.q = st.rq; S.fix.q = st.xq; S.fix.type = st.xt; S.rv.q = st.rvq||''; S.rv.act = st.rva||''; S.rv.cat = st.rvc||''; if(st.br && st.br!==BRAND){ setBrand(st.br); return; }
   navPopping = true; try{ render(); } finally { navPopping = false; }
 });
 document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if(b) setTab(b.dataset.tab); });
@@ -2261,6 +2662,8 @@ document.addEventListener('input', e => {
   if(t.dataset && t.dataset.fx){ const k = t.dataset.fx; S.fix.edits[k] = S.fix.edits[k]||{}; S.fix.edits[k][t.dataset.k] = t.value; t.classList.add('dirty'); }
   if(t.id==='fixQ'){ S.fix.q = t.value; S.fix.n = 60; clearTimeout(tmr); tmr=setTimeout(render,200); }
   if(t.id==='rcvQ'){ S.rcv.q = t.value; clearTimeout(tmr); tmr=setTimeout(render,200); }
+  if(t.id==='rvQ'){ S.rv.q = t.value; S.rv.n = 150; clearTimeout(tmr); tmr=setTimeout(render,200); }
+  if(t.id==='rvSalesT'){ S.rvs = S.rvs || {}; S.rvs.text = t.value; }
   if(t.id==='rpT'){ S.rcv.paste = t.value; }
   if(t.id==='stT'){ S.stk.text = t.value; }
   if(t.id==='plT'){ S.pl.text = t.value; }
@@ -2289,7 +2692,7 @@ document.addEventListener('change', e => {
   if(t.dataset && t.dataset.tmp){ const m = members[t.dataset.tmp]; if(m){ const pm = Object.assign(ALLP(), m.perms||{}); pm[t.dataset.k] = t.checked; teamSet(t.dataset.tmp, {perms:pm}); } }
   if(t.id==='snapFile' && t.files && t.files[0] && window.__boardAdmin){
     const f = t.files[0]; const pg = x => { const e = document.getElementById('snapProg'); if(e) e.textContent = x; };
-    window.__boardAdmin.replaceSnap(f, pg).then(()=>{ pg('교체 완료 · 새로고침합니다…'); setTimeout(()=>location.reload(), 900); }).catch(err=>pg('실패: '+(err.code||err.message)));
+    window.__boardAdmin.replaceSnap(f, pg).then(br=>{ pg((br?brandName(br)+' ':'')+'교체 완료 · 새로고침합니다…'); if(br && br!==BRAND){ try{ localStorage.setItem('kb_brand', br); }catch(e){} } setTimeout(()=>location.reload(), 900); }).catch(err=>pg('실패: '+(err.code||err.message)));
   }
   if(t.id==='smFile' && t.files && t.files[0]){
     const f = t.files[0]; const fr = new FileReader();
@@ -2322,6 +2725,21 @@ document.addEventListener('change', e => {
   }
   if(t.id==='syncAll'){ if(S.sync.res) S.sync.res.plan.forEach((x,i)=>S.sync.off[i] = !t.checked); render(); }
   if(t.id==='rcvFac'){ S.rcv.fac = t.value; render(); }
+  if(t.id==='rvSt'){ S.rv.st = t.value; render(); }
+  if(t.id==='rvFac'){ S.rv.fac = t.value; render(); }
+  if(t.id==='rvCat'){ S.rv.cat = t.value; render(); }
+  if(t.id==='rvChAllM'){ document.querySelectorAll('[data-rvch]').forEach(i=>{ i.checked = t.checked; }); }
+  if(t.dataset && t.dataset.rvch && !t.checked){ const a = document.getElementById('rvChAllM'); if(a) a.checked = false; }
+  if(t.dataset && t.dataset.rvcat){ if(t.value==='__new'){ S.catEdit = null; catModal(); render(); } else setStyleCat(t.dataset.rvcat, t.value); }
+  if(t.id==='rvAll'){ S.rv.all = t.checked; render(); }
+  if(t.dataset && t.dataset.rvst){ const b = t.dataset.rvst, v = t.value; const x = rvCalc([...PRODS.values()].find(p=>p.b===b));
+    if(v==='예약배송' && !x.live.length){ S.rvEdit = null; rvModal(b, 'resv'); }
+    else rvQuick(b, {st:v}, '노출 상태 '+(x.st||'미지정')+' → '+v); }
+  if(t.id==='rvSalesFile' && t.files && t.files[0]){
+    const f = t.files[0]; const fr = new FileReader();
+    fr.onload = () => { const buf = fr.result; let text; try{ text = new TextDecoder('utf-8',{fatal:true}).decode(buf); }catch(e){ text = new TextDecoder('euc-kr').decode(buf); } rvsRun(text.replace(/^\ufeff/,''), f.name); };
+    fr.readAsArrayBuffer(f);
+  }
   if(t.id==='findOpen'){ S.find.onlyOpen = t.checked; S.find.n = 300; render(); }
   if(t.dataset && t.dataset.pcountry){ setStyleCountry([t.dataset.pcountry], t.value); }
   if(t.dataset && t.dataset.scountry){ const st = STYLES.get(t.dataset.scountry); if(st) setStyleCountry(st.prods.map(p=>p.key), t.value); }

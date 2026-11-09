@@ -1,4 +1,4 @@
-// 노운베러 오더·입고 보드 — Firebase 연결부
+// 오더·입고 보드 (틸아이다이 · 노운베러 · 프리버) — Firebase 연결부
 // 로그인 → 팀원 확인 → 시트 데이터 불러오기 → 보드 실행
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithCredential, onAuthStateChanged, signOut, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -28,7 +28,7 @@ let me = null, isAdmin = false, started = false, memberName = '';
 
 // ---------- 화면 ----------
 function loginScreen(msg){
-  show('<span class="logo glogo"></span><h1>노운베러 오더·입고 보드</h1><p>회사에서 쓰는 Google 계정으로 로그인하세요.</p>'+
+  show('<span class="logo glogo"></span><h1>오더·입고 보드</h1><p>틸아이다이 · 노운베러 · 프리버</p><p>회사에서 쓰는 Google 계정으로 로그인하세요.</p>'+
     (msg ? '<p class="gerr">'+esc(msg)+'</p>' : '')+
     '<button class="gbtn" id="gLogin">Google 계정으로 로그인</button>');
   document.getElementById('gLogin').onclick = async () => {
@@ -70,16 +70,27 @@ onAuthStateChanged(auth, async user => {
 });
 
 // ---------- 시트 스냅샷 (여러 조각으로 저장, 브라우저에 보관해서 다시 읽지 않음) ----------
+// 브랜드: kb = 기존 위치(meta/snap, snap/p0…), 다른 브랜드 = meta/snap_frv, snap/frv_p0…
+const BRANDS = ['all','tid','kb','frv'];
+let BRAND = 'kb'; try{ BRAND = localStorage.getItem('kb_brand') || 'kb'; }catch(e){}
+if(!BRANDS.includes(BRAND)) BRAND = 'kb';
+const metaId = b => b === 'kb' ? 'snap' : 'snap_'+b;
+const partId = (b, i) => (b === 'kb' ? 'p' : b+'_p') + i;
 async function loadSnap(){
-  const m = await getDoc(doc(fs, 'meta', 'snap'));
-  if(!m.exists()) return '';
-  const meta = m.data();
-  const key = 'kb_snap_'+meta.at;
+  const metas = {};
+  await Promise.all(['kb','tid','frv'].map(async b => { try{ const m = await getDoc(doc(fs, 'meta', metaId(b))); if(m.exists()) metas[b] = m.data(); }catch(e){} }));
+  const sums = {}; for(const [b, m] of Object.entries(metas)) sums[b] = m.sum || {asof:'', prods:0, open:[]};
+  window.__BRAND_SUMS = sums;
+  let use = (BRAND === 'all' || !metas[BRAND]) ? 'kb' : BRAND;
+  if(!metas[use]) use = Object.keys(metas)[0];
+  window.__BRAND = BRAND;
+  if(!use) return '';
+  const meta = metas[use];
+  const key = 'kb_snap_'+use+'_'+meta.at;
   try{ const c = localStorage.getItem(key); if(c) return c; }catch(e){}
-  const parts = [];
-  for(let i = 0; i < meta.parts; i++){ const d = await getDoc(doc(fs, 'snap', 'p'+i)); parts.push(d.exists() ? d.data().t : ''); }
+  const parts = await Promise.all(Array.from({length: meta.parts}, (_, i) => getDoc(doc(fs, 'snap', partId(use, i))).then(d => d.exists() ? d.data().t : '')));
   const text = parts.join('');
-  try{ for(const k of Object.keys(localStorage)) if(k.startsWith('kb_snap_')) localStorage.removeItem(k); localStorage.setItem(key, text); }catch(e){}
+  try{ for(const k of Object.keys(localStorage)) if(k.startsWith('kb_snap_'+use+'_') || /^kb_snap_\d/.test(k)) localStorage.removeItem(k); localStorage.setItem(key, text); }catch(e){}
   return text;
 }
 
@@ -108,12 +119,13 @@ async function importBackup(b, prog){
     await batch.commit(); done += Math.min(300, writes.length - i);
     prog('팀 공유 기록 올리는 중… '+done+' / '+writes.length);
   }
-  await saveSnap(JSON.stringify(b.snap), prog);
+  await saveSnap(JSON.stringify(b.snap), prog, b.brand || b.snap.brand || 'kb', b.snap.sum);
 }
-async function saveSnap(text, prog){
+async function saveSnap(text, prog, brand, sum){
+  brand = brand || 'kb';
   const SIZE = 200000; const n = Math.ceil(text.length / SIZE);
-  for(let i = 0; i < n; i++){ await setDoc(doc(fs, 'snap', 'p'+i), { t: text.slice(i*SIZE, (i+1)*SIZE) }); prog && prog('시트 데이터 올리는 중… '+(i+1)+' / '+n); }
-  await setDoc(doc(fs, 'meta', 'snap'), { parts: n, at: new Date().toISOString(), by: me ? me.email : '' });
+  for(let i = 0; i < n; i++){ await setDoc(doc(fs, 'snap', partId(brand, i)), { t: text.slice(i*SIZE, (i+1)*SIZE) }); prog && prog('시트 데이터 올리는 중… '+(i+1)+' / '+n); }
+  await setDoc(doc(fs, 'meta', metaId(brand)), { parts: n, at: new Date().toISOString(), by: me ? me.email : '', sum: sum || null });
 }
 
 // ---------- 보드가 쓰는 저장소 연결 (claude.ai 보드와 같은 모양으로 맞춤) ----------
@@ -180,7 +192,10 @@ window.__boardAdmin = {
   replaceSnap: async (file, prog) => {
     if(!isAdmin) throw new Error('관리자만 할 수 있습니다');
     const b = JSON.parse(await file.text());
-    if(!b || b.kind !== 'knownbetter-board-backup' || !b.snap) throw new Error('노운베러 보드 데이터 파일이 아닙니다');
-    await saveSnap(JSON.stringify(b.snap), prog);
+    if(!b || b.kind !== 'knownbetter-board-backup' || !b.snap) throw new Error('보드 데이터 파일이 아닙니다');
+    const br = b.brand || b.snap.brand || 'kb';
+    if(!['kb','tid','frv'].includes(br)) throw new Error('브랜드를 알 수 없는 파일입니다');
+    await saveSnap(JSON.stringify(b.snap), prog, br, b.snap.sum);
+    return br;
   }
 };

@@ -31,5 +31,23 @@ service cloud.firestore {
     match /pfix/{id}  { allow read: if isMember(); allow write: if can('fix') || can('reg'); }
     match /fchg/{id}  { allow read: if isMember(); allow write: if can('fix'); }
     match /fac/{id}   { allow read: if isMember(); allow write: if can('fac') || can('fix') || can('reg'); }
+    match /resv/{id}  { allow read: if isMember(); allow write: if can('resv'); }
+    match /sales/{id} { allow read: if isMember(); allow write: if can('resv') || can('stock'); }
+    match /cfg/{id}   { allow read: if isMember(); allow write: if can('resv'); }
+    match /sum/{id}   { allow read: if isMember(); allow write: if isMember(); }
+    // 브랜드별 공유 기록 (틸아이다이 · 프리버): 같은 메뉴 권한 적용
+    function canColl(c) {
+      return ((c == 'log' || c == 'sum') && isMember())
+        || (c == 'prod' && can('reg'))
+        || (c == 'ord' && (can('reorder') || can('reg')))
+        || (c == 'ovr' && (can('recv') || can('reorder')))
+        || (c == 'stock' && can('stock'))
+        || (c == 'pfix' && (can('fix') || can('reg')))
+        || (c == 'fchg' && can('fix'))
+        || (c == 'fac' && (can('fac') || can('fix') || can('reg')))
+        || ((c == 'resv' || c == 'cfg') && can('resv'))
+        || (c == 'sales' && (can('resv') || can('stock')));
+    }
+    match /brands/{br}/{coll}/{id} { allow read: if isMember(); allow write: if br in ['tid', 'frv'] && canColl(coll); }
   }
 }
