@@ -24,7 +24,7 @@ try{
 }catch(e){ fs = initializeFirestore(app, { ignoreUndefinedProperties: true }); }
 if(window.__EMU){ connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true }); connectFirestoreEmulator(fs, '127.0.0.1', 8080); }
 
-let me = null, isAdmin = false, started = false;
+let me = null, isAdmin = false, started = false, memberName = '';
 
 // ---------- 화면 ----------
 function loginScreen(msg){
@@ -56,10 +56,10 @@ onAuthStateChanged(auth, async user => {
   loadingScreen('팀원 확인 중…');
   let ok = isAdmin;
   if(!ok){
-    try{ ok = (await getDoc(doc(fs, 'members', email))).exists(); }catch(e){ ok = false; }
+    try{ const md = await getDoc(doc(fs, 'members', email)); ok = md.exists(); if(ok) memberName = (md.data() || {}).name || ''; }catch(e){ ok = false; }
   }
   if(!ok){ deniedScreen(email); return; }
-  try{ await setDoc(doc(fs, 'users', user.uid), { name: user.displayName || email.split('@')[0], email, at: new Date().toISOString() }); }catch(e){}
+  try{ await setDoc(doc(fs, 'users', user.uid), { name: memberName || user.displayName || email.split('@')[0], email, at: new Date().toISOString() }); }catch(e){}
   loadingScreen('시트 데이터 불러오는 중…');
   let snapText = '';
   try{ snapText = await loadSnap(); }
@@ -142,7 +142,7 @@ function watchUsers(){
 }
 const userShim = {
   id: async () => me.uid,
-  me: async () => ({ id: me.uid, name: me.displayName || me.email }),
+  me: async () => ({ id: me.uid, name: memberName || me.displayName || me.email, email: String(me.email || '').toLowerCase() }),
   isOwner: () => isAdmin, canEdit: () => true, can: () => true,
   profiles: async ids => {
     watchUsers();
@@ -170,38 +170,16 @@ function start(snapText){
   const sc = document.createElement('script'); sc.textContent = document.getElementById('app-src').textContent; document.body.appendChild(sc);
   gate.hidden = true;
   const acct = document.getElementById('acct');
-  acct.innerHTML = '<span>'+esc(me.displayName || me.email)+'</span>'+(isAdmin ? '<button class="btn sm" id="aMembers">팀원 관리</button>' : '')+'<button class="btn sm ghost" id="aOut">로그아웃</button>';
+  acct.innerHTML = '<span>'+esc(memberName || me.displayName || me.email)+(isAdmin ? ' · 관리자' : '')+'</span><button class="btn sm ghost" id="aOut">로그아웃</button>';
   document.getElementById('aOut').onclick = () => signOut(auth);
-  if(isAdmin) document.getElementById('aMembers').onclick = membersPanel;
 }
 
-// ---------- 팀원 관리 (관리자) ----------
-let unMembers = null;
-function membersPanel(){
-  const box = document.getElementById('members');
-  box.hidden = false;
-  box.innerHTML = '<div class="mcard"><div class="mh"><h2>팀원 관리</h2><button class="btn sm" id="mClose">닫기</button></div>'+
-    '<p class="note">여기 등록된 Google 계정만 보드를 열 수 있어요. 퇴사자는 삭제하면 바로 못 들어옵니다.</p>'+
-    '<div class="filters"><input id="mEmail" type="email" placeholder="팀원 Google 이메일 (예: hong@gmail.com)"><input id="mName" placeholder="이름 (선택)" style="max-width:140px"><button class="btn pri" id="mAdd">추가</button></div>'+
-    '<div class="mlist" id="mList">불러오는 중…</div>'+'</div>';
-  document.getElementById('mClose').onclick = () => { box.hidden = true; if(unMembers){ unMembers(); unMembers = null; } };
-  document.getElementById('mAdd').onclick = async () => {
-    const e = document.getElementById('mEmail').value.trim().toLowerCase(); const nm = document.getElementById('mName').value.trim();
-    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){ alertBox('이메일 형식을 확인해 주세요'); return; }
-    try{ await setDoc(doc(fs, 'members', e), { email: e, name: nm, at: new Date().toISOString(), by: me.email }); document.getElementById('mEmail').value = ''; document.getElementById('mName').value = ''; }
-    catch(err){ alertBox('추가하지 못했습니다: '+(err.code||err.message)); }
-  };
-  if(unMembers) unMembers();
-  unMembers = onSnapshot(collection(fs, 'members'), s => {
-    const rows = s.docs.map(d => d.data()).sort((a,b) => (a.name||a.email).localeCompare(b.name||b.email, 'ko'));
-    const list = document.getElementById('mList'); if(!list) return;
-    list.innerHTML = '<div class="mrow"><span><b>'+esc(ADMINS.join(', '))+'</b></span><span class="note">관리자</span><span></span></div>'+
-      (rows.length ? rows.map(r => '<div class="mrow"><span>'+esc(r.email)+'</span><span>'+esc(r.name||'')+'</span><button class="btn sm ghost" data-del="'+esc(r.email)+'">삭제</button></div>').join('') : '<div class="note" style="padding:10px 0">아직 등록된 팀원이 없어요.</div>');
-    list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
-      if(!confirmBox(b.dataset.del+' 님을 팀원에서 삭제할까요?')) return;
-      try{ await deleteDoc(doc(fs, 'members', b.dataset.del)); }catch(err){ alertBox('삭제하지 못했습니다: '+(err.code||err.message)); }
-    });
-  }, err => { const list = document.getElementById('mList'); if(list) list.textContent = '불러오지 못했습니다: '+(err.code||err.message); });
-}
-function alertBox(t){ const p = document.getElementById('mProg'); if(p) p.textContent = t; }
-function confirmBox(t){ return window.__EMU ? true : window.confirm(t); }
+// ---------- 관리자: 시트 데이터 교체 (팀원 · 권한 화면에서 사용) ----------
+window.__boardAdmin = {
+  replaceSnap: async (file, prog) => {
+    if(!isAdmin) throw new Error('관리자만 할 수 있습니다');
+    const b = JSON.parse(await file.text());
+    if(!b || b.kind !== 'knownbetter-board-backup' || !b.snap) throw new Error('노운베러 보드 데이터 파일이 아닙니다');
+    await saveSnap(JSON.stringify(b.snap), prog);
+  }
+};

@@ -6,7 +6,12 @@ service cloud.firestore {
 
     function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
     function myEmail() { return request.auth.token.email.lower(); }
-    function isMember() { return isAdmin() || (signedIn() && exists(/databases/$(database)/documents/members/$(myEmail()))); }
+    function memberPath() { return /databases/$(database)/documents/members/$(myEmail()); }
+    function isMember() { return isAdmin() || (signedIn() && exists(memberPath())); }
+    // 메뉴 권한: 관리자는 전부, 팀원은 체크된 메뉴만 (권한 칸이 없는 예전 팀원은 전부 허용)
+    function can(p) {
+      return isAdmin() || (isMember() && (!('perms' in get(memberPath()).data) || get(memberPath()).data.perms.get(p, false) == true));
+    }
 
     match /members/{email} {
       allow read: if isAdmin() || (signedIn() && email == myEmail());
@@ -18,8 +23,13 @@ service cloud.firestore {
       allow read: if isMember();
       allow write: if isAdmin() || (isMember() && uid == request.auth.uid);
     }
-    match /{col}/{id} {
-      allow read, write: if isMember() && col in ['prod', 'ord', 'ovr', 'fac', 'fchg', 'pfix', 'stock', 'log'];
-    }
+    match /log/{id}   { allow read: if isMember(); allow write: if isMember(); }
+    match /prod/{id}  { allow read: if isMember(); allow write: if can('reg'); }
+    match /ord/{id}   { allow read: if isMember(); allow write: if can('reorder') || can('reg'); }
+    match /ovr/{id}   { allow read: if isMember(); allow write: if can('recv') || can('reorder'); }
+    match /stock/{id} { allow read: if isMember(); allow write: if can('stock'); }
+    match /pfix/{id}  { allow read: if isMember(); allow write: if can('fix') || can('reg'); }
+    match /fchg/{id}  { allow read: if isMember(); allow write: if can('fix'); }
+    match /fac/{id}   { allow read: if isMember(); allow write: if can('fac') || can('fix') || can('reg'); }
   }
 }
