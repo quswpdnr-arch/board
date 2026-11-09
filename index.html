@@ -2344,7 +2344,7 @@ function brandHeader(){
 }
 function brandEmpty(){
   const B = BRANDS.find(b=>b.k===BRAND);
-  return '<div class="sec"><div class="panel pad bempty"><span class="wordmark wm-'+B.k+'" style="font-size:30px">'+esc(B.mark||B.t)+'</span><h2>'+esc(B.t)+' 데이터는 아직 연결 전이에요</h2><p class="note">오더 체크 시트 · 리오더 시트 · 셀메이트 재고(창고별)를 받으면 노운베러와 같은 화면으로 열립니다. 재고 파일의 양식 · 이름이 달라도 머리글로 맞춰 읽어요.</p><button class="btn" data-act="brand" data-k="kb">노운베러 보기</button></div></div>';
+  return '<div class="sec"><div class="panel pad bempty"><span class="wordmark wm-'+B.k+'" style="font-size:30px">'+esc(B.mark||B.t)+'</span><h2>'+esc(B.t)+' 데이터는 아직 연결 전이에요</h2><p class="note">오더 체크 시트 · 리오더 시트 · 셀메이트 재고(창고별)를 받으면 노운베러와 같은 화면으로 열립니다. 재고 파일의 양식 · 이름이 달라도 머리글로 맞춰 읽어요.</p>'+(window.__boardAdmin && isAdmin() ? '<div class="panel pad step" style="width:min(520px,100%);text-align:left"><h3 style="margin:0">관리자: '+esc(B.t)+' 데이터 올리기</h3><p class="note" style="margin:0">Claude에게 받은 <b>knownbetter-sheet-'+B.k+'-….json</b> 파일을 고르면 바로 연결됩니다.</p><div class="filters"><label class="btn pri" for="snapFile" style="cursor:pointer">데이터 파일 선택</label><input type="file" id="snapFile" accept=".json" hidden><span class="note" id="snapProg"></span></div></div>' : '<p class="note">관리자가 데이터 파일을 올리면 열립니다.</p>')+'<button class="btn" data-act="brand" data-k="kb">노운베러 보기</button></div></div>';
 }
 
 // ---------- order modal ----------
