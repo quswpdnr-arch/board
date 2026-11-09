@@ -24,7 +24,9 @@ try{
 }catch(e){ fs = initializeFirestore(app, { ignoreUndefinedProperties: true }); }
 if(window.__EMU){ connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true }); connectFirestoreEmulator(fs, '127.0.0.1', 8080); }
 
-let me = null, isAdmin = false, started = false, memberName = '';
+let me = null, isAdmin = false, started = false, memberName = '', memberAdmins = [];
+const brandKey = () => (typeof BRAND !== 'undefined' && BRAND !== 'all') ? BRAND : 'kb';
+const isBrandAdmin = br => isAdmin || memberAdmins.includes(br || brandKey());
 
 // ---------- 화면 ----------
 function loginScreen(msg){
@@ -55,7 +57,7 @@ onAuthStateChanged(auth, async user => {
   isAdmin = ADMINS.includes(email);
   loadingScreen('불러오는 중…');
   // 팀원 확인과 시트 데이터 확인을 동시에 (기다리는 시간 단축)
-  const memberP = getDoc(doc(fs, 'members', email)).then(md => { if(md.exists()){ memberName = (md.data() || {}).name || ''; return true; } return false; }).catch(() => false);
+  const memberP = getDoc(doc(fs, 'members', email)).then(md => { if(md.exists()){ const d = md.data() || {}; memberName = d.name || ''; memberAdmins = Array.isArray(d.admins) ? d.admins : []; return true; } return false; }).catch(() => false);
   const snapP = loadSnap().then(t => ({t}), e => ({e}));
   let ok = (await memberP) || isAdmin;
   if(!ok){ deniedScreen(email); return; }
@@ -156,7 +158,7 @@ function watchUsers(){
 const userShim = {
   id: async () => me.uid,
   me: async () => ({ id: me.uid, name: memberName || me.displayName || me.email, email: String(me.email || '').toLowerCase() }),
-  isOwner: () => isAdmin, canEdit: () => true, can: () => true,
+  isOwner: () => isBrandAdmin(), canEdit: () => true, can: () => true,
   profiles: async ids => {
     watchUsers();
     const out = {};
@@ -179,22 +181,23 @@ const dlShim = {
 function start(snapText){
   started = true;
   document.getElementById('snap').textContent = snapText;
+  window.__SUPER = isAdmin;
   window.claude = { use: async n => n === 'db' ? dbShim : n === 'user' ? userShim : n === 'downloads' ? dlShim : null };
   const sc = document.createElement('script'); sc.textContent = document.getElementById('app-src').textContent; document.body.appendChild(sc);
   gate.hidden = true;
   const acct = document.getElementById('acct');
-  acct.innerHTML = '<span>'+esc(memberName || me.displayName || me.email)+(isAdmin ? ' · 관리자' : '')+'</span><button class="btn sm ghost" id="aOut">로그아웃</button>';
+  acct.innerHTML = '<span>'+esc(memberName || me.displayName || me.email)+(isAdmin ? ' · 관리자' : isBrandAdmin() ? ' · 팀장' : '')+'</span><button class="btn sm ghost" id="aOut">로그아웃</button>';
   document.getElementById('aOut').onclick = () => signOut(auth);
 }
 
 // ---------- 관리자: 시트 데이터 교체 (팀원 · 권한 화면에서 사용) ----------
 window.__boardAdmin = {
   replaceSnap: async (file, prog) => {
-    if(!isAdmin) throw new Error('관리자만 할 수 있습니다');
     const b = JSON.parse(await file.text());
     if(!b || b.kind !== 'knownbetter-board-backup' || !b.snap) throw new Error('보드 데이터 파일이 아닙니다');
     const br = b.brand || b.snap.brand || 'kb';
     if(!['kb','tid','frv'].includes(br)) throw new Error('브랜드를 알 수 없는 파일입니다');
+    if(!isBrandAdmin(br)) throw new Error('이 브랜드 관리자만 데이터를 교체할 수 있습니다');
     await saveSnap(JSON.stringify(b.snap), prog, br, b.snap.sum);
     return br;
   }

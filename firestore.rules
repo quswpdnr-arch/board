@@ -8,17 +8,23 @@ service cloud.firestore {
     function myEmail() { return request.auth.token.email.lower(); }
     function memberPath() { return /databases/$(database)/documents/members/$(myEmail()); }
     function isMember() { return isAdmin() || (signedIn() && exists(memberPath())); }
+    function mdoc() { return get(memberPath()).data; }
+    // 브랜드 관리자(팀장): 멤버 문서의 admins 목록 ['tid','kb','frv']
+    function bAdmin(br) { return isAdmin() || (isMember() && br in mdoc().get('admins', [])); }
+    function anyAdmin() { return isAdmin() || (isMember() && mdoc().get('admins', []).size() > 0); }
     // 메뉴 권한: 관리자는 전부, 팀원은 체크된 메뉴만 (권한 칸이 없는 예전 팀원은 전부 허용)
-    function can(p) {
-      return isAdmin() || (isMember() && (!('perms' in get(memberPath()).data) || get(memberPath()).data.perms.get(p, false) == true));
-    }
+    function permOk(p) { return isMember() && (!('perms' in mdoc()) || mdoc().perms.get(p, false) == true); }
+    function can(p) { return bAdmin('kb') || permOk(p); }
+    function canB(p, br) { return bAdmin(br) || permOk(p); }
 
     match /members/{email} {
-      allow read: if isAdmin() || (signedIn() && email == myEmail());
-      allow write: if isAdmin();
+      allow read: if anyAdmin() || (signedIn() && email == myEmail());
+      allow create: if isAdmin() || (anyAdmin() && request.resource.data.get('admins', []).size() == 0);
+      allow update: if isAdmin() || (anyAdmin() && request.resource.data.get('admins', []) == resource.data.get('admins', []));
+      allow delete: if isAdmin() || (anyAdmin() && resource.data.get('admins', []).size() == 0);
     }
-    match /meta/{id} { allow read: if isMember(); allow write: if isAdmin(); }
-    match /snap/{id} { allow read: if isMember(); allow write: if isAdmin(); }
+    match /meta/{id} { allow read: if isMember(); allow write: if isAdmin() || (id == 'snap' && bAdmin('kb')) || (id == 'snap_tid' && bAdmin('tid')) || (id == 'snap_frv' && bAdmin('frv')); }
+    match /snap/{id} { allow read: if isMember(); allow write: if isAdmin() || (id.matches('p[0-9]+') && bAdmin('kb')) || (id.matches('tid_p[0-9]+') && bAdmin('tid')) || (id.matches('frv_p[0-9]+') && bAdmin('frv')); }
     match /users/{uid} {
       allow read: if isMember();
       allow write: if isAdmin() || (isMember() && uid == request.auth.uid);
@@ -26,7 +32,7 @@ service cloud.firestore {
     match /log/{id}   { allow read: if isMember(); allow write: if isMember(); }
     match /prod/{id}  { allow read: if isMember(); allow write: if can('reg'); }
     match /ord/{id}   { allow read: if isMember(); allow write: if can('reorder') || can('reg'); }
-    match /ovr/{id}   { allow read: if isMember(); allow write: if can('recv') || can('reorder'); }
+    match /ovr/{id}   { allow read: if isMember(); allow write: if can('recv') || can('reorder') || can('eta'); }
     match /stock/{id} { allow read: if isMember(); allow write: if can('stock'); }
     match /pfix/{id}  { allow read: if isMember(); allow write: if can('fix') || can('reg'); }
     match /fchg/{id}  { allow read: if isMember(); allow write: if can('fix'); }
@@ -36,18 +42,18 @@ service cloud.firestore {
     match /cfg/{id}   { allow read: if isMember(); allow write: if can('resv'); }
     match /sum/{id}   { allow read: if isMember(); allow write: if isMember(); }
     // 브랜드별 공유 기록 (틸아이다이 · 프리버): 같은 메뉴 권한 적용
-    function canColl(c) {
+    function canColl(c, br) {
       return ((c == 'log' || c == 'sum') && isMember())
-        || (c == 'prod' && can('reg'))
-        || (c == 'ord' && (can('reorder') || can('reg')))
-        || (c == 'ovr' && (can('recv') || can('reorder')))
-        || (c == 'stock' && can('stock'))
-        || (c == 'pfix' && (can('fix') || can('reg')))
-        || (c == 'fchg' && can('fix'))
-        || (c == 'fac' && (can('fac') || can('fix') || can('reg')))
-        || ((c == 'resv' || c == 'cfg') && can('resv'))
-        || (c == 'sales' && (can('resv') || can('stock')));
+        || (c == 'prod' && canB('reg', br))
+        || (c == 'ord' && (canB('reorder', br) || canB('reg', br)))
+        || (c == 'ovr' && (canB('recv', br) || canB('reorder', br) || canB('eta', br)))
+        || (c == 'stock' && canB('stock', br))
+        || (c == 'pfix' && (canB('fix', br) || canB('reg', br)))
+        || (c == 'fchg' && canB('fix', br))
+        || (c == 'fac' && (canB('fac', br) || canB('fix', br) || canB('reg', br)))
+        || ((c == 'resv' || c == 'cfg') && canB('resv', br))
+        || (c == 'sales' && (canB('resv', br) || canB('stock', br)));
     }
-    match /brands/{br}/{coll}/{id} { allow read: if isMember(); allow write: if br in ['tid', 'frv'] && canColl(coll); }
+    match /brands/{br}/{coll}/{id} { allow read: if isMember(); allow write: if br in ['tid', 'frv'] && canColl(coll, br); }
   }
 }
