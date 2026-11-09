@@ -2111,6 +2111,7 @@ function rvCalc(p){
   const ast = r.st || (known && rest>0 ? '일반배송' : '');   // 할 일 계산용 (직접 정한 상태 기준)
   // 노출 상태가 비어 있으면 자동 배치: 재고 있음 → 일반배송 · 재고 없고 입고 예정 → 예약배송 · 둘 다 없음 → 품절
   const auto = !r.st;
+  if(!r.sale && (!known || rest>0 || (+p.stock||0)>0)) r.sale = '판매중';   // 판매 상태가 비어 있고 재고가 있으면 판매중
   const st = r.st || ((known && (rest>0 || (+p.stock||0)>0)) || !known ? '일반배송' : inc>0 ? '예약배송' : '품절');
   let lvl = '';
   if(s.wk>0 && st!=='단종' && st!=='단종(예정)'){ if(total < s.wk*0.3) lvl = '긴급'; else if(total < s.wk*0.6) lvl = '주의'; }
@@ -2179,7 +2180,7 @@ function viewResv(){
   for(const x of a.slice(0, X.n)){
     const p = x.p, r = x.r;
     h += '<tr'+(x.acts.length?' class="rvneed"':'')+'><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(p.key)+'">'+esc(p.n||p.en)+'</a><small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+flink(p.curFac)+'</small><select class="catsel" data-rvcat="'+esc(normK(p.n||p.b))+'" title="분류 (담당 분담)"'+(lock?' disabled':'')+'>'+CATS.map(c=>'<option'+(c===x.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="__new">+ 분류 관리…</option></select></div></div></td>'+
-      '<td><select class="rvsel st-'+(x.st==='예약배송'?'open':x.st==='임시예약배송'?'soon':x.st==='단종(예정)'?'over':x.st==='품절'?'late':x.st==='단종'?'none':'done')+'" data-rvst="'+esc(p.b)+'"'+(lock?' disabled':'')+'>'+RV_ST.map(s=>'<option'+(s===x.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+(x.auto?'<small class="odsub" title="노출 상태를 정하지 않아 재고 · 입고 예정으로 자동 배치했어요">자동 배치</small>':'')+(r.sale&&r.sale!=='판매중'?'<small class="odsub">'+esc(r.sale)+'</small>':'')+'</td>'+
+      '<td><select class="rvsel st-'+(x.st==='예약배송'?'open':x.st==='임시예약배송'?'soon':x.st==='단종(예정)'?'over':x.st==='품절'?'late':x.st==='단종'?'none':'done')+'" data-rvst="'+esc(p.b)+'"'+(lock?' disabled':'')+'>'+RV_ST.map(s=>'<option'+(s===x.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+'</td>'+
       '<td>'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d)+'">'+RV_ACT[k].t+'</span>').join(' ')+(x.lvl?' <span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
       '<td class="num">'+(x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')+(x.s.unsent?'<small class="odsub">미발송 '+nf(x.s.unsent)+'</small>':'')+'</td>'+
       '<td class="num">'+(x.known?'<b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b> <span class="muted">/ '+nf(p.stock)+'</span>'+(x.wh?'<small class="odsub">트랜쇼 '+nf(p.trans)+' · 본사 '+nf(p.hq)+(p.hq>0?' (검수)':'')+'</small>':''):'<span class="muted">—</span>')+'</td>'+
