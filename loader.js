@@ -28,7 +28,7 @@ let me = null, isAdmin = false, started = false, memberName = '';
 
 // ---------- 화면 ----------
 function loginScreen(msg){
-  show('<span class="logo glogo"></span><h1>오더·입고 보드</h1><p>틸아이다이 · 노운베러 · 프리버</p><p>회사에서 쓰는 Google 계정으로 로그인하세요.</p>'+
+  show('<span class="logo lg-jk glogo"></span><h1>오더·입고 보드</h1><p>틸아이다이 · 노운베러 · 프리버</p><p>회사에서 쓰는 Google 계정으로 로그인하세요.</p>'+
     (msg ? '<p class="gerr">'+esc(msg)+'</p>' : '')+
     '<button class="gbtn" id="gLogin">Google 계정으로 로그인</button>');
   document.getElementById('gLogin').onclick = async () => {
@@ -39,12 +39,12 @@ function loginScreen(msg){
   };
 }
 function deniedScreen(email){
-  show('<span class="logo glogo"></span><h1>아직 팀원으로 등록되지 않았어요</h1><p>관리자에게 아래 이메일을 알려주고 팀원 등록을 요청하세요.</p><p class="gmail">'+esc(email)+'</p>'+
+  show('<span class="logo lg-jk glogo"></span><h1>아직 팀원으로 등록되지 않았어요</h1><p>관리자에게 아래 이메일을 알려주고 팀원 등록을 요청하세요.</p><p class="gmail">'+esc(email)+'</p>'+
     '<div class="grow"><button class="gbtn ghost" id="gRetry">등록됐어요, 다시 확인</button><button class="gbtn ghost" id="gOut">다른 계정으로 로그인</button></div>');
   document.getElementById('gRetry').onclick = () => location.reload();
   document.getElementById('gOut').onclick = () => signOut(auth);
 }
-function loadingScreen(t){ show('<span class="logo glogo"></span><p class="gload">'+esc(t||'불러오는 중…')+'</p>'); }
+function loadingScreen(t){ show('<span class="logo lg-jk glogo"></span><p class="gload">'+esc(t||'불러오는 중…')+'</p>'); }
 
 // ---------- 로그인 상태 ----------
 onAuthStateChanged(auth, async user => {
@@ -65,7 +65,7 @@ onAuthStateChanged(auth, async user => {
   let snapText = '';
   try{ const r = await snapP; if(r.e) throw r.e; snapText = r.t; }
   catch(e){ show('<h1>데이터를 불러오지 못했어요</h1><p class="gerr">'+esc(e.code||e.message)+'</p><p>Firestore 규칙(설명서 4단계)이 제대로 게시됐는지 확인해 주세요.</p><button class="gbtn ghost" onclick="location.reload()">다시 시도</button>'); return; }
-  if(!snapText){ isAdmin ? setupScreen() : show('<span class="logo glogo"></span><h1>아직 데이터가 없어요</h1><p>관리자가 처음 데이터를 올린 뒤에 열 수 있습니다.</p>'); return; }
+  if(!snapText){ isAdmin ? setupScreen() : show('<span class="logo lg-jk glogo"></span><h1>아직 데이터가 없어요</h1><p>관리자가 처음 데이터를 올린 뒤에 열 수 있습니다.</p>'); return; }
   start(snapText);
 });
 
@@ -96,7 +96,7 @@ async function loadSnap(){
 
 // ---------- 처음 설정: 백업 파일 올리기 (관리자) ----------
 function setupScreen(){
-  show('<span class="logo glogo"></span><h1>처음 설정</h1><p>기존 보드(claude.ai)의 <b>등록·입고처리 › 변경 이력 › 전체 데이터 백업 내려받기</b>로 받은 파일을 올려주세요.</p>'+
+  show('<span class="logo lg-jk glogo"></span><h1>처음 설정</h1><p>기존 보드(claude.ai)의 <b>등록·입고처리 › 변경 이력 › 전체 데이터 백업 내려받기</b>로 받은 파일을 올려주세요.</p>'+
     '<label class="gbtn" for="gFile">백업 파일 선택 (knownbetter-backup-….json)</label><input type="file" id="gFile" accept=".json" hidden><p class="gload" id="gProg"></p>');
   document.getElementById('gFile').onchange = async ev => {
     const f = ev.target.files && ev.target.files[0]; if(!f) return;
