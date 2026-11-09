@@ -53,16 +53,17 @@ onAuthStateChanged(auth, async user => {
   me = user;
   const email = String(user.email || '').toLowerCase();
   isAdmin = ADMINS.includes(email);
-  loadingScreen('팀원 확인 중…');
-  let ok = isAdmin;
-  if(!ok){
-    try{ const md = await getDoc(doc(fs, 'members', email)); ok = md.exists(); if(ok) memberName = (md.data() || {}).name || ''; }catch(e){ ok = false; }
-  }
+  loadingScreen('불러오는 중…');
+  // 팀원 확인과 시트 데이터 확인을 동시에 (기다리는 시간 단축)
+  const memberP = getDoc(doc(fs, 'members', email)).then(md => { if(md.exists()){ memberName = (md.data() || {}).name || ''; return true; } return false; }).catch(() => false);
+  const snapP = loadSnap().then(t => ({t}), e => ({e}));
+  let ok = (await memberP) || isAdmin;
   if(!ok){ deniedScreen(email); return; }
-  try{ await setDoc(doc(fs, 'users', user.uid), { name: memberName || user.displayName || email.split('@')[0], email, at: new Date().toISOString() }); }catch(e){}
-  loadingScreen('시트 데이터 불러오는 중…');
+  // 이름 기록은 바뀌었을 때만, 기다리지 않고
+  const nm = memberName || user.displayName || email.split('@')[0];
+  try{ if(localStorage.getItem('kb_user_'+user.uid) !== nm){ setDoc(doc(fs, 'users', user.uid), { name: nm, email, at: new Date().toISOString() }).then(()=>{ try{ localStorage.setItem('kb_user_'+user.uid, nm); }catch(e){} }).catch(()=>{}); } }catch(e){}
   let snapText = '';
-  try{ snapText = await loadSnap(); }
+  try{ const r = await snapP; if(r.e) throw r.e; snapText = r.t; }
   catch(e){ show('<h1>데이터를 불러오지 못했어요</h1><p class="gerr">'+esc(e.code||e.message)+'</p><p>Firestore 규칙(설명서 4단계)이 제대로 게시됐는지 확인해 주세요.</p><button class="gbtn ghost" onclick="location.reload()">다시 시도</button>'); return; }
   if(!snapText){ isAdmin ? setupScreen() : show('<span class="logo glogo"></span><h1>아직 데이터가 없어요</h1><p>관리자가 처음 데이터를 올린 뒤에 열 수 있습니다.</p>'); return; }
   start(snapText);
