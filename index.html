@@ -344,6 +344,12 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 .dkv dd{white-space:nowrap}.dkv dd.dwh{grid-column:1/-1;font-size:11px;color:var(--muted);margin-top:-2px}
 .schcards{grid-template-columns:repeat(auto-fill,minmax(230px,260px))}.schtbl input[type=date]{width:140px}.schtbl input:not([type]){min-width:150px}.schtbl tr.schdirty td{background:var(--sunk)}
 .tbadm{min-width:96px}.badm{display:inline-grid;gap:2px;justify-items:start;font-size:12px;text-align:left}.badm label{display:inline-flex;gap:3px;align-items:center;white-space:nowrap}
+tr.qchg td{background:color-mix(in srgb, var(--warn) 8%, transparent)}.qtxt{color:var(--warn)}
+tr.xchg td{background:color-mix(in srgb, var(--bad) 7%, transparent)}
+.rbtns{display:grid;grid-template-columns:auto auto;gap:3px;justify-content:start}.rbtns .pri{grid-column:1/-1}
+.rcvtbl th,.rcvtbl td{padding-left:5px;padding-right:5px}.rcvtbl .pname{max-width:150px}.overq{color:var(--bad);font-weight:600}.overq[hidden]{display:none}.rbtns .btn{padding-left:7px;padding-right:7px}
+body.mode-ext #tabs button:not([data-tab=sched]){display:none}body.mode-ext .bsw[data-k=all]{display:none}
+td.text{text-align:left}
 .bcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:980px){.bcards{grid-template-columns:1fr}}
 .bcard{display:grid;gap:12px}.bcard.off{opacity:.6}
@@ -358,9 +364,9 @@ body.mode-all #tabs{display:none}
 .alltbl{min-width:780px}.alltbl td:first-child,.alltbl td:nth-child(2){white-space:nowrap}
 .bempty{display:grid;gap:10px;justify-items:center;text-align:center;padding:48px 20px}.bempty h2{margin:6px 0 0;font-size:17px}
 @media (max-width:640px){.hrow{flex-wrap:wrap;gap:8px}.brandsw{margin-left:0;order:3;width:100%;justify-content:space-between}.bsw{flex:1;padding:5px 6px}}
-.rvcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(134px,1fr));gap:8px;margin-bottom:12px}
-.rvcard{display:grid;grid-template-columns:1fr auto;gap:2px 6px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 11px;cursor:pointer;font:inherit;color:inherit}.rvcard small{grid-column:1/-1}
-.rvcard b{font-size:18px}.rvcard small{font-size:11px;color:var(--muted);line-height:1.3}.rvcard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.rvcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(116px,1fr));gap:6px;margin-bottom:10px}
+.rvcard{display:grid;grid-template-columns:1fr auto;gap:1px 4px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 8px;cursor:pointer;font:inherit;color:inherit}.rvcard small{grid-column:1/-1}
+.rvcard b{font-size:16px}.rvcard .chip{font-size:11px;padding:1px 6px;white-space:nowrap}.rvcard small{font-size:10.5px;color:var(--muted);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rvcard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
 .rvtbl td{vertical-align:top}.rvtbl td:first-child{min-width:220px}.rvtbl td.rvmemo{min-width:140px}.rvtbl tr.rvneed td:first-child{box-shadow:3px 0 0 var(--accent) inset}
 .rvsel{font-size:12.5px;padding:3px 22px 3px 8px;min-height:0;height:auto;width:auto;border-radius:8px;font-weight:600}
 .rvround{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--sunk);border:1px solid var(--line);margin:0 4px 4px 0;white-space:nowrap}.rvround.bad{border-color:var(--bad);color:var(--bad)}
@@ -1509,6 +1515,14 @@ function roPlan(text){
     const b = g(r,'b').replace(/^잔여량-/,''); const od = parseDay(g(r,'od'));
     const sum = parseInt(g(r,'sum').replace(/[^\d]/g,''),10);
     const qty = sum>0 ? sum : ((parseInt(g(r,'on').replace(/[^\d]/g,''),10)||0) + (parseInt(g(r,'off').replace(/[^\d]/g,''),10)||0));
+    const memo0 = g(r,'memo'); const sumRaw = g(r,'sum').replace(/[^\d]/g,'');
+    const cancel = /취소/.test(memo0) || (sumRaw!=='' && /^0+$/.test(sumRaw));
+    if(b && od && cancel){
+      const p0 = byB.get(b); const o0 = p0 && (p0.orders.filter(o=>o.od===od && isOpen(o)).find(o=>!(qty>0) || o.qty===qty) || p0.orders.find(o=>o.od===od && isOpen(o)));
+      if(o0){ plan.push({type:'cancel', p:p0, o:o0, od, qty:o0.qty, patch:{closed:true, closeReason:'오더 취소 (리오더 시트)'}, logs:[{type:'close', msg:'오더 취소 · 남은 '+o0.remain+'장 (리오더 시트)'}], recvQ:0, label:'오더 취소', text:'남은 '+nf(o0.remain)+'장 취소 · 오더 종료'+(o0.recv?' (입고 '+nf(o0.recv)+'장은 그대로)':'')}); }
+      else same++;
+      continue;
+    }
     if(!b || !od || !(qty>0)){ if(b||od) skipped++; continue; }
     const key = b+'|'+od+'|'+qty; if(seen.has(key)){ dup++; continue; } seen.add(key);
     const {eta, note} = parseEta(g(r,'eta'), od);
@@ -1535,11 +1549,12 @@ function roPlan(text){
     }
     if(reason && reason!==o.etaReason && !String(o.memo||'').includes(reason) && isOpen(o)){ patch.reason = reason; ch.push('사유: '+reason); }
     let recvQ = 0;
-    if(done && o.remain>0) recvQ = o.remain;
+    if(done && !o.closed && qty - o.recv > 0) recvQ = qty - o.recv;   // 시트 수량 기준으로 아직 안 잡힌 만큼만
     else if(part && part > o.recv && !o.closed) recvQ = part - o.recv;
-    if(recvQ>0){ ch.push((done?'입고완료':'입고 '+nf(part)+'장까지')+' → +'+nf(recvQ)+'장'); }
+    const newQty = patch.qty!=null ? patch.qty : o.qty; const over = recvQ>0 ? Math.max(0, o.recv + recvQ - newQty) : 0;
+    if(recvQ>0){ ch.push((done?'입고완료':'입고 '+nf(part)+'장까지')+' → +'+nf(recvQ)+'장'+(over?' (오더보다 '+nf(over)+'장 많음)':'')); }
     if(!ch.length){ same++; continue; }
-    plan.push({type: recvQ>0 ? 'recv' : (patch.eta||patch.reason ? 'eta' : 'qty'), p, o, od, qty, patch, logs, recvQ, recvD: (eta && eta<=TODAY ? eta : TODAY), label: recvQ>0 ? '입고 반영' : (shift==='late' ? '일정 지연 예정' : shift==='early' ? '조기 입고 예상' : shift==='set' ? '일정 확정' : patch.reason ? '사유 반영' : '수량 변경'), shift, text: ch.join(' · ')});
+    plan.push({type: recvQ>0 ? 'recv' : (patch.eta||patch.reason ? 'eta' : 'qty'), over, p, o, od, qty, patch, logs, recvQ, recvD: (eta && eta<=TODAY ? eta : TODAY), label: recvQ>0 ? '입고 반영' : (shift==='late' ? '일정 지연 예정' : shift==='early' ? '조기 입고 예상' : shift==='set' ? '일정 확정' : patch.reason ? '사유 반영' : '오더 수량 변경'), shift, text: ch.join(' · ')});
   }
   return {plan, miss, same, skipped, dup, header, total: rows.length - start};
 }
@@ -1552,11 +1567,11 @@ function regSync(){
   const R = Y.res;
   if(R){
     const cnt = t => R.plan.filter(x=>x.type===t).length;
-    h += '<div class="stats"><span>읽은 줄 <b>'+nf(R.total)+'</b></span><span>신규 리오더 <b style="color:var(--accent)">'+cnt('new')+'</b></span><span>일정 반영 <b style="color:var(--info)">'+cnt('eta')+'</b>'+(R.plan.some(x=>x.shift==='late')?' · 지연 예정 '+R.plan.filter(x=>x.shift==='late').length:'')+(R.plan.some(x=>x.shift==='early')?' · 조기 입고 '+R.plan.filter(x=>x.shift==='early').length:'')+'</span><span>입고 반영 <b style="color:var(--ok)">'+cnt('recv')+'</b></span><span>수량 변경 <b>'+cnt('qty')+'</b></span><span>이미 같음 <b>'+nf(R.same)+'</b></span>'+(R.miss.length?'<span>보드에 없는 바코드 <b style="color:var(--bad)">'+R.miss.length+'</b></span>':'')+(R.dup?'<span>시트 안 중복 <b>'+R.dup+'</b></span>':'')+'</div>';
+    h += '<div class="stats"><span>읽은 줄 <b>'+nf(R.total)+'</b></span><span>신규 리오더 <b style="color:var(--accent)">'+cnt('new')+'</b></span><span>일정 반영 <b style="color:var(--info)">'+cnt('eta')+'</b>'+(R.plan.some(x=>x.shift==='late')?' · 지연 예정 '+R.plan.filter(x=>x.shift==='late').length:'')+(R.plan.some(x=>x.shift==='early')?' · 조기 입고 '+R.plan.filter(x=>x.shift==='early').length:'')+'</span><span>입고 반영 <b style="color:var(--ok)">'+cnt('recv')+'</b></span><span>오더 수량 변경 <b style="color:var(--warn)">'+R.plan.filter(x=>x.patch&&x.patch.qty!=null).length+'</b></span>'+(R.plan.some(x=>x.over)?'<span>초과 입고 <b style="color:var(--bad)">'+R.plan.filter(x=>x.over).length+'</b></span>':'')+(cnt('cancel')?'<span>오더 취소 <b style="color:var(--bad)">'+cnt('cancel')+'</b></span>':'')+'<span>이미 같음 <b>'+nf(R.same)+'</b></span>'+(R.miss.length?'<span>보드에 없는 바코드 <b style="color:var(--bad)">'+R.miss.length+'</b></span>':'')+(R.dup?'<span>시트 안 중복 <b>'+R.dup+'</b></span>':'')+'</div>';
     if(!R.header) h += '<p class="note" style="margin:0">머리글 줄이 없어 리오더 시트 기본 열 순서(리오더 날짜 · 바코드 · 담당 · 공장 · … · 합계 · 입고일정 · 사유 · 예약배송 · 비고)로 읽었습니다.</p>';
     if(R.plan.length){
-      h += '<div class="tw" style="max-height:420px;overflow:auto"><table><thead><tr><th><input type="checkbox" id="syncAll" checked aria-label="전체 선택"></th><th>구분</th><th>상품</th><th>리오더 날짜</th><th>차수</th><th>바뀌는 내용</th></tr></thead><tbody>'+
-        R.plan.map((x,i)=>'<tr><td><input type="checkbox" data-sync="'+i+'"'+(Y.off[i]?'':' checked')+'></td><td><span class="chip '+(x.shift==='late'?'st-late':x.shift==='early'?'st-done':({new:'st-done',eta:'st-open',recv:'st-done',qty:'st-soon'})[x.type])+'">'+x.label+'</span></td><td><b>'+esc(x.p.n||x.p.en)+'</b> '+esc(x.p.opt)+' <span class="mono muted">'+esc(x.p.b)+'</span></td><td class="num">'+fmtDY(x.od)+'</td><td>'+esc(x.o?x.o.round:nextRound(x.p))+'</td><td class="muted">'+esc(x.text)+'</td></tr>').join('')+'</tbody></table></div>'+
+      h += '<div class="tw" style="max-height:420px;overflow:auto"><table><thead><tr><th><input type="checkbox" id="syncAll"'+(Object.values(Y.off).some(Boolean)?'':' checked')+' aria-label="전체 선택"></th><th>구분</th><th>상품</th><th>리오더 날짜</th><th>차수</th><th>바뀌는 내용</th></tr></thead><tbody>'+
+        R.plan.map((x,i)=>{ const qc = x.patch && x.patch.qty!=null && x.type!=='qty'; return '<tr'+(x.type==='cancel'||x.over?' class="xchg"':x.patch&&x.patch.qty!=null?' class="qchg"':'')+'><td><input type="checkbox" data-sync="'+i+'"'+(Y.off[i]?'':' checked')+'></td><td style="white-space:nowrap"><span class="chip '+(x.shift==='late'?'st-late':x.shift==='early'?'st-done':({new:'st-done',eta:'st-open',recv:'st-done',qty:'st-soon',cancel:'st-late'})[x.type])+'">'+x.label+'</span>'+(qc?' <span class="chip st-soon">오더 수량 변경</span>':'')+(x.over?' <span class="chip st-late">초과 입고</span>':'')+'</td><td><b>'+esc(x.p.n||x.p.en)+'</b> '+esc(x.p.opt)+' <span class="mono muted">'+esc(x.p.b)+'</span></td><td class="num">'+fmtDY(x.od)+'</td><td>'+esc(x.o?x.o.round:nextRound(x.p))+'</td><td class="muted">'+(x.patch&&x.patch.qty!=null?'<b class="qtxt">오더 수량 '+nf(x.o.qty)+' → '+nf(x.patch.qty)+'장</b>'+(x.text.replace(/^수량 [\d,]+ → [\d,]+( · )?/,'')?' · ':'')+esc(x.text.replace(/^수량 [\d,]+ → [\d,]+( · )?/,'')):esc(x.text))+'</td></tr>'; }).join('')+'</tbody></table></div>'+
         '<div><button class="btn pri" data-act="syncApply"'+(canWrite()?'':' disabled')+'>선택한 '+(R.plan.length-Object.values(Y.off).filter(Boolean).length)+'건 반영</button></div>';
     } else h += '<div class="empty">새로 반영할 내용이 없습니다. 보드가 리오더 시트와 같은 상태입니다.</div>';
     if(R.miss.length) h += '<details><summary class="note" style="cursor:pointer">보드에 없는 바코드 '+R.miss.length+'건 (신규 상품 등록 또는 정보 보정에서 바코드를 연결하면 다음 붙여넣기 때 반영됩니다)</summary><div class="tw"><table><thead><tr><th>바코드</th><th>제작품명</th><th>컬러,사이즈</th><th>공장</th><th>리오더 날짜</th><th class="num">수량</th></tr></thead><tbody>'+
@@ -1568,7 +1583,7 @@ async function syncApply(){ if(!need('reorder')) return;
   const R = S.sync.res; if(!R) return;
   const picks = R.plan.filter((x,i)=>!S.sync.off[i]);
   if(!picks.length){ toast('반영할 줄을 고르세요'); return; }
-  const at = new Date().toISOString(); const c = {new:0, eta:0, recv:0, qty:0};
+  const at = new Date().toISOString(); const c = {new:0, eta:0, recv:0, qty:0, cancel:0};
   const n = await guardN(async()=>{
     for(const x of picks){
       if(x.type==='new'){
@@ -1577,13 +1592,13 @@ async function syncApply(){ if(!need('reorder')) return;
         c.new++; continue;
       }
       const o = x.o; const cur = Object.assign({}, ovr[o.id]||{}); const patch = Object.assign({}, x.patch); const logs = (x.logs||[]).slice();
-      if(x.recvQ>0){ patch.recv = (Array.isArray(cur.recv)?cur.recv:[]).concat([{q:x.recvQ, d:x.recvD, by:MYID||''}]); logs.push({type:'recv', msg:'입고 '+x.recvQ+'장 (리오더 시트)'}); }
+      if(x.recvQ>0){ patch.recv = (Array.isArray(cur.recv)?cur.recv:[]).concat([{q:x.recvQ, d:x.recvD, by:MYID||''}]); logs.push({type:'recv', msg:'입고 '+x.recvQ+'장'+(x.over?' · 초과 입고 +'+x.over+'장':'')+' (리오더 시트)'}); }
       const next = Object.assign(cur, patch);
       next.log = (Array.isArray(next.log)?next.log:[]).concat(logs.map(l=>Object.assign({at, by:MYID||''}, l))).slice(-40);
       await DB.doc('ovr/'+o.id).set(next);
       c[x.type]++;
     }
-    await writeLog('리오더 시트 반영: 신규 '+c.new+' · 일정 '+c.eta+' · 입고 '+c.recv+' · 수량 '+c.qty+'건');
+    await writeLog('리오더 시트 반영: 신규 '+c.new+' · 일정 '+c.eta+' · 입고 '+c.recv+' · 수량 '+c.qty+(c.cancel?' · 취소 '+c.cancel:'')+'건');
     return picks.length;
   });
   if(n){ toast(n+'건 반영했습니다'); S.sync.res = null; S.sync.off = {}; render(); }
@@ -1739,8 +1754,8 @@ function recvList(){
   if(!a.length) h += '<tr><td colspan="10" class="empty">입고를 기다리는 오더가 없습니다.</td></tr>';
   for(const o of a.slice(0,200)){
     h += '<tr><td><div class="pc">'+thumb(o.p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(o.p.key)+'" title="상품 조회로 이동">'+esc(o.p.n||o.p.en)+'</a><small>'+esc(o.p.opt)+' · <span class="mono">'+esc(o.p.b)+'</span></small></div></div></td><td>'+flink(o.f)+'</td><td style="white-space:nowrap">'+esc(o.round)+'<small class="odsub">'+(o.od?fmtDY(o.od)+' 오더':'초두')+'</small></td><td style="white-space:nowrap">'+etaCell(o)+'</td><td class="num"><b>'+nf(o.remain)+'</b></td><td class="num">'+stockCell(o.p)+'</td>'+
-      '<td><input type="number" min="1" id="rq_'+o.id+'" style="width:70px" value="'+o.remain+'"></td><td><input type="date" id="rd_'+o.id+'" value="'+TODAY+'"></td>'+
-      '<td style="white-space:nowrap"><button class="btn sm pri" data-act="rcvOne" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+'>입고</button> <button class="btn sm" data-act="mDelay" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="입고 예정일 늦추기">지연</button> <button class="btn sm" data-act="mCancel" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="불량 · 미입고 수량 빼기">빼기</button></td></tr>';
+      '<td><input type="number" min="1" id="rq_'+o.id+'" style="width:58px" value="'+o.remain+'" data-rem="'+o.remain+'"><small class="odsub overq" hidden>초과 입고</small></td><td><input type="date" id="rd_'+o.id+'" value="'+TODAY+'" style="width:122px;padding-left:6px;padding-right:4px"></td>'+
+      '<td><div class="rbtns"><button class="btn sm pri" data-act="rcvOne" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+'>입고</button><button class="btn sm" data-act="mDelay" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="입고 예정일 늦추기">지연</button><button class="btn sm" data-act="mCancel" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="불량 · 미입고 수량 빼기">빼기</button></div></td></tr>';
   }
   return h+'</tbody></table></div></div>';
 }
@@ -1788,7 +1803,8 @@ async function recvApply(items){ if(!need('recv')) return 0;
     for(const [id, xs] of by){
       const o = BYID.get(id); const cur = Object.assign({}, ovr[id]||{});
       cur.recv = (Array.isArray(cur.recv)?cur.recv:[]).concat(xs.map(x=>({q:x.q, d:x.d, by:MYID||''})));
-      cur.log = (Array.isArray(cur.log)?cur.log:[]).concat(xs.map(x=>({at, by:MYID||'', type:'recv', msg:'입고 '+x.q+'장 ('+x.d.slice(5).replace('-','.')+')'}))).slice(-40);
+      let left = o.remain;
+      cur.log = (Array.isArray(cur.log)?cur.log:[]).concat(xs.map(x=>{ const ov = Math.max(0, x.q - Math.max(0,left)); left -= x.q; return {at, by:MYID||'', type:'recv', msg:'입고 '+x.q+'장 ('+x.d.slice(5).replace('-','.')+')'+(ov?' · 초과 입고 +'+ov+'장':'')}; })).slice(-40);
       await DB.doc('ovr/'+id).set(cur);
     }
     const tot = items.reduce((s,x)=>s+x.q,0);
@@ -1935,6 +1951,8 @@ const PERMS = [{k:'reorder',t:'리오더'},{k:'recv',t:'입고 처리'},{k:'eta'
 const ALLP = () => Object.fromEntries(PERMS.map(p=>[p.k,true]));
 let ME = {email:'', name:'', admin:false}; let members = {}; let myMember = null;
 const isAdmin = () => ME.admin;
+const isExt = () => !ME.admin && !!(myMember && myMember.ext);
+const extFacs = () => (isExt() && Array.isArray(myMember.facs)) ? myMember.facs.map(f=>String(f).replace(/\s/g,'')).filter(Boolean) : [];
 const isSuper = () => ME.admin && (window.__SUPER===undefined || !!window.__SUPER);
 const BADM = [['tid','틸아이다이'],['kb','노운베러'],['frv','프리버']];
 function myPerms(){ if(ME.admin || !ME.email || !myMember || !myMember.perms) return null; return myMember.perms; }
@@ -1958,15 +1976,16 @@ function regTeam(){
       '<textarea id="tmAdd" rows="2" placeholder="kim@gmail.com, lee@gmail.com, park@gmail.com">'+esc(X.add)+'</textarea>'+
       '<div class="tperm"><span class="note">추가할 사람 권한</span>'+PERMS.map(p=>'<label><input type="checkbox" data-tap="'+p.k+'"'+(X.perms[p.k]?' checked':'')+'> '+p.t+'</label>').join('')+'</div>'+
       '<div id="tmBox">'+teamAddBox()+'</div></div>'+
-    '<div class="panel tw"><table class="ttbl"><thead><tr><th>이메일</th><th>이름</th>'+PERMS.map(p=>'<th class="c">'+p.t+'</th>').join('')+'<th class="c tbadm">브랜드 관리자<small class="thsub">팀장</small></th><th></th></tr></thead><tbody>'+
-      '<tr class="tadmin"><td class="mono">'+esc(ME.email||'(나)')+'</td><td>'+(isSuper()?'전체 관리자':'관리자')+'</td>'+PERMS.map(()=>'<td class="c">●</td>').join('')+'<td class="c">'+(isSuper()?'전체':'')+'</td><td></td></tr>'+
+    '<div class="panel tw"><table class="ttbl"><thead><tr><th>이메일</th><th>이름</th>'+PERMS.map(p=>'<th class="c">'+p.t+'</th>').join('')+'<th class="c tbadm">브랜드 관리자<small class="thsub">팀장</small></th><th class="c">외부 실장님<small class="thsub">일정 입력 화면만</small></th><th></th></tr></thead><tbody>'+
+      '<tr class="tadmin"><td class="mono">'+esc(ME.email||'(나)')+'</td><td>'+(isSuper()?'전체 관리자':'관리자')+'</td>'+PERMS.map(()=>'<td class="c">●</td>').join('')+'<td class="c">'+(isSuper()?'전체':'')+'</td><td></td><td></td></tr>'+
       (list.length ? list.map(m=>{ const pm = m.perms || ALLP();
         return '<tr><td class="mono">'+esc(m.email)+'</td><td><input class="tname'+(m.name?'':' need')+'" data-tmname="'+esc(m.email)+'" value="'+esc(m.name||'')+'" placeholder="이름 입력"></td>'+
           PERMS.map(p=>'<td class="c"><input type="checkbox" data-tmp="'+esc(m.email)+'" data-k="'+p.k+'"'+(pm[p.k]?' checked':'')+' aria-label="'+esc(m.email)+' '+p.t+'"></td>').join('')+
           '<td class="c tbadm"><span class="badm">'+BADM.map(([k,t])=>'<label title="'+t+' 관리자"><input type="checkbox" data-tma="'+esc(m.email)+'" data-k="'+k+'"'+((m.admins||[]).includes(k)?' checked':'')+(isSuper()?'':' disabled')+'> '+t+'</label>').join('')+'</span></td>'+
+          '<td class="c text"><label class="chk"><input type="checkbox" data-tmx="'+esc(m.email)+'"'+(m.ext?' checked':'')+'> 외부</label>'+(m.ext?'<input data-tmf="'+esc(m.email)+'" value="'+esc((m.facs||[]).join(', '))+'" placeholder="공장 (쉼표 · 비우면 전체)" style="width:150px;margin-top:4px">':'')+'</td>'+
           '<td><button class="btn sm ghost" data-act="tmDel" data-e="'+esc(m.email)+'">삭제</button></td></tr>'; }).join('')
-        : '<tr><td colspan="'+(PERMS.length+4)+'" class="empty">아직 등록된 팀원이 없습니다.</td></tr>')+
-    '</tbody></table></div><p class="note">이름은 칸을 벗어나면 저장됩니다. 권한 체크는 바로 저장되고, 그 사람이 다음에 보드를 열거나 새로고침하면 적용됩니다. <b>브랜드 관리자</b>(팀장)는 그 브랜드에서 모든 메뉴 + 팀원 추가 · 권한 체크 + 시트 데이터 교체를 할 수 있어요. 브랜드 관리자 지정은 전체 관리자만 할 수 있습니다.</p>'+
+        : '<tr><td colspan="'+(PERMS.length+5)+'" class="empty">아직 등록된 팀원이 없습니다.</td></tr>')+
+    '</tbody></table></div><p class="note">이름은 칸을 벗어나면 저장됩니다. 권한 체크는 바로 저장되고, 그 사람이 다음에 보드를 열거나 새로고침하면 적용됩니다. <b>외부 실장님</b>으로 체크하면 그 계정은 <b>일정 입력</b> 화면만 보이고(다른 메뉴 · 전체 현황 숨김) 날짜만 넣을 수 있어요. 공장 칸에 이름을 적으면 그 공장 오더만 보여요. <b>브랜드 관리자</b>(팀장)는 그 브랜드에서 모든 메뉴 + 팀원 추가 · 권한 체크 + 시트 데이터 교체를 할 수 있어요. 브랜드 관리자 지정은 전체 관리자만 할 수 있습니다.</p>'+
     (window.__boardAdmin ? '<div class="panel pad step"><h3>시트 기준 데이터 교체</h3><p class="note" style="margin:0">오더 체크 엑셀을 새로 정리해 Claude에게 받은 데이터 파일(knownbetter-sheet-브랜드-….json)이 있을 때만 쓰세요. 파일에 적힌 브랜드로 들어가고, 팀원이 보드에서 입력한 기록은 그대로 유지됩니다. 현재 '+esc(brandName())+' 시트 기준 '+esc(SNAP.asof)+'</p><div class="filters"><label class="btn" for="snapFile" style="cursor:pointer">데이터 파일 선택</label><input type="file" id="snapFile" accept=".json" hidden><span class="note" id="snapProg"></span></div></div>' : '')+
     '</div>';
   return h;
@@ -2402,8 +2421,10 @@ function schedRows(){
   const open = ORDERS.filter(isOpen);
   const isNew = o => (o.od && o.od >= from) || (o.src==='db' && o.at && o.at.slice(0,10) >= from);
   const noEta = o => o.etaKind!=='fixed';
-  const cnt = {none: open.filter(noEta).length, new: open.filter(isNew).length, all: open.length};
+  const EF0 = extFacs(); const open2 = EF0.length ? open.filter(o=>EF0.includes(String(o.f).replace(/\s/g,''))) : open;
+  const cnt = {none: open2.filter(noEta).length, new: open2.filter(isNew).length, all: open2.length};
   let a = X.view==='none' ? open.filter(noEta) : X.view==='new' ? open.filter(isNew) : open;
+  const EF = extFacs(); if(EF.length) a = a.filter(o=>EF.includes(String(o.f).replace(/\s/g,'')));
   if(X.fac) a = a.filter(o=>o.f===X.fac);
   if(q) a = a.filter(o=>(o.p.b+' '+o.p.n+' '+o.p.en+' '+o.p.opt+' '+o.f+' '+(o.p.contact||'')).toLowerCase().includes(q));
   a = a.slice().sort(X.view==='new' ? (x,y)=>(y.od||y.at||'').localeCompare(x.od||x.at||'') : (x,y)=>(x.od||'0').localeCompare(y.od||'0'));
@@ -2417,7 +2438,7 @@ function viewSched(){
   let h = '<div class="sec"><div class="sechead"><h2>일정 입력</h2><span class="sub">입고 예정일이 비어 있는 오더와 최근 들어간 신규 오더예요 · 담당 디자이너가 공장과 확인한 날짜를 넣고 저장하면 입고 예정 · 예약배송에 바로 반영돼요</span></div>'+
     '<div class="rvcards schcards">'+tab('none','일정 미입력',cnt.none,'확정 예정일 없음 (예상만 있음)')+tab('new','최근 신규 오더',cnt.new,'오더일 2주 이내')+tab('all','진행 중 전체',cnt.all,'모든 미입고 오더')+'</div>'+
     '<div class="filters"><input type="search" id="schQ" placeholder="바코드 · 제작품명 · 컬러 · 공장 · 담당 검색" value="'+esc(X.q)+'">'+
-    '<select id="schFac"><option value="">전체 공장</option>'+activeFacs().map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
+    '<select id="schFac"><option value="">전체 공장</option>'+(extFacs().length ? activeFacs().filter(f=>extFacs().includes(String(f).replace(/\s/g,''))) : activeFacs()).map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
     (X.q||X.fac?'<button class="btn sm" data-act="schClear">‹ 검색 필터 해제</button>':'')+'<span class="note">'+nf(a.length)+'건</span>'+
     '<span class="right"><button class="btn pri" data-act="schSaveAll"'+(dirty&&!lock?'':' disabled')+'>입력한 '+dirty+'건 저장</button></span></div>';
   h += '<div class="panel tw"><table class="schtbl"><thead><tr><th>상품 · 컬러,사이즈 · 바코드</th><th>공장 · 담당</th><th>차수 · 오더일</th><th class="num">오더 · 잔여</th><th>지금 예정일</th><th>새 예정일</th><th>메모 (사유)</th><th></th></tr></thead><tbody>';
@@ -2562,7 +2583,8 @@ async function act(a, el){
       const o = BYID.get(id); const q = parseInt(val('m_q'),10), d = val('m_d');
       if(!(q>0) || !d){ toast('수량과 입고일을 넣어주세요'); return; }
       const cur = (ovr[o.id]&&Array.isArray(ovr[o.id].recv))?ovr[o.id].recv:[];
-      await guard(()=>saveOvr(o, {recv:cur.concat([{q,d,by:MYID||''}])}, {type:'recv', msg:'입고 '+q+'장 ('+d.slice(5).replace('-','.')+')'}, label(o)+' 입고 '+q+'장 처리'), '입고 처리했습니다');
+      const ov = Math.max(0, q - o.remain);
+      await guard(()=>saveOvr(o, {recv:cur.concat([{q,d,by:MYID||''}])}, {type:'recv', msg:'입고 '+q+'장 ('+d.slice(5).replace('-','.')+')'+(ov?' · 초과 입고 +'+ov+'장':'')}, label(o)+' 입고 '+q+'장 처리'+(ov?' (초과 입고 +'+ov+'장)':'')), ov ? '입고 처리했습니다 · 초과 입고 '+ov+'장' : '입고 처리했습니다');
       closeModal(); break; }
     case 'doEta': {
       const o = BYID.get(id); const eta = val('m_eta'), r = val('m_r'), memo = val('m_memo');
@@ -2618,7 +2640,7 @@ async function act(a, el){
     case 'syncClear': S.sync = {text:'', res:null, off:{}}; render(); break;
     case 'syncApply': await syncApply(); break;
     case 'regCat': { const C = REG_MENU.find(c=>c.k===el.dataset.c); S.reg.mode = (C.subs.find(x=>x.rec)||C.subs[0]).k; render(); break; }
-    case 'rcvOne': { const o = BYID.get(id); const q = parseInt(val('rq_'+id),10), d = val('rd_'+id) || TODAY; if(!(q>0)){ toast('입고 수량을 넣어주세요'); break; } const n = await recvApply([{o, q, d}]); if(n) toast(label(o)+' '+q+'장 입고'); break; }
+    case 'rcvOne': { const o = BYID.get(id); const q = parseInt(val('rq_'+id),10), d = val('rd_'+id) || TODAY; if(!(q>0)){ toast('입고 수량을 넣어주세요'); break; } const n = await recvApply([{o, q, d}]); if(n) toast(label(o)+' '+q+'장 입고'+(q>o.remain?' · 초과 입고 '+(q-o.remain)+'장으로 기록했어요':'')); break; }
     case 'rpCheck': { const t = (document.getElementById('rpT')||{}).value||''; S.rcv.paste = t; S.rcv.res = t.trim() ? recvPlan(t) : null; render(); break; }
     case 'rpApply': { const R = S.rcv.res; if(!R) break; const n = await recvApply(R.plan); if(n){ toast(n+'건 입고 처리했습니다'); S.rcv.res = null; S.rcv.paste = ''; render(); } break; }
     case 'regMode': S.reg.mode = el.dataset.m; render(); break;
@@ -2720,6 +2742,9 @@ function render(){
   const ae = document.activeElement; const fid = ae && ae.id; const pos = fid && ae.selectionStart;
   brandHeader();
   document.body.classList.toggle('mode-all', BRAND==='all');
+  document.body.classList.toggle('mode-ext', isExt());
+  if(isExt() && S.tab!=='sched'){ S.tab = 'sched'; }
+  if(isExt() && BRAND==='all'){ setBrand('kb'); return; }
   if(BRAND==='all'){ app.innerHTML = viewAll(); navSync(); return; }
   if(!BRAND_DATA[BRAND]){ app.innerHTML = brandEmpty(); navSync(); return; }
   pushSum();
@@ -2771,6 +2796,7 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); }
 let tmr;
 document.addEventListener('input', e => {
   const t = e.target;
+  if(t.dataset && t.dataset.rem!=null){ const w = t.parentNode.querySelector('.overq'); if(w){ const ov = (+t.value||0) - (+t.dataset.rem||0); w.hidden = !(ov>0); w.textContent = '초과 입고 +'+ov; } }
   if(t.dataset && t.dataset.sch){ const id = t.dataset.sch; S.sched.edits[id] = S.sched.edits[id] || {}; S.sched.edits[id][t.dataset.k] = t.value; const tr = t.closest('tr'); const has = !!S.sched.edits[id].eta; if(tr){ tr.classList.toggle('schdirty', has); const b = tr.querySelector('[data-act=schSave]'); if(b){ b.disabled = !has; b.classList.toggle('pri', has); } } const all = document.querySelector('[data-act=schSaveAll]'); if(all){ const n = Object.values(S.sched.edits).filter(e=>e&&e.eta).length; all.textContent = '입력한 '+n+'건 저장'; all.disabled = !n; } }
   if(t.id==='schQ'){ S.sched.q = t.value; S.sched.n = 150; clearTimeout(tmr); tmr=setTimeout(render,200); }
   if(t.id==='dueQ'){ S.due.q = t.value; S.showMore=0; clearTimeout(tmr); tmr=setTimeout(render,180); }
@@ -2805,6 +2831,8 @@ document.addEventListener('change', e => {
   if(t.dataset && t.dataset.pld!=null && S.pl.res){ S.pl.res.diff[+t.dataset.pld].on = t.checked; S.pl.diffOpen = true; render(); }
   if(t.dataset && t.dataset.tap){ S.team.perms[t.dataset.tap] = t.checked; }
   if(t.dataset && t.dataset.tmname!=null){ teamSet(t.dataset.tmname, {name:t.value.trim()}); }
+  if(t.dataset && t.dataset.tmx){ const e = t.dataset.tmx; const m = members[e]; if(m){ const patch = {ext: t.checked}; if(t.checked) patch.perms = Object.fromEntries(PERMS.map(p=>[p.k, p.k==='eta'])); teamSet(e, patch); writeLog(e+' 외부 실장님(일정 입력만) '+(t.checked?'지정':'해제')); } }
+  if(t.dataset && t.dataset.tmf){ const e = t.dataset.tmf; const m = members[e]; if(m){ const facs = t.value.split(/[,，\n]/).map(x=>x.trim()).filter(Boolean); teamSet(e, {facs}); } }
   if(t.dataset && t.dataset.tma){ const m = members[t.dataset.tma]; if(m && isSuper()){ const cur = new Set(m.admins||[]); if(t.checked) cur.add(t.dataset.k); else cur.delete(t.dataset.k); teamSet(t.dataset.tma, {admins:[...cur]}); writeLog(t.dataset.tma+' '+(BADM.find(b=>b[0]===t.dataset.k)||[])[1]+' 관리자 '+(t.checked?'지정':'해제')); } }
   if(t.dataset && t.dataset.tmp){ const m = members[t.dataset.tmp]; if(m){ const pm = Object.assign(ALLP(), m.perms||{}); pm[t.dataset.k] = t.checked; teamSet(t.dataset.tmp, {perms:pm}); } }
   if(t.id==='snapFile' && t.files && t.files[0] && window.__boardAdmin){
