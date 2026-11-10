@@ -363,6 +363,8 @@ td.text{text-align:left}
 .dc .dkv{grid-column:1/-1;align-self:end;margin-top:10px;padding-top:8px;row-gap:4px}.dkv dd.dwh{min-height:14px}
 .rbtn2{display:inline-flex;gap:4px;margin-left:auto}
 .smcols{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:2px 0}.smcol{font-size:11.5px;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:1px 6px;white-space:nowrap}
+.tperm .tall{padding-right:8px;margin-right:2px;border-right:1px solid var(--line)}
+.btn.ghost.danger{color:var(--bad)}
 .bcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:980px){.bcards{grid-template-columns:1fr}}
 .bcard{display:grid;gap:12px}.bcard.off{opacity:.6}
@@ -379,7 +381,8 @@ body.mode-all #tabs{display:none}
 @media (max-width:640px){.hrow{flex-wrap:wrap;gap:8px}.brandsw{margin-left:0;order:3;width:100%;justify-content:space-between}.bsw{flex:1;padding:5px 6px}}
 .rvcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px;margin-bottom:10px}
 .rvcard{display:grid;grid-template-columns:1fr auto;gap:1px 4px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 8px;cursor:pointer;font:inherit;color:inherit}.rvcard small{grid-column:1/-1}
-.rvcard b{font-size:16px}.rvcard .chip{font-size:11px;padding:1px 6px;white-space:nowrap}.rvcard small{font-size:10.5px;color:var(--muted);line-height:1.25;grid-column:1/-1;white-space:normal;word-break:keep-all}.rvcard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.rvcard b{font-size:16px}.rvcard .chip{font-size:11px;padding:1px 6px;white-space:nowrap}.rvcard small{font-size:10.5px;color:var(--muted);line-height:1.3;grid-column:1/-1;white-space:normal;word-break:keep-all;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rvcards:not(.schcards){grid-template-columns:repeat(auto-fill,minmax(min(196px,calc(50% - 3px)),1fr))}.rvcard{align-content:start;align-items:center}.rvcard .chip{justify-self:start;max-width:100%;overflow:hidden;text-overflow:ellipsis}.rvcard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
 .rvtbl td{vertical-align:top}.rvtbl td:first-child{min-width:220px}.rvtbl td.rvmemo{min-width:140px}
 .rvsel{font-size:12.5px;padding:3px 22px 3px 8px;min-height:0;height:auto;width:auto;border-radius:8px;font-weight:600}
 .rvround{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--sunk);border:1px solid var(--line);margin:0 4px 4px 0;white-space:nowrap}.rvround.bad{border-color:var(--bad);color:var(--bad)}
@@ -1353,7 +1356,7 @@ function viewFix(){
       (r.iss.includes('fac')?'<div class="muted" style="font-size:12px;margin-top:4px">보드: '+esc(p.curFac)+' · 셀메이트: '+esc(p.sysFac)+' <button class="btn sm" data-act="fixFac" data-k="'+esc(p.key)+'"'+(canWrite()?'':' disabled')+'>공장 변경</button></div>':'')+(sg?'<div style="margin-top:4px"><button class="btn sm" data-act="fixSuggest" data-k="'+esc(p.key)+'" data-b="'+esc(sg.b)+'">추천: '+esc(sg.b)+' ('+esc(sg.n||sg.en)+') 연결</button></div>':'')+'</td>'+
       '<td style="white-space:nowrap">'+esc(p.curFac)+(p.facs.size>1?'<small class="muted" style="display:block">이전: '+esc([...p.facs].filter(f=>f!==p.curFac).join(', '))+'</small>':'')+'</td><td>'+countrySel('data-pcountry="'+esc(p.key)+'"', countryP(p))+'</td><td>'+inp('n','130px')+'</td><td>'+inp('opt','140px')+'</td><td>'+inp('b','125px','mono')+'</td><td>'+inp('en','230px')+'</td><td>'+inp('cat','100px')+'</td>'+
       '<td class="num"><a href="#" class="flink" data-act="fixOpen" data-k="'+esc(p.key)+'">'+p.orders.length+'차</a></td>'+
-      '<td><button class="btn sm'+(Object.keys(e).length?' pri':'')+'" data-act="fixSave" data-k="'+esc(p.key)+'"'+(canWrite()?'':' disabled')+'>저장</button></td></tr>';
+      '<td style="white-space:nowrap"><button class="btn sm'+(Object.keys(e).length?' pri':'')+'" data-act="fixSave" data-k="'+esc(p.key)+'"'+(canWrite()?'':' disabled')+'>저장</button> <button class="btn sm ghost danger" data-act="delProd" data-k="'+esc(p.key)+'"'+(canWrite()?'':' disabled')+' title="잘못 저장된 상품을 목록에서 삭제 (되살리기 가능)">삭제</button></td></tr>';
   }
   h += '</tbody></table></div>';
   if(rows.length>limit) h += '<div style="text-align:center"><button class="btn" data-act="fixMore">'+(rows.length-limit)+'개 더 보기</button></div>';
@@ -1424,6 +1427,21 @@ function matchPaste(rows){
 
 
 // ---------- 삭제 · 복구 ----------
+function delProdModal(key){
+  const p = PRODS.get(key); if(!p) return; const rem = p.orders.filter(isOpen).reduce((s,o)=>s+o.remain,0);
+  openModal('<div class="mh"><div><h2>상품 삭제</h2><div class="muted" style="font-size:12.5px">'+esc(p.n||p.en||'(제작품명 없음)')+' · '+esc(p.opt||'')+' · <span class="mono">'+esc(isNoB(p.b)?'바코드 없음':p.b)+'</span></div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
+    '<p class="note" style="margin:0">이 상품(컬러)과 차수 '+p.orders.length+'개'+(rem?' · 입고 예정 '+nf(rem)+'장':'')+'가 보드 전체에서 빠집니다. 원본 시트는 바뀌지 않고, 정보 보정 탭 맨 아래 "삭제한 항목"에서 언제든 되살릴 수 있어요.</p>'+
+    '<label class="f">사유<input id="dl_r" placeholder="예: 잘못 저장 · 중복 · 다른 브랜드 상품"></label>'+
+    '<div class="filters"><button class="btn danger-solid" data-act="doDelProd" data-k="'+esc(key)+'">삭제</button><button class="btn" data-act="close">취소</button></div>');
+}
+async function doDelProd(key){ if(!need('fix','reg')) return;
+  const p = PRODS.get(key); if(!p) return; const reason = val('dl_r'); const at = new Date().toISOString();
+  const ok = await guard(async()=>{
+    for(const ob of p.origBs){ const cur = pfixDocs[ob] || {}; await DB.doc('pfix/'+pfixId(ob)).set(Object.assign({}, cur, {orig:ob, deleted:true, delAt:at, delBy:MYID||'', delReason:reason, delName:p.n||p.en, delOpt:p.opt, delFac:p.curFac, delN:p.orders.length})); }
+    await writeLog((p.n||p.en||p.b)+' '+(p.opt||'')+' 삭제 (정보 보정)'+(reason?' · '+reason:''));
+  }, '삭제했습니다 · 삭제한 항목에서 되살릴 수 있어요');
+  if(ok){ delete S.fix.edits[key]; closeModal(); }
+}
 function delStyleModal(k){
   const st = STYLES.get(k); if(!st) return;
   openModal('<div class="mh"><div><h2>상품 삭제</h2><div class="muted" style="font-size:12.5px">'+esc(st.n||st.en)+' · '+esc(st.f)+'</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
@@ -1979,9 +1997,23 @@ function need(...ks){ if(!canWrite()){ toast('이 보기에서는 저장할 수 
 const permErr = () => Object.assign(new Error(NOPERM), {code:'perm'});
 function errMsg(e){ const c = e && e.code || ''; if(c==='perm' || /permission/.test(c) || /insufficient permissions/i.test(e&&e.message||'')) return NOPERM; return '저장하지 못했습니다: '+((e&&e.message)||c||'오류'); }
 function parseEmails(t){ return [...new Set((String(t||'').toLowerCase().match(/[^\s<>,;"'()]+@[^\s<>,;"'()]+\.[a-z]{2,}/g)||[]))]; }
+// "홍길동 kim@gmail.com" · "kim@gmail.com 홍길동" · "홍길동<kim@gmail.com>" · 줄바꿈/쉼표/탭 섞여도 인식 (이름은 없어도 됨)
+function parseMembers(t){
+  const em = /[^\s<>,;"'()\t]+@[^\s<>,;"'()\t]+\.[a-z]{2,}/i;
+  const parts = String(t||'').split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean);
+  const out = []; let pend = '';
+  for(const x of parts){
+    const m = x.match(em);
+    if(!m){ const nm = x.replace(/[<>"'()\t]/g,' ').replace(/\s+/g,' ').trim(); if(!nm) continue; const last = out[out.length-1]; if(last && !last.name && !pend) last.name = nm; else pend = nm; continue; }
+    const e = m[0].toLowerCase(); let nm = x.replace(m[0],' ').replace(/[<>"'()\t:]/g,' ').replace(/\s+/g,' ').trim();
+    if(!nm && pend) nm = pend; pend = '';
+    if(!out.some(o=>o.email===e)) out.push({email:e, name:nm});
+  }
+  return out;
+}
 function teamAddBox(){
-  const X = S.team; const emails = parseEmails(X.add); const fresh = emails.filter(e=>!members[e]);
-  return (emails.length?'<div class="tchips">'+emails.map(e=>'<span class="tchip'+(members[e]?' dup':'')+'">'+esc(e)+(members[e]?' · 이미 있음':'')+'</span>').join('')+'</div>':'')+
+  const X = S.team; const ms = parseMembers(X.add); const fresh = ms.filter(m=>!members[m.email]);
+  return (ms.length?'<div class="tchips">'+ms.map(m=>'<span class="tchip'+(members[m.email]?' dup':'')+'">'+(m.name?'<b>'+esc(m.name)+'</b> ':'')+esc(m.email)+(members[m.email]?' · 이미 있음':'')+'</span>').join('')+'</div>':'')+
     '<div><button class="btn pri" data-act="tmAdd"'+(fresh.length&&canWrite()?'':' disabled')+'>'+(fresh.length?fresh.length+'명 추가':'추가')+'</button></div>';
 }
 function regTeam(){
@@ -1989,19 +2021,20 @@ function regTeam(){
   const X = S.team;
   const list = Object.values(members).filter(m=>m&&m.email).sort((a,b)=>(a.name||'힣'+a.email).localeCompare(b.name||'힣'+b.email,'ko'));
   let h = '<div class="sec"><div class="sechead"><h2>팀원 · 권한</h2><span class="sub">등록된 Google 계정만 들어올 수 있고, 체크한 메뉴만 입력 · 수정할 수 있습니다. 조회는 모두 가능합니다.</span></div>'+
-    '<div class="panel pad step"><h3>팀원 추가</h3><p class="note" style="margin:0">이메일을 여러 개 한 번에 붙여넣으세요 (쉼표 · 띄어쓰기 · 줄바꿈 아무거나). 이름은 추가한 뒤 아래 목록에서 넣습니다.</p>'+
-      '<textarea id="tmAdd" rows="2" placeholder="kim@gmail.com, lee@gmail.com, park@gmail.com">'+esc(X.add)+'</textarea>'+
-      '<div class="tperm"><span class="note">추가할 사람 권한</span>'+(X.ext?'<span class="note">일정 입력만</span>':PERMS.map(p=>'<label><input type="checkbox" data-tap="'+p.k+'"'+(X.perms[p.k]?' checked':'')+'> '+p.t+'</label>').join(''))+'<label class="extchk"><input type="checkbox" id="taExt"'+(X.ext?' checked':'')+'> 외부 실장님 <small>(일정 입력 화면만)</small></label>'+(X.ext?'<input id="taFacs" value="'+esc(X.facs||'')+'" placeholder="공장 이름 (쉼표 · 비우면 전체)" style="width:200px">':'')+'</div>'+
+    '<div class="panel pad step"><h3>팀원 추가</h3><p class="note" style="margin:0">이름과 계정을 한 줄에 하나씩 붙여넣으세요 (이름 계정 · 계정 이름 · 엑셀에서 두 칸 복사 모두 돼요). 이름은 없어도 등록되고, 나중에 아래 목록에서 넣어도 됩니다.</p>'+
+      '<textarea id="tmAdd" rows="3" placeholder="김지수 kim@gmail.com&#10;이민호 lee@gmail.com&#10;park@gmail.com">'+esc(X.add)+'</textarea>'+
+      '<div class="tperm"><span class="note">추가할 사람 권한</span>'+(X.ext?'<span class="note">일정 입력만</span>':'<label class="tall"><input type="checkbox" id="taAll"'+(PERMS.every(p=>X.perms[p.k])?' checked':'')+'> <b>전체</b></label>'+PERMS.map(p=>'<label><input type="checkbox" data-tap="'+p.k+'"'+(X.perms[p.k]?' checked':'')+'> '+p.t+'</label>').join(''))+'<label class="extchk"><input type="checkbox" id="taExt"'+(X.ext?' checked':'')+'> 외부 실장님 <small>(일정 입력 화면만)</small></label>'+(X.ext?'<input id="taFacs" value="'+esc(X.facs||'')+'" placeholder="공장 이름 (쉼표 · 비우면 전체)" style="width:200px">':'')+'</div>'+
       '<div id="tmBox">'+teamAddBox()+'</div></div>'+
-    '<div class="panel tw"><table class="ttbl"><thead><tr><th>이메일</th><th>이름</th>'+PERMS.map(p=>'<th class="c">'+p.t+'</th>').join('')+'<th class="c tbadm">브랜드 관리자<small class="thsub">팀장</small></th><th class="c">외부 실장님<small class="thsub">일정 입력 화면만</small></th><th></th></tr></thead><tbody>'+
-      '<tr class="tadmin"><td class="mono">'+esc(ME.email||'(나)')+'</td><td>'+(isSuper()?'전체 관리자':'관리자')+'</td>'+PERMS.map(()=>'<td class="c">●</td>').join('')+'<td class="c">'+(isSuper()?'전체':'')+'</td><td></td><td></td></tr>'+
+    '<div class="panel tw"><table class="ttbl"><thead><tr><th>이메일</th><th>이름</th><th class="c">전체</th>'+PERMS.map(p=>'<th class="c">'+p.t+'</th>').join('')+'<th class="c tbadm">브랜드 관리자<small class="thsub">팀장</small></th><th class="c">외부 실장님<small class="thsub">일정 입력 화면만</small></th><th></th></tr></thead><tbody>'+
+      '<tr class="tadmin"><td class="mono">'+esc(ME.email||'(나)')+'</td><td>'+(isSuper()?'전체 관리자':'관리자')+'</td><td class="c">●</td>'+PERMS.map(()=>'<td class="c">●</td>').join('')+'<td class="c">'+(isSuper()?'전체':'')+'</td><td></td><td></td></tr>'+
       (list.length ? list.map(m=>{ const pm = m.perms || ALLP();
         return '<tr><td class="mono">'+esc(m.email)+'</td><td><input class="tname'+(m.name?'':' need')+'" data-tmname="'+esc(m.email)+'" value="'+esc(m.name||'')+'" placeholder="이름 입력"></td>'+
+          '<td class="c"><input type="checkbox" data-tmall="'+esc(m.email)+'"'+(PERMS.every(p=>pm[p.k])?' checked':'')+' aria-label="'+esc(m.email)+' 전체 권한"></td>'+
           PERMS.map(p=>'<td class="c"><input type="checkbox" data-tmp="'+esc(m.email)+'" data-k="'+p.k+'"'+(pm[p.k]?' checked':'')+' aria-label="'+esc(m.email)+' '+p.t+'"></td>').join('')+
           '<td class="c tbadm"><span class="badm">'+BADM.map(([k,t])=>'<label title="'+t+' 관리자"><input type="checkbox" data-tma="'+esc(m.email)+'" data-k="'+k+'"'+((m.admins||[]).includes(k)?' checked':'')+(isSuper()?'':' disabled')+'> '+t+'</label>').join('')+'</span></td>'+
           '<td class="c text"><label class="chk"><input type="checkbox" data-tmx="'+esc(m.email)+'"'+(m.ext?' checked':'')+'> 외부</label>'+(m.ext?'<input data-tmf="'+esc(m.email)+'" value="'+esc((m.facs||[]).join(', '))+'" placeholder="공장 (쉼표 · 비우면 전체)" style="width:150px;margin-top:4px">':'')+'</td>'+
           '<td><button class="btn sm ghost" data-act="tmDel" data-e="'+esc(m.email)+'">삭제</button></td></tr>'; }).join('')
-        : '<tr><td colspan="'+(PERMS.length+5)+'" class="empty">아직 등록된 팀원이 없습니다.</td></tr>')+
+        : '<tr><td colspan="'+(PERMS.length+6)+'" class="empty">아직 등록된 팀원이 없습니다.</td></tr>')+
     '</tbody></table></div><p class="note">이름은 칸을 벗어나면 저장됩니다. 권한 체크는 바로 저장되고, 그 사람이 다음에 보드를 열거나 새로고침하면 적용됩니다. <b>외부 실장님</b>으로 체크하면 그 계정은 <b>일정 입력</b> 화면만 보이고(다른 메뉴 · 전체 현황 숨김) 날짜만 넣을 수 있어요. 공장 칸에 이름을 적으면 그 공장 오더만 보여요. <b>브랜드 관리자</b>(팀장)는 그 브랜드에서 모든 메뉴 + 팀원 추가 · 권한 체크 + 시트 데이터 교체를 할 수 있어요. 브랜드 관리자 지정은 전체 관리자만 할 수 있습니다.</p>'+
     (window.__boardAdmin ? '<div class="panel pad step"><h3>시트 기준 데이터 교체</h3><p class="note" style="margin:0">오더 체크 엑셀을 새로 정리해 Claude에게 받은 데이터 파일(knownbetter-sheet-브랜드-….json)이 있을 때만 쓰세요. 파일에 적힌 브랜드로 들어가고, 팀원이 보드에서 입력한 기록은 그대로 유지됩니다. 현재 '+esc(brandName())+' 시트 기준 '+esc(SNAP.asof)+'</p><div class="filters"><label class="btn" for="snapFile" style="cursor:pointer">데이터 파일 선택</label><input type="file" id="snapFile" accept=".json" hidden><span class="note" id="snapProg"></span></div></div>' : '')+
     '</div>';
@@ -2009,15 +2042,15 @@ function regTeam(){
 }
 async function teamAdd(){
   if(!isAdmin()) return;
-  const X = S.team; const fresh = parseEmails(X.add).filter(e=>!members[e]); if(!fresh.length) return;
+  const X = S.team; const freshM = parseMembers(X.add).filter(m=>!members[m.email]); const fresh = freshM.map(m=>m.email); if(!fresh.length) return;
   const at = new Date().toISOString();
   const n = await guardN(async()=>{
     const extFacsIn = String(X.facs||'').split(/[,，\n]/).map(x=>x.trim()).filter(Boolean);
-    for(const e of fresh) await DB.doc('members/'+e).set(X.ext ? {email:e, name:'', ext:true, facs:extFacsIn, perms:Object.fromEntries(PERMS.map(p=>[p.k, p.k==='eta'])), at, by:MYID||''} : {email:e, name:'', perms:Object.assign({}, X.perms), at, by:MYID||''});
+    for(const {email:e, name:nm} of freshM) await DB.doc('members/'+e).set(X.ext ? {email:e, name:nm||'', ext:true, facs:extFacsIn, perms:Object.fromEntries(PERMS.map(p=>[p.k, p.k==='eta'])), at, by:MYID||''} : {email:e, name:nm||'', perms:Object.assign({}, X.perms), at, by:MYID||''});
     await writeLog((X.ext?'외부 실장님 ':'팀원 ')+fresh.length+'명 추가 ('+fresh.slice(0,3).join(', ')+(fresh.length>3?' 외':'')+')');
     return fresh.length;
   });
-  if(n){ toast(n+'명을 추가했습니다 · 이름을 넣어주세요'); X.add = ''; render(); }
+  if(n){ toast(n+'명을 추가했습니다'+(freshM.some(m=>!m.name)?' · 이름이 빈 사람은 아래 목록에서 넣어주세요':'')); X.add = ''; render(); }
 }
 async function teamSet(e, patch){
   if(!isAdmin() || !members[e]) return;
@@ -2213,7 +2246,7 @@ function viewResv(){
   }
   const sth = (k, label, cls, sub) => '<th class="sortable'+(cls?' '+cls:'')+(X.sk===k?' sorted':'')+'" data-act="rvSort" data-k="'+k+'" title="눌러서 정렬 (오름차순 → 내림차순 → 기본)">'+label+'<span class="sarr">'+(X.sk===k?(X.sd===1?'▲':'▼'):'↕')+'</span>'+(sub||'')+'</th>';
   const anyF = X.q || X.st || X.fac || X.cat || X.act;
-  const card = (k,t,n,c,d) => '<button class="rvcard'+(X.act===k?' on':'')+'" data-act="rvAct" data-k="'+k+'"><span class="chip '+c+'">'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
+  const card = (k,t,n,c,d) => '<button class="rvcard'+(X.act===k?' on':'')+'" data-act="rvAct" data-k="'+k+'" title="'+esc(t+' · '+d)+'"><span class="chip '+c+'">'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
   let h = '<div class="sec"><div class="sechead"><h2>예약배송</h2><span class="sub">재고 · 입고 예정 · 판매 추이를 합쳐 오늘 처리할 것만 골라 보여드립니다 · 판매 추이 '+esc(salesLabel())+' · 재고 '+esc(stockAtLabel())+'</span>'+
     '<span class="right"><button class="btn sm" data-act="rvSales">판매 추이 업데이트</button> <button class="btn sm" data-act="catMng">분류 · 담당자</button> <button class="btn sm" data-act="chMng">판매 채널</button></span></div>'+
     '<div class="rvcards">'+
@@ -2708,6 +2741,8 @@ async function act(a, el){
       await guard(()=>saveOvr(o, {deleted:true, delAt:new Date().toISOString(), delBy:MYID||'', delReason:r, delLabel:label(o)+' ('+nf(o.qty)+'장'+(o.od?' · '+fmtDY(o.od):'')+')', delFac:o.f}, {type:'del', msg:'차수 삭제'+(r?' · '+r:'')}, label(o)+' 차수 삭제'+(r?' · '+r:'')), '차수를 삭제했습니다');
       closeModal(); break; }
     case 'delStyle': delStyleModal(el.dataset.k); break;
+    case 'delProd': delProdModal(el.dataset.k); break;
+    case 'doDelProd': await doDelProd(el.dataset.k); break;
     case 'doDelStyle': await doDelStyle(el.dataset.k); break;
     case 'restoreP': await restorePfix(el.dataset.ob); break;
     case 'restoreO': await restoreOrder(el.dataset.id); break;
@@ -2932,7 +2967,9 @@ document.addEventListener('change', e => {
   if(t.dataset && t.dataset.sync!=null){ S.sync.off[t.dataset.sync] = !t.checked; render(); }
   if(t.dataset && t.dataset.plf!=null && S.pl.res){ S.pl.res.fresh[+t.dataset.plf].on = t.checked; render(); }
   if(t.dataset && t.dataset.pld!=null && S.pl.res){ S.pl.res.diff[+t.dataset.pld].on = t.checked; S.pl.diffOpen = true; render(); }
-  if(t.dataset && t.dataset.tap){ S.team.perms[t.dataset.tap] = t.checked; }
+  if(t.dataset && t.dataset.tap){ S.team.perms[t.dataset.tap] = t.checked; const a = document.getElementById('taAll'); if(a) a.checked = PERMS.every(p=>S.team.perms[p.k]); }
+  if(t.id==='taAll'){ for(const p of PERMS) S.team.perms[p.k] = t.checked; document.querySelectorAll('[data-tap]').forEach(i=>i.checked = t.checked); }
+  if(t.dataset && t.dataset.tmall){ const e = t.dataset.tmall; const m = members[e]; if(m){ teamSet(e, {perms:Object.fromEntries(PERMS.map(p=>[p.k, t.checked])), ext:false}); writeLog(e+' 권한 전체 '+(t.checked?'켬':'끔')); } }
   if(t.id==='m_call'){ const q = document.getElementById('m_cq'); if(q){ q.disabled = t.checked; if(t.checked) q.value = q.max; } }
   if(t.id==='m_cr2'){ const w = document.getElementById('m_crw'); if(w) w.hidden = t.value!=='__'; }
   if(t.id==='m_eta'){ const h = document.getElementById('m_etaHint'); const o = BYID.get((document.querySelector('[data-act=doEta]')||{dataset:{}}).dataset.id); if(h && o && o.eta && t.value){ const dd = diffDays(t.value, o.eta); h.innerHTML = dd>0 ? '<b style="color:var(--bad)">입고 지연 예정 +'+dd+'일</b>로 기록돼요.' : dd<0 ? '<b style="color:var(--ok)">조기 입고 예정 ('+(-dd)+'일 앞당김)</b>으로 기록돼요.' : '예정일이 같아요.'; } }
