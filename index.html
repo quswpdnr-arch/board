@@ -362,6 +362,7 @@ td.text{text-align:left}
 .dc .copt,.dc .s{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dc .dkv{grid-column:1/-1;align-self:end;margin-top:10px;padding-top:8px;row-gap:4px}.dkv dd.dwh{min-height:14px}
 .rbtn2{display:inline-flex;gap:4px;margin-left:auto}
+.smcols{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:2px 0}.smcol{font-size:11.5px;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:1px 6px;white-space:nowrap}
 .bcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:980px){.bcards{grid-template-columns:1fr}}
 .bcard{display:grid;gap:12px}.bcard.off{opacity:.6}
@@ -2045,11 +2046,19 @@ function stockPlanRows(rows){
   }
   return {items, imgs, n:Object.keys(items).length, same, changed, notIn, diffs};
 }
+// 셀메이트 목록 공통 양식 (틸아이다이 · 노운베러 · 프리버 동일)
+const SM_COLS = ['상품등록일자','대표이미지주소','바코드번호','상품명','옵션명','사입상품명','공급처','상품분류','현재재고','미발송주문수','창고별재고-트랜쇼','창고별재고-본사창고'];
+function smHeaderCheck(text){
+  const first = (text.split(/\r?\n/).find(l=>/바코드/.test(l))||'');
+  const H = first.split(first.includes('\t')?'\t':',').map(x=>unwrapX(x).replace(/[\s"]/g,''));
+  const has = k => k==='창고별재고-트랜쇼' ? H.some(h=>/트랜쇼/.test(h)&&!/오프라인/.test(h)) : k==='창고별재고-본사창고' ? H.some(h=>/본사/.test(h)&&/창고|재고/.test(h)) : H.some(h=>h===k || h.startsWith(k));
+  return SM_COLS.filter(k=>!has(k));
+}
 function smRun(text, fileName){
   const r = plParse(text);
   if(r.err){ S.sm = {text: fileName?'':text, fileName, err:r.err}; S.pl = {text:'', res:null}; S.stk = {text:'', res:null}; render(); return; }
   const P = plPlan(r.rows);
-  S.sm = {text: fileName?'':text, fileName, err:'', total:r.rows.length, done:{}};
+  S.sm = {text: fileName?'':text, fileName, err:'', total:r.rows.length, done:{}, miss:smHeaderCheck(text)};
   S.pl = {text:'', fileName, err:'', res:Object.assign(P, {total:r.rows.length, dupIn:r.dupIn})};
   S.stk = {text:'', fileName, err:'', res:stockPlanRows(r.rows)};
   render();
@@ -2057,10 +2066,12 @@ function smRun(text, fileName){
 function smHtml(){
   const L = S.sm || (S.sm = {});
   let h = '<div class="sec"><div class="sechead"><h2>셀메이트 목록 붙여넣기</h2><span class="sub">재고 업데이트와 신규 상품 등록을 한 번에 · 지금 보드 재고: 셀메이트 '+esc(stockAtLabel())+' 기준</span></div>'+
-    '<div class="panel pad step"><p class="note" style="margin:0">셀메이트 상품 · 재고 목록을 <b>머리글까지</b> 복사해 붙여넣거나 CSV 파일을 그대로 올리세요. 한 번 읽어서 <b>① 재고 업데이트</b>와 <b>② 신규 상품 등록</b>으로 나눠 보여드리고, 각각 따로 반영합니다. 대표이미지주소가 있으면 상품 사진도 함께 들어갑니다.</p>'+
-    '<textarea id="smT" rows="4" placeholder="공급처&#9;상품분류&#9;…&#9;바코드번호&#9;…&#9;상품명&#9;…&#9;사입상품명&#9;…&#9;옵션명&#9;…&#9;현재재고&#9;…&#9;가용재고">'+esc(L.text||'')+'</textarea>'+
+    '<div class="panel pad step"><p class="note" style="margin:0">셀메이트 <b>상품 · 재고 목록</b>(세 브랜드 공통 양식)을 CSV 그대로 올리거나 <b>머리글까지</b> 복사해 붙여넣으세요. 한 번 읽어서 <b>① 재고 업데이트</b>와 <b>② 신규 상품 등록</b>으로 나눠 보여드리고, 각각 따로 반영합니다.</p>'+
+    '<div class="smcols"><span class="note">양식</span>'+SM_COLS.map(k=>'<span class="smcol">'+esc(k)+'</span>').join('')+'<span class="note">· 창고 칸은 "트랜쇼"(오프라인 제외) · "본사창고"가 들어간 이름이면 됩니다 · 다른 창고 칸은 읽지 않아요</span></div>'+
+    '<textarea id="smT" rows="4" placeholder="상품등록일자&#9;대표이미지주소&#9;바코드번호&#9;상품명&#9;옵션명&#9;사입상품명&#9;공급처&#9;상품분류&#9;현재재고&#9;미발송주문수&#9;창고별재고-♥트랜쇼♥&#9;…&#9;창고별재고-★본사창고★ …">'+esc(L.text||'')+'</textarea>'+
     '<div class="filters"><button class="btn pri" data-act="smCheck">읽어서 나누기</button><label class="btn" for="smFile" style="cursor:pointer">CSV 파일 올리기</label><input type="file" id="smFile" accept=".csv,.tsv,.txt" hidden>'+(L.fileName?'<span class="note">'+esc(L.fileName)+' · '+nf(L.total||0)+'줄</span>':'')+'</div>'+
-    (L.err?'<p class="note" style="margin:0;color:var(--bad)">'+esc(L.err)+'</p>':'')+'</div>';
+    (L.err?'<p class="note" style="margin:0;color:var(--bad)">'+esc(L.err)+'</p>':'')+
+    (!L.err && L.miss && L.miss.length ? '<p class="note" style="margin:0;color:var(--warn)">공통 양식에서 빠진 칸: <b>'+L.miss.map(esc).join(' · ')+'</b> · 읽기는 하지만 '+(L.miss.some(k=>/트랜쇼|본사|미발송|현재재고/.test(k))?'재고 · 출고 가능 계산':'')+(L.miss.some(k=>/대표이미지/.test(k))?' 사진':'')+(L.miss.some(k=>/사입상품명|공급처|옵션명/.test(k))?' 신규 등록 정보':'')+'이 빠질 수 있어요. 셀메이트 양식을 확인해 주세요.</p>' : '')+'</div>';
   if(L.total!=null && !L.err){
     const R = S.stk && S.stk.res; const lockS = !canDo('stock'), lockR = !canDo('reg');
     h += '<div class="panel pad step smsec"><div class="nstep"><span class="nnum">1</span><h3>재고 업데이트</h3>'+(lockS?'<span class="chip st-none">권한 없음</span>':'')+'</div>';
