@@ -342,7 +342,7 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 .dkv dt{color:var(--muted);white-space:nowrap}.dkv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;color:var(--fg)}
 .dkv dd b{font-weight:600}.dkv dd small{font-size:11px;color:var(--muted);font-weight:400}.dkv dd small:only-child,.dkv dd b+small{margin-left:2px}.dkv dd b.inq{color:var(--info)}
 .dkv dd{white-space:nowrap}.dkv dd.dwh{grid-column:1/-1;font-size:11px;color:var(--muted);margin-top:-2px}
-.schcards{grid-template-columns:repeat(auto-fill,minmax(196px,220px))}.schcards .rvcard span{white-space:nowrap}.schcards .rvcard small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.schtbl input[type=date]{width:140px}.schtbl input:not([type]){min-width:150px}.schtbl tr.schdirty td{background:var(--sunk)}
+label.f[hidden]{display:none}.rvcards.schcards{grid-template-columns:repeat(4,minmax(0,1fr));width:100%;max-width:960px;gap:8px}@media (max-width:700px){.rvcards.schcards{grid-template-columns:repeat(2,minmax(0,1fr))}}.schcards .rvcard{column-gap:16px;padding:9px 14px}.schcards .rvcard span{min-width:0;overflow:hidden;text-overflow:ellipsis}.schcards .rvcard b{justify-self:end;padding-left:4px}.schcards .rvcard span{white-space:nowrap}.schcards .rvcard small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.schtbl input[type=date]{width:140px}.schtbl input:not([type]){min-width:150px}.schtbl tr.schdirty td{background:var(--sunk)}
 .tbadm{min-width:96px}.badm{display:inline-grid;gap:2px;justify-items:start;font-size:12px;text-align:left}.badm label{display:inline-flex;gap:3px;align-items:center;white-space:nowrap}
 tr.qchg td{background:color-mix(in srgb, var(--warn) 8%, transparent)}.qtxt{color:var(--warn)}
 tr.xchg td{background:color-mix(in srgb, var(--bad) 7%, transparent)}
@@ -2533,7 +2533,7 @@ function viewSched(){
       '<td style="white-space:nowrap">'+(o.etaKind==='fixed'?fmtD(o.eta)+' <span class="kind">확정</span>':o.eta?'<span class="muted">'+fmtD(o.eta)+' 예상</span>':'<span class="muted">미정</span>')+'</td>'+
       '<td><input type="date" data-sch="'+o.id+'" data-k="eta" value="'+esc(e.eta||'')+'"'+(lock?' disabled':'')+'></td>'+
       '<td><input data-sch="'+o.id+'" data-k="memo" value="'+esc(e.memo||'')+'" placeholder="예: 원단 11/12 입고"'+(lock?' disabled':'')+'></td>'+
-      '<td><button class="btn sm'+(e.eta?' pri':'')+'" data-act="schSave" data-id="'+o.id+'"'+(e.eta&&!lock?'':' disabled')+'>저장</button></td></tr>';
+      '<td><button class="btn sm'+(e.eta?' pri':'')+'" data-act="schSave" data-id="'+o.id+'"'+(e.eta&&!lock?'':' disabled')+'>저장</button> <button class="btn sm ghost danger" data-act="schDel" data-id="'+o.id+'"'+(canDo('recv','reorder')?'':' disabled title="입고 처리 · 리오더 권한이 필요해요"')+' title="취소된 오더 · 잘못 들어간 오더를 목록에서 뺍니다">삭제</button></td></tr>';
   }
   h += '</tbody></table></div>'+(a.length>X.n?'<div class="more"><button class="btn" data-act="schMore">'+nf(a.length-X.n)+'건 더 보기</button></div>':'')+
     '<p class="note">저장하면 그 오더의 예정일이 <b>확정</b>으로 바뀌고 변경 이력에 남아요. 날짜를 여러 개 넣고 <b>입력한 n건 저장</b>으로 한 번에 저장해도 됩니다. 권한: 팀원 · 권한의 <b>일정 입력</b>(또는 입고 처리 · 리오더).</p></div>';
@@ -2584,6 +2584,7 @@ function orderModal(id, mode){
     h += '<div class="filters"><button class="btn pri" data-act="mRecv" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>입고 처리</button><button class="btn" data-act="mEta" data-id="'+o.id+'"'+dis+'>일정 수정</button><button class="btn" data-act="mCancel" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>취소 · 마감</button><button class="btn" data-act="mQty" data-id="'+o.id+'"'+dis+'>수량 수정</button><button class="btn danger" data-act="mDel" data-id="'+o.id+'"'+dis+'>이 차수 삭제</button></div>';
     const ed = o.rcAdd.map((r,i)=>'<div><span class="rc add">'+fmtDY(r.d)+' · '+(r.q>0?'':'')+nf(r.q)+'장</span><span>'+(r.adj?'입고 정정':'입고')+' · '+esc(who(r.by))+'</span><span class="rbtn2"><button class="btn sm" data-act="mQty" data-id="'+o.id+'"'+dis+'>수정</button><button class="btn sm" data-act="undoRecv" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></span></div>').concat((o.cancels||[]).map((r,i)=>'<div><span class="rc cx">−'+nf(r.q)+'</span><span>'+esc(r.r||'빼기')+' · '+esc(fmtDY(r.d))+' · '+esc(who(r.by))+'</span><button class="btn sm" data-act="undoCancel" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></div>'));
     if(ed.length) h += '<div><h3 style="margin-bottom:6px">보드에서 입력한 입고 · 빼기</h3><div class="panel undolist">'+ed.join('')+'</div><p class="note" style="margin:4px 0 0">잘못 누른 입고나 빼기는 되돌리기로 취소할 수 있습니다.</p></div>';
+    if((ovr[o.id]||{}).closed) h += '<div class="filters"><span class="note" style="margin:0">취소 · 마감한 오더예요 · 잘못 눌렀다면</span><button class="btn sm" data-act="reopenOrd" data-id="'+o.id+'"'+dis+'>다시 열기</button></div>';
     if(!canWrite()) h += '<p class="note" style="margin:0">저장이 켜진 보기에서만 처리할 수 있습니다.</p>';
   }
   if(mode==='recv') h += '<div class="panel pad step"><h3>입고 처리</h3><div class="formgrid"><label class="f">입고 수량<input type="number" id="m_q" min="1" value="'+o.remain+'"></label><label class="f">입고일 (출고일)<input type="date" id="m_d" value="'+TODAY+'"></label></div><div class="filters"><button class="btn pri" data-act="doRecv" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
@@ -2596,7 +2597,7 @@ function orderModal(id, mode){
       '<div class="filters"><button class="btn pri" data-act="doEta" data-id="'+o.id+'">저장</button><button class="btn" data-act="close">취소</button></div></div>'; }
   if(mode==='eta') h += '<div class="panel pad step"><h3>일정 변경</h3><div class="formgrid"><label class="f">새 예정일<input type="date" id="m_eta" value="'+(o.eta||'')+'"></label><label class="f">사유<select id="m_r">'+REASONS.map(r=>'<option>'+r+'</option>').join('')+'</select></label></div><label class="f">메모<input id="m_memo" placeholder="예: 원단 입고 11/12 → 봉제 일주일"></label><p class="note" style="margin:0">변경 전 날짜와 사유가 기록으로 남아 CS가 고객 안내에 쓸 수 있습니다.</p><div class="filters"><button class="btn pri" data-act="doEta" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
   if(mode==='cancel'){ const CR = ['미달 (공장 수량 부족)','불량','오더 취소','다음 차수로 이월','오더 수량 줄임'];
-    h += '<div class="panel pad step"><h3>취소 · 마감</h3><p class="note" style="margin:0">더 이상 들어오지 않을 수량을 뺍니다. 지금 남은 수량 <b>'+nf(o.remain)+'장</b> · 전량을 빼면 이 차수는 마감돼요.</p>'+
+    h += '<div class="panel pad step"><h3>취소 · 삭제</h3><p class="note" style="margin:0">더 이상 들어오지 않을 수량을 뺍니다 (취소 · 잘못 들어간 오더 삭제). 지금 남은 수량 <b>'+nf(o.remain)+'장</b> · 전량을 빼면 이 차수는 마감돼요.</p>'+
       '<label class="chk"><input type="checkbox" id="m_call" checked> 전량 (남은 '+nf(o.remain)+'장 모두)</label>'+
       '<div class="formgrid"><label class="f">빼는 수량<input type="number" id="m_cq" min="1" max="'+o.remain+'" value="'+o.remain+'" disabled></label><label class="f">사유<select id="m_cr2">'+CR.map(r=>'<option>'+r+'</option>').join('')+'<option value="__">직접 입력</option></select></label></div>'+
       '<label class="f" id="m_crw" hidden>사유 직접 입력<input id="m_crx" placeholder="예: 샘플 전환 · 컬러 변경"></label><label class="f">메모<input id="m_cm" placeholder="예: 원단 오염 1장 · 재생산 안 함"></label>'+
@@ -2717,6 +2718,9 @@ async function act(a, el){
       orderModal(id); break; }
     case 'recvKeep': case 'recvShort': { const P = S.pendRecv; S.pendRecv = null; if(!P) break; const o = BYID.get(P.id); if(!o) break; await recvOne(o, P.q, P.d, a==='recvShort'); closeModal(); break; }
     case 'mCancel': orderModal(id,'cancel'); break;
+    case 'schDel': { if(!need('recv','reorder')) break; orderModal(id,'cancel'); const sl = document.getElementById('m_cr2'); if(sl) sl.value = '오더 취소'; break; }
+    case 'reopenOrd': { const o = BYID.get(id); if(!o || !need('recv','reorder')) break;
+      await guard(()=>saveOvr(o, {closed:false, closeReason:''}, {type:'reopen', msg:'마감 취소 · 다시 진행'}, label(o)+' 마감 취소 · 다시 진행'), '다시 진행 중으로 돌렸습니다'); closeModal(); break; }
     case 'doCancel': {
       const o = BYID.get(id); const all = (document.getElementById('m_call')||{}).checked; const q = all ? o.remain : parseInt(val('m_cq'),10);
       let r = val('m_cr2'); if(r==='__') r = (val('m_crx')||'').trim() || '기타'; const m = val('m_cm');
