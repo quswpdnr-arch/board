@@ -78,6 +78,12 @@ let BRAND = 'kb'; try{ BRAND = localStorage.getItem('kb_brand') || 'kb'; }catch(
 if(!BRANDS.includes(BRAND)) BRAND = 'kb';
 const metaId = b => b === 'kb' ? 'snap' : 'snap_'+b;
 const partId = (b, i) => (b === 'kb' ? 'p' : b+'_p') + i;
+// 시트 데이터 캐시 (브라우저 IndexedDB · 큰 브랜드도 저장됨)
+function idbOpen(){ return new Promise((res, rej) => { const r = indexedDB.open('kb-board', 1); r.onupgradeneeded = () => r.result.createObjectStore('snap'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function idbGet(k){ const db = await idbOpen(); return new Promise((res) => { const t = db.transaction('snap','readonly').objectStore('snap').get(k); t.onsuccess = () => res(t.result || null); t.onerror = () => res(null); }); }
+async function idbSet(k, v, prefix){ const db = await idbOpen(); const st = db.transaction('snap','readwrite').objectStore('snap');
+  await new Promise(res => { const c = st.getAllKeys(); c.onsuccess = () => { for(const x of c.result||[]) if(String(x).startsWith(prefix) && x!==k) st.delete(x); res(); }; c.onerror = () => res(); });
+  st.put(v, k); }
 async function loadSnap(){
   const metas = {};
   await Promise.all(['kb','tid','frv'].map(async b => { try{ const m = await getDoc(doc(fs, 'meta', metaId(b))); if(m.exists()) metas[b] = m.data(); }catch(e){} }));
@@ -90,9 +96,11 @@ async function loadSnap(){
   const meta = metas[use];
   const key = 'kb_snap_'+use+'_'+meta.at;
   try{ const c = localStorage.getItem(key); if(c) return c; }catch(e){}
+  try{ const c = await idbGet(key); if(c) return c; }catch(e){}
   const parts = await Promise.all(Array.from({length: meta.parts}, (_, i) => getDoc(doc(fs, 'snap', partId(use, i))).then(d => d.exists() ? d.data().t : '')));
   const text = parts.join('');
   try{ for(const k of Object.keys(localStorage)) if(k.startsWith('kb_snap_'+use+'_') || /^kb_snap_\d/.test(k)) localStorage.removeItem(k); localStorage.setItem(key, text); }catch(e){}
+  idbSet(key, text, 'kb_snap_'+use+'_').catch(()=>{});
   return text;
 }
 

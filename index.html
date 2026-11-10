@@ -342,7 +342,7 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 .dkv dt{color:var(--muted);white-space:nowrap}.dkv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;color:var(--fg)}
 .dkv dd b{font-weight:600}.dkv dd small{font-size:11px;color:var(--muted);font-weight:400}.dkv dd small:only-child,.dkv dd b+small{margin-left:2px}.dkv dd b.inq{color:var(--info)}
 .dkv dd{white-space:nowrap}.dkv dd.dwh{grid-column:1/-1;font-size:11px;color:var(--muted);margin-top:-2px}
-.schcards{grid-template-columns:repeat(auto-fill,minmax(230px,260px))}.schtbl input[type=date]{width:140px}.schtbl input:not([type]){min-width:150px}.schtbl tr.schdirty td{background:var(--sunk)}
+.schcards{grid-template-columns:repeat(auto-fill,minmax(196px,220px))}.schcards .rvcard span{white-space:nowrap}.schcards .rvcard small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.schtbl input[type=date]{width:140px}.schtbl input:not([type]){min-width:150px}.schtbl tr.schdirty td{background:var(--sunk)}
 .tbadm{min-width:96px}.badm{display:inline-grid;gap:2px;justify-items:start;font-size:12px;text-align:left}.badm label{display:inline-flex;gap:3px;align-items:center;white-space:nowrap}
 tr.qchg td{background:color-mix(in srgb, var(--warn) 8%, transparent)}.qtxt{color:var(--warn)}
 tr.xchg td{background:color-mix(in srgb, var(--bad) 7%, transparent)}
@@ -361,6 +361,7 @@ td.text{text-align:left}
 .dc .t{display:flex;align-items:center;gap:6px;min-width:0}.dc .t .tn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.dc .t .chip{flex:none}
 .dc .copt,.dc .s{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dc .dkv{grid-column:1/-1;align-self:end;margin-top:10px;padding-top:8px;row-gap:4px}.dkv dd.dwh{min-height:14px}
+.rbtn2{display:inline-flex;gap:4px;margin-left:auto}
 .bcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:980px){.bcards{grid-template-columns:1fr}}
 .bcard{display:grid;gap:12px}.bcard.off{opacity:.6}
@@ -377,8 +378,8 @@ body.mode-all #tabs{display:none}
 @media (max-width:640px){.hrow{flex-wrap:wrap;gap:8px}.brandsw{margin-left:0;order:3;width:100%;justify-content:space-between}.bsw{flex:1;padding:5px 6px}}
 .rvcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px;margin-bottom:10px}
 .rvcard{display:grid;grid-template-columns:1fr auto;gap:1px 4px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 8px;cursor:pointer;font:inherit;color:inherit}.rvcard small{grid-column:1/-1}
-.rvcard b{font-size:16px}.rvcard .chip{font-size:11px;padding:1px 6px;white-space:nowrap}.rvcard small{font-size:10.5px;color:var(--muted);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rvcard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
-.rvtbl td{vertical-align:top}.rvtbl td:first-child{min-width:220px}.rvtbl td.rvmemo{min-width:140px}.rvtbl tr.rvneed td:first-child{box-shadow:3px 0 0 var(--accent) inset}
+.rvcard b{font-size:16px}.rvcard .chip{font-size:11px;padding:1px 6px;white-space:nowrap}.rvcard small{font-size:10.5px;color:var(--muted);line-height:1.25;grid-column:1/-1;white-space:normal;word-break:keep-all}.rvcard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.rvtbl td{vertical-align:top}.rvtbl td:first-child{min-width:220px}.rvtbl td.rvmemo{min-width:140px}
 .rvsel{font-size:12.5px;padding:3px 22px 3px 8px;min-height:0;height:auto;width:auto;border-radius:8px;font-weight:600}
 .rvround{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--sunk);border:1px solid var(--line);margin:0 4px 4px 0;white-space:nowrap}.rvround.bad{border-color:var(--bad);color:var(--bad)}
 .rvch{display:inline-flex;gap:2px;flex-wrap:nowrap}.rvc{font:inherit;font-size:10.5px;width:21px;height:21px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;padding:0}.rvc.on{background:var(--ok);border-color:var(--ok);color:#fff}
@@ -489,7 +490,7 @@ function fmtAt(iso, dateOnly){ const d = new Date(iso); if(!iso || isNaN(d)) ret
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeId = s => String(s).replace(/[^A-Za-z0-9_-]/g,'_').slice(0,120);
 const ST = {late:'지연',over:'예상일 경과',soon:'7일 내 입고',open:'진행 중',none:'일정 미정',done:'입고 완료',closed:'마감'};
-const REASONS = ['원단 수급 지연','공장 생산 지연','검수/불량 재작업','부자재 지연','물류/통관 지연','오더 수량 변경','기타'];
+const REASONS = ['공장 일정 확인','원단 수급 지연','공장 생산 지연','검수/불량 재작업','부자재 지연','물류/통관 지연','오더 수량 변경','기타'];
 
 // ---------- state ----------
 let DB = null, RAWDB = null, USER = null, MYID = null, dbState = 'connecting';
@@ -656,6 +657,8 @@ function addOrder(o){
   else if(o.od && o.remain>0){ o.eta = addDays(o.od, leadFor(o.f)); o.etaKind = 'est'; }
   else { o.eta = ''; o.etaKind = ''; }
   o.firstEta = (o.changes.find(c=>c.type==='eta')||{}).from || '';
+  o.short = o.closed && o.qty>0 && o.recv>0 && o.recv < o.qty ? o.qty - o.recv : 0;
+  o.overQ = o.recv > o.qty && o.qty>0 ? o.recv - o.qty : 0;
   o.status = statusOf(o);
   o.p.orders.push(o); ORDERS.push(o); BYID.set(o.id, o);
 }
@@ -708,13 +711,13 @@ async function initCaps(){
   DB.doc('stock/current').onSnapshot(d => { stockDoc = d.exists ? d.data() : null; if(first.s){first.s=false;ready();} else refresh(); }, fail);
   DB.collection('pfix').onSnapshot(s => { pfixDocs={}; s.docs.forEach(d=>{ const x=d.data(); if(x&&x.orig) pfixDocs[x.orig]=x; }); if(first.x){first.x=false;ready();} else refresh(); }, fail);
   DB.collection('fchg').onSnapshot(s => { fchgs = s.docs.map(d=>Object.assign({id:d.id}, d.data())); if(first.c){first.c=false;ready();} else refresh(); }, fail);
-  DB.collection('resv').onSnapshot(s => { resvDocs = {}; s.docs.forEach(d=>{ const x = d.data(); if(x) resvDocs[d.id] = x; }); refresh(); }, ()=>{});
-  DB.doc('sales/current').onSnapshot(d => { salesDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
-  DB.doc('cfg/channels').onSnapshot(d => { cfgCh = d.exists ? d.data() : null; refresh(); }, ()=>{});
-  DB.doc('cfg/rvcat').onSnapshot(d => { cfgCat = d.exists ? d.data() : null; refresh(); }, ()=>{});
-  if(ME.admin) DB.collection('members').onSnapshot(s => { members = {}; s.docs.forEach(d=>{ const x = d.data(); if(x) members[d.id] = x; }); refresh(); }, ()=>{});
-  else if(ME.email) DB.doc('members/'+ME.email).onSnapshot(d => { myMember = d.exists ? d.data() : null; refresh(); }, ()=>{});
-  DB.collection('log').orderBy('at','desc').limit(80).onSnapshot(s => { logs = s.docs.map(d=>d.data()); if(first.l){first.l=false;ready();} else refresh(); }, fail);
+  DB.collection('resv').onSnapshot(s => { resvDocs = {}; s.docs.forEach(d=>{ const x = d.data(); if(x) resvDocs[d.id] = x; }); lightRefresh(); }, ()=>{});
+  DB.doc('sales/current').onSnapshot(d => { salesDoc = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
+  DB.doc('cfg/channels').onSnapshot(d => { cfgCh = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
+  DB.doc('cfg/rvcat').onSnapshot(d => { cfgCat = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
+  if(ME.admin) DB.collection('members').onSnapshot(s => { members = {}; s.docs.forEach(d=>{ const x = d.data(); if(x) members[d.id] = x; }); lightRefresh(); }, ()=>{});
+  else if(ME.email) DB.doc('members/'+ME.email).onSnapshot(d => { myMember = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
+  DB.collection('log').orderBy('at','desc').limit(80).onSnapshot(s => { logs = s.docs.map(d=>d.data()); if(first.l){first.l=false;ready();} else lightRefresh(); }, fail);
 }
 const canWrite = () => !!DB && dbState!=='off';
 let nameCache = {};
@@ -1768,7 +1771,7 @@ function recvList(){
   for(const o of a.slice(0,200)){
     h += '<tr><td><div class="pc">'+thumb(o.p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(o.p.key)+'" title="상품 조회로 이동">'+esc(o.p.n||o.p.en)+'</a><small>'+esc(o.p.opt)+' · <span class="mono">'+esc(o.p.b)+'</span></small></div></div></td><td>'+flink(o.f)+'</td><td style="white-space:nowrap">'+esc(o.round)+'<small class="odsub">'+(o.od?fmtDY(o.od)+' 오더':'초두')+'</small></td><td style="white-space:nowrap">'+etaCell(o)+'</td><td class="num"><b>'+nf(o.remain)+'</b></td><td class="num">'+stockCell(o.p)+'</td>'+
       '<td><input type="number" min="1" id="rq_'+o.id+'" style="width:58px" value="'+o.remain+'" data-rem="'+o.remain+'"><small class="odsub overq" hidden>초과 입고</small></td><td><input type="date" id="rd_'+o.id+'" value="'+TODAY+'" style="width:122px;padding-left:6px;padding-right:4px"></td>'+
-      '<td><div class="rbtns"><button class="btn sm pri" data-act="rcvOne" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+'>입고</button><button class="btn sm" data-act="mDelay" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="입고 예정일 늦추기">지연</button><button class="btn sm" data-act="mCancel" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="불량 · 미입고 수량 빼기">빼기</button></div></td></tr>';
+      '<td><div class="rbtns"><button class="btn sm pri" data-act="rcvOne" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+'>입고</button><button class="btn sm" data-act="mDelay" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="입고 예정일 수정 (앞당기기 · 미루기)">수정</button><button class="btn sm" data-act="mCancel" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="불량 · 미입고 수량 빼기">빼기</button></div></td></tr>';
   }
   return h+'</tbody></table></div></div>';
 }
@@ -2457,7 +2460,7 @@ function viewSched(){
   const tab = (k,t,n,d) => '<button class="rvcard'+(X.view===k?' on':'')+'" data-act="schView" data-k="'+k+'"><span>'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
   const dirty = Object.entries(X.edits).filter(([id,e])=>e && e.eta && BYID.get(id)).length;
   let h = '<div class="sec"><div class="sechead"><h2>일정 입력</h2><span class="sub">입고 예정일이 비어 있는 오더와 최근 들어간 신규 오더예요 · 담당 디자이너가 공장과 확인한 날짜를 넣고 저장하면 입고 예정 · 예약배송에 바로 반영돼요</span></div>'+
-    '<div class="rvcards schcards">'+tab('none','일정 미입력',cnt.none,'확정 예정일 없음 (예상만 있음)')+tab('new','최근 신규 오더',cnt.new,'오더일 2주 이내')+tab('first','초두만',cnt.first,'첫 오더 (초두 · 신상)')+tab('all','진행 중 전체',cnt.all,'모든 미입고 오더')+'</div>'+
+    '<div class="rvcards schcards">'+tab('none','일정 미입력',cnt.none,'확정 예정일 없음')+tab('new','최근 신규 오더',cnt.new,'오더일 2주 이내')+tab('first','초두만',cnt.first,'첫 오더 (초두 · 신상)')+tab('all','진행 중 전체',cnt.all,'모든 미입고 오더')+'</div>'+
     '<div class="filters"><input type="search" id="schQ" placeholder="바코드 · 제작품명 · 컬러 · 공장 · 담당 검색" value="'+esc(X.q)+'">'+
     '<select id="schFac"><option value="">전체 공장</option>'+(extFacs().length ? activeFacs().filter(f=>extFacs().includes(String(f).replace(/\s/g,''))) : activeFacs()).map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
     (X.q||X.fac?'<button class="btn sm" data-act="schClear">‹ 검색 필터 해제</button>':'')+'<span class="note">'+nf(a.length)+'건</span>'+
@@ -2479,6 +2482,20 @@ function viewSched(){
     '<p class="note">저장하면 그 오더의 예정일이 <b>확정</b>으로 바뀌고 변경 이력에 남아요. 날짜를 여러 개 넣고 <b>입력한 n건 저장</b>으로 한 번에 저장해도 됩니다. 권한: 팀원 · 권한의 <b>일정 입력</b>(또는 입고 처리 · 리오더).</p></div>';
   return h;
 }
+function recvAsk(o, q, d){
+  if(q >= o.remain) return recvOne(o, q, d, false);
+  S.pendRecv = {id:o.id, q, d};
+  openModal('<div class="mh"><div><h2>미달 입고예요</h2><div class="muted" style="font-size:12.5px">'+esc(label(o))+'</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
+    '<div class="panel pad step"><p style="margin:0">남은 <b>'+nf(o.remain)+'장</b> 중 <b>'+nf(q)+'장</b>만 들어왔어요. 모자란 <b style="color:var(--bad)">'+nf(o.remain-q)+'장</b>은 어떻게 할까요?</p>'+
+    '<div class="filters"><button class="btn pri" data-act="recvKeep">나머지 받을 예정 (입고만 저장)</button><button class="btn" data-act="recvShort">미달분 취소 (입고 저장 + 마감)</button><button class="btn" data-act="close">돌아가기</button></div></div>');
+}
+async function recvOne(o, q, d, closeShort){
+  const cur = (ovr[o.id]&&Array.isArray(ovr[o.id].recv))?ovr[o.id].recv:[];
+  const ov = Math.max(0, q - o.remain); const short = Math.max(0, o.remain - q);
+  const patch = {recv:cur.concat([{q,d,by:MYID||''}])}; if(closeShort && short>0){ patch.closed = true; patch.closeReason = '미달 마감 ('+short+'장 미입고)'; }
+  const msg = '입고 '+q+'장 ('+d.slice(5).replace('-','.')+')'+(ov?' · 초과 입고 +'+ov+'장':'')+(closeShort&&short?' · 미달 '+short+'장 취소 · 마감':'');
+  return guard(()=>saveOvr(o, patch, {type:'recv', msg}, label(o)+' '+msg), ov ? '입고 처리했습니다 · 초과 입고 '+ov+'장' : (closeShort&&short ? '입고 처리하고 미달 '+short+'장은 마감했습니다' : '입고 처리했습니다'));
+}
 async function schSave(ids){
   if(!need('eta','recv','reorder')) return;
   let n = 0;
@@ -2486,7 +2503,7 @@ async function schSave(ids){
     for(const id of ids){
       const o = BYID.get(id); const e = S.sched.edits[id]; if(!o || !e || !e.eta) continue;
       const memo = (e.memo||'').trim(); const reason = '일정 입력'+(memo?' · '+memo:'');
-      const tag = o.etaKind!=='fixed' ? '예정일 지정' : (diffDays(e.eta, o.eta)>0 ? '입고 지연 +'+diffDays(e.eta, o.eta)+'일' : '예정일 변경');
+      const tag = o.etaKind!=='fixed' ? '예정일 지정' : (diffDays(e.eta, o.eta)>0 ? '입고 지연 예정 +'+diffDays(e.eta, o.eta)+'일' : diffDays(e.eta, o.eta)<0 ? '조기 입고 예정' : '예정일 변경');
       await saveOvr(o, {eta:e.eta, reason}, {type:'eta', from:o.etaKind==='fixed'?o.eta:'', to:e.eta, msg:tag+' · 예정일 '+(o.etaKind==='fixed'?fmtDY(o.eta):'미정')+' → '+fmtDY(e.eta)+' ('+reason+')'}, label(o)+' '+tag+' · '+fmtDY(e.eta)+(memo?' · '+memo:''), ['eta','recv','reorder']);
       delete S.sched.edits[id]; n++;
     }
@@ -2503,24 +2520,37 @@ function orderModal(id, mode){
   resolveNames(o.changes.map(c=>c.by).concat(o.rcAdd.map(r=>r.by)));
   const p = o.p;
   let h = '<div class="mh">'+thumb(p,'l')+'<div><h2>'+esc(p.n||p.en)+' <span class="muted" style="font-weight:500">'+esc(o.round)+'</span></h2><div class="muted" style="font-size:12.5px">'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span></div></div><button class="btn sm x" data-act="close">닫기</button></div>';
-  h += '<dl class="kv"><dt>상태</dt><dd>'+chip(o.status)+'</dd><dt>공장</dt><dd>'+esc(o.f)+(p.contact?' · '+esc(p.contact):'')+'</dd><dt>오더일</dt><dd>'+(o.od||'초두')+'</dd><dt>수량</dt><dd>오더 <b>'+nf(o.qty)+'</b> · 입고 <b>'+nf(o.recv)+'</b> · 잔여 <b>'+nf(o.remain)+'</b></dd><dt>예정일</dt><dd>'+etaCell(o)+(o.etaKind==='est'?'<div class="note">'+esc(o.f)+' 평균 리드타임 '+leadFor(o.f)+'일로 계산한 예상일</div>':'')+(o.etaReason?'<div class="note">사유: '+esc(o.etaReason)+'</div>':'')+'</dd><dt>입고 내역</dt><dd>'+receiptsHtml(o)+'</dd>'+(o.memo?'<dt>비고</dt><dd>'+esc(o.memo)+'</dd>':'')+'</dl>';
+  h += '<dl class="kv"><dt>상태</dt><dd>'+chip(o.status)+(o.short?' <span class="chip st-late">미달 '+nf(o.short)+'장</span>':'')+(o.overQ?' <span class="chip st-soon">초과 '+nf(o.overQ)+'장</span>':'')+(o.closed&&o.closeReason?' <span class="muted">'+esc(o.closeReason)+'</span>':'')+'</dd><dt>공장</dt><dd>'+esc(o.f)+(p.contact?' · '+esc(p.contact):'')+'</dd><dt>오더일</dt><dd>'+(o.od||'초두')+'</dd><dt>수량</dt><dd>오더 <b>'+nf(o.qty)+'</b> · 입고 <b>'+nf(o.recv)+'</b> · 잔여 <b>'+nf(o.remain)+'</b></dd><dt>예정일</dt><dd>'+etaCell(o)+(o.etaKind==='est'?'<div class="note">'+esc(o.f)+' 평균 리드타임 '+leadFor(o.f)+'일로 계산한 예상일</div>':'')+(o.etaReason?'<div class="note">사유: '+esc(o.etaReason)+'</div>':'')+'</dd><dt>입고 내역</dt><dd>'+receiptsHtml(o)+'</dd>'+(o.memo?'<dt>비고</dt><dd>'+esc(o.memo)+'</dd>':'')+'</dl>';
   if(o.changes.length) h += '<div><h3 style="margin-bottom:6px">변경 기록</h3><div class="panel loglist">'+o.changes.slice().reverse().map(c=>'<div><span class="muted">'+esc(fmtAt(c.at,true).replace('-','.'))+'</span><span>'+esc(c.msg||'')+' <span class="muted">· '+esc(who(c.by))+'</span></span></div>').join('')+'</div></div>';
   const dis = canWrite() ? '' : ' disabled';
   if(!mode){
-    h += '<div class="filters"><button class="btn pri" data-act="mRecv" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>입고 처리</button><button class="btn" data-act="mEta" data-id="'+o.id+'"'+dis+'>일정 변경 · 지연</button><button class="btn" data-act="mClose" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>마감 (미달·취소)</button><button class="btn" data-act="mCancel" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>수량 빼기 (불량 · 취소)</button><button class="btn danger" data-act="mDel" data-id="'+o.id+'"'+dis+'>이 차수 삭제</button></div>';
-    const ed = o.rcAdd.map((r,i)=>'<div><span class="rc add">'+fmtDY(r.d)+' · '+nf(r.q)+'장</span><span>입고 · '+esc(who(r.by))+'</span><button class="btn sm" data-act="undoRecv" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></div>').concat((o.cancels||[]).map((r,i)=>'<div><span class="rc cx">−'+nf(r.q)+'</span><span>'+esc(r.r||'빼기')+' · '+esc(fmtDY(r.d))+' · '+esc(who(r.by))+'</span><button class="btn sm" data-act="undoCancel" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></div>'));
+    h += '<div class="filters"><button class="btn pri" data-act="mRecv" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>입고 처리</button><button class="btn" data-act="mEta" data-id="'+o.id+'"'+dis+'>일정 수정</button><button class="btn" data-act="mCancel" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>취소 · 마감</button><button class="btn" data-act="mQty" data-id="'+o.id+'"'+dis+'>수량 수정</button><button class="btn danger" data-act="mDel" data-id="'+o.id+'"'+dis+'>이 차수 삭제</button></div>';
+    const ed = o.rcAdd.map((r,i)=>'<div><span class="rc add">'+fmtDY(r.d)+' · '+(r.q>0?'':'')+nf(r.q)+'장</span><span>'+(r.adj?'입고 정정':'입고')+' · '+esc(who(r.by))+'</span><span class="rbtn2"><button class="btn sm" data-act="mQty" data-id="'+o.id+'"'+dis+'>수정</button><button class="btn sm" data-act="undoRecv" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></span></div>').concat((o.cancels||[]).map((r,i)=>'<div><span class="rc cx">−'+nf(r.q)+'</span><span>'+esc(r.r||'빼기')+' · '+esc(fmtDY(r.d))+' · '+esc(who(r.by))+'</span><button class="btn sm" data-act="undoCancel" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></div>'));
     if(ed.length) h += '<div><h3 style="margin-bottom:6px">보드에서 입력한 입고 · 빼기</h3><div class="panel undolist">'+ed.join('')+'</div><p class="note" style="margin:4px 0 0">잘못 누른 입고나 빼기는 되돌리기로 취소할 수 있습니다.</p></div>';
     if(!canWrite()) h += '<p class="note" style="margin:0">저장이 켜진 보기에서만 처리할 수 있습니다.</p>';
   }
   if(mode==='recv') h += '<div class="panel pad step"><h3>입고 처리</h3><div class="formgrid"><label class="f">입고 수량<input type="number" id="m_q" min="1" value="'+o.remain+'"></label><label class="f">입고일 (출고일)<input type="date" id="m_d" value="'+TODAY+'"></label></div><div class="filters"><button class="btn pri" data-act="doRecv" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
   if(mode==='delay'){ const base = o.eta && o.eta > TODAY ? o.eta : TODAY;
     const rvw = rvOf(p.b); const rvl = (rvw.rounds||[]).filter(x=>!x.done && x.d);
-    h += '<div class="panel pad step"><h3>일정 변경 · 지연</h3>'+(isResvSt(rvw.st) && rvl.length ? '<p class="note" style="margin:0;color:var(--bad)">이 상품은 예약배송 중이에요 (출고 '+rvl.map(x=>fmtD(x.d).slice(0,5)+(x.q?' · '+x.q+'장':'')).join(', ')+'). 지연 저장 후 예약배송 탭에서 출고일도 바꿔주세요.</p>' : '')+'<p class="note" style="margin:0">지금 예정일 '+(o.eta?fmtDY(o.eta)+' ('+(o.etaKind==='fixed'?'확정':'예상')+')':'미정')+' · 남은 '+nf(o.remain)+'장</p>'+
-      '<div class="filters">'+[3,7,14,21].map(n=>'<button class="btn sm" data-act="dPlus" data-base="'+base+'" data-n="'+n+'">+'+n+'일</button>').join('')+'</div>'+
-      '<div class="formgrid"><label class="f">새 예정일<input type="date" id="m_eta" value="'+addDays(base,7)+'"></label><label class="f">사유<select id="m_r">'+REASONS.map(r=>'<option>'+r+'</option>').join('')+'</select></label></div><label class="f">메모<input id="m_memo" placeholder="예: 원단 입고 늦어짐 · 공장 재확인 11/15"></label>'+
-      '<div class="filters"><button class="btn pri" data-act="doEta" data-id="'+o.id+'">지연 저장</button><button class="btn" data-act="close">취소</button></div></div>'; }
+    h += '<div class="panel pad step"><h3>일정 수정</h3>'+(isResvSt(rvw.st) && rvl.length ? '<p class="note" style="margin:0;color:var(--bad)">이 상품은 예약배송 중이에요 (출고 '+rvl.map(x=>fmtD(x.d).slice(0,5)+(x.q?' · '+x.q+'장':'')).join(', ')+'). 저장 후 예약배송 탭에서 출고일도 맞춰주세요.</p>' : '')+'<p class="note" style="margin:0">지금 예정일 '+(o.eta?fmtDY(o.eta)+' ('+(o.etaKind==='fixed'?'확정':'예상')+')':'미정')+' · 남은 '+nf(o.remain)+'장</p>'+
+      '<div class="filters">'+[-7,-3,3,7,14].map(n=>'<button class="btn sm" data-act="dPlus" data-base="'+(o.eta||TODAY)+'" data-n="'+n+'">'+(n>0?'+':'')+n+'일</button>').join('')+'</div>'+
+      '<div class="formgrid"><label class="f">새 예정일<input type="date" id="m_eta" value="'+(o.eta||TODAY)+'"></label><label class="f">사유<select id="m_r">'+REASONS.map(r=>'<option>'+r+'</option>').join('')+'</select></label></div><label class="f">메모<input id="m_memo" placeholder="예: 공장 확인 11/15 · 원단 일찍 들어옴"></label>'+
+      '<p class="note" id="m_etaHint" style="margin:0">앞당기면 <b>조기 입고 예정</b>, 미루면 <b>입고 지연 예정</b>으로 기록돼요.</p>'+
+      '<div class="filters"><button class="btn pri" data-act="doEta" data-id="'+o.id+'">저장</button><button class="btn" data-act="close">취소</button></div></div>'; }
   if(mode==='eta') h += '<div class="panel pad step"><h3>일정 변경</h3><div class="formgrid"><label class="f">새 예정일<input type="date" id="m_eta" value="'+(o.eta||'')+'"></label><label class="f">사유<select id="m_r">'+REASONS.map(r=>'<option>'+r+'</option>').join('')+'</select></label></div><label class="f">메모<input id="m_memo" placeholder="예: 원단 입고 11/12 → 봉제 일주일"></label><p class="note" style="margin:0">변경 전 날짜와 사유가 기록으로 남아 CS가 고객 안내에 쓸 수 있습니다.</p><div class="filters"><button class="btn pri" data-act="doEta" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
-  if(mode==='cancel') h += '<div class="panel pad step"><h3>수량 빼기</h3><p class="note" style="margin:0">더 이상 들어오지 않을 수량을 남은 수량에서 뺍니다. 지금 남은 수량 '+nf(o.remain)+'장 · 다 빼면 이 차수는 완료로 바뀝니다.</p><div class="formgrid"><label class="f">빼는 수량<input type="number" id="m_cq" min="1" max="'+o.remain+'" value="1"></label><label class="f">사유<select id="m_cr2"><option>불량</option><option>공장 수량 부족</option><option>오더 수량 줄임</option><option>오더 취소</option><option>기타</option></select></label></div><label class="f">메모<input id="m_cm" placeholder="예: 원단 오염 1장 · 재생산 안 함"></label><div class="filters"><button class="btn pri" data-act="doCancel" data-id="'+o.id+'">빼기</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
+  if(mode==='cancel'){ const CR = ['미달 (공장 수량 부족)','불량','오더 취소','다음 차수로 이월','오더 수량 줄임'];
+    h += '<div class="panel pad step"><h3>취소 · 마감</h3><p class="note" style="margin:0">더 이상 들어오지 않을 수량을 뺍니다. 지금 남은 수량 <b>'+nf(o.remain)+'장</b> · 전량을 빼면 이 차수는 마감돼요.</p>'+
+      '<label class="chk"><input type="checkbox" id="m_call" checked> 전량 (남은 '+nf(o.remain)+'장 모두)</label>'+
+      '<div class="formgrid"><label class="f">빼는 수량<input type="number" id="m_cq" min="1" max="'+o.remain+'" value="'+o.remain+'" disabled></label><label class="f">사유<select id="m_cr2">'+CR.map(r=>'<option>'+r+'</option>').join('')+'<option value="__">직접 입력</option></select></label></div>'+
+      '<label class="f" id="m_crw" hidden>사유 직접 입력<input id="m_crx" placeholder="예: 샘플 전환 · 컬러 변경"></label><label class="f">메모<input id="m_cm" placeholder="예: 원단 오염 1장 · 재생산 안 함"></label>'+
+      '<div class="filters"><button class="btn pri" data-act="doCancel" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>'; }
+  if(mode==='qty'){
+    h += '<div class="panel pad step"><h3>수량 수정</h3><div class="formgrid"><label class="f">오더 수량<input type="number" id="m_oq" min="0" value="'+o.qty+'"></label><label class="f">사유<input id="m_oqr" placeholder="예: 공장 최종 수량 확정"></label></div>'+
+      '<div class="filters"><button class="btn pri" data-act="doQty" data-id="'+o.id+'">오더 수량 저장</button></div>'+
+      (o.rcAdd.length ? '<h3 style="margin-top:6px">보드에서 입력한 입고 수량</h3>'+o.rcAdd.map((r,i)=>'<div class="filters"><span class="rc add">'+fmtDY(r.d)+'</span><input type="number" id="m_rq'+i+'" min="0" value="'+r.q+'" style="width:90px"><span class="muted">장</span><button class="btn sm" data-act="doRcEdit" data-id="'+o.id+'" data-i="'+i+'">입고 수량 저장</button></div>').join('') : '')+
+      '<h3 style="margin-top:6px">뒤늦게 확인된 입고 · 정정</h3><p class="note" style="margin:0">시트로 들어온 입고가 실제와 다르면 차이만큼 더하거나(+) 빼서(−) 맞춰요.</p><div class="filters"><input type="number" id="m_adj" placeholder="예: 5 또는 -3" style="width:120px"><input type="date" id="m_adjd" value="'+TODAY+'"><button class="btn sm" data-act="doRcAdj" data-id="'+o.id+'">정정 저장</button></div>'+
+      '<div class="filters"><button class="btn" data-act="openOrder" data-id="'+o.id+'">닫기</button></div></div>';
+  }
   if(mode==='del') h += '<div class="panel pad step delbox"><h3>이 차수 삭제</h3><p class="note" style="margin:0">잘못 등록한 차수를 목록에서 뺍니다. 입고 수량 '+nf(o.recv)+'장 · 잔여 '+nf(o.remain)+'장도 함께 빠집니다. 정보 보정 탭의 "삭제한 항목"에서 되살릴 수 있습니다.</p><label class="f">사유<input id="m_dr" placeholder="예: 중복 등록 · 잘못된 상품에 등록"></label><div class="filters"><button class="btn danger-solid" data-act="doDel" data-id="'+o.id+'">삭제</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
   if(mode==='close') h += '<div class="panel pad step"><h3>마감</h3><p class="note" style="margin:0">남은 '+nf(o.remain)+'장을 더 기다리지 않고 이 차수를 닫습니다.</p><label class="f">사유<select id="m_cr"><option>미달 마감 (공장 수량 부족)</option><option>오더 취소</option><option>다음 차수로 이월</option><option>기타</option></select></label><div class="filters"><button class="btn pri" data-act="doClose" data-id="'+o.id+'">마감</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
   openModal(h);
@@ -2595,34 +2625,53 @@ async function act(a, el){
     case 'brand': closeModal(); setBrand(el.dataset.k); break;
     case 'rvsCheck': { const t = val('rvSalesT'); if(!t.trim()){ toast('옵션별추이현황을 붙여넣어 주세요'); break; } rvsRun(t, ''); break; }
     case 'rvsApply': await rvsApply(); break;
-    case 'dPlus': { const i = document.getElementById('m_eta'); if(i) i.value = addDays(el.dataset.base, +el.dataset.n); break; }
+    case 'dPlus': { const i = document.getElementById('m_eta'); if(i){ i.value = addDays(el.dataset.base, +el.dataset.n); i.dispatchEvent(new Event('change', {bubbles:true})); } break; }
     case 'goProd': { const p = PRODS.get(el.dataset.k); if(!p) break; closeModal(); S.find = Object.assign({}, S.find, {q: p.n||p.en||p.b, style: styleKey(p), view:'list'}); setTab('find'); setTimeout(()=>{ const d = document.getElementById('detail'); if(d) d.scrollIntoView({block:'start'}); }, 30); break; }
     case 'goFac': closeModal(); S.fac.view='list'; S.fac.f = el.dataset.f; S.fac.q=''; S.fac.n=15; setTab('fac'); break;
     case 'qBack': { const i = document.getElementById(el.dataset.t); if(i){ i.value = ''; i.dispatchEvent(new Event('input', {bubbles:true})); i.dispatchEvent(new Event('change', {bubbles:true})); } break; }
-    case 'mClose': orderModal(id,'close'); break;
+    case 'mClose': orderModal(id,'cancel'); break;
+    case 'mQty': orderModal(id,'qty'); break;
     case 'doRecv': {
       const o = BYID.get(id); const q = parseInt(val('m_q'),10), d = val('m_d');
       if(!(q>0) || !d){ toast('수량과 입고일을 넣어주세요'); return; }
-      const cur = (ovr[o.id]&&Array.isArray(ovr[o.id].recv))?ovr[o.id].recv:[];
-      const ov = Math.max(0, q - o.remain);
-      await guard(()=>saveOvr(o, {recv:cur.concat([{q,d,by:MYID||''}])}, {type:'recv', msg:'입고 '+q+'장 ('+d.slice(5).replace('-','.')+')'+(ov?' · 초과 입고 +'+ov+'장':'')}, label(o)+' 입고 '+q+'장 처리'+(ov?' (초과 입고 +'+ov+'장)':'')), ov ? '입고 처리했습니다 · 초과 입고 '+ov+'장' : '입고 처리했습니다');
-      closeModal(); break; }
+      if(q < o.remain){ recvAsk(o, q, d); break; }
+      await recvOne(o, q, d, false); closeModal(); break; }
     case 'doEta': {
       const o = BYID.get(id); const eta = val('m_eta'), r = val('m_r'), memo = val('m_memo');
       if(!eta){ toast('새 예정일을 골라주세요'); return; }
       const reason = r+(memo?' · '+memo:'');
-      const dd = o.eta ? diffDays(eta, o.eta) : 0; const tag = !o.eta ? '예정일 지정' : dd>0 ? '입고 지연 +'+dd+'일' : dd<0 ? '조기 입고 '+dd+'일' : '예정일 확인';
+      const dd = o.eta ? diffDays(eta, o.eta) : 0; const tag = !o.eta ? '예정일 지정' : dd>0 ? '입고 지연 예정 +'+dd+'일' : dd<0 ? '조기 입고 예정 '+(-dd)+'일 앞당김' : '예정일 확인';
       await guard(()=>saveOvr(o, {eta, reason}, {type:'eta', from:o.eta||'', to:eta, msg:tag+' · 예정일 '+(o.eta?fmtDY(o.eta):'미정')+' → '+fmtDY(eta)+' ('+reason+')'}, label(o)+' '+tag+' · '+fmtDY(eta)+' · '+reason), '일정을 바꿨습니다');
       closeModal(); break; }
     case 'mDel': orderModal(id,'del'); break;
+    case 'doQty': { const o = BYID.get(id); const q = parseInt(val('m_oq'),10); const r = (val('m_oqr')||'').trim();
+      if(!(q>=0)){ toast('오더 수량을 넣어주세요'); break; } if(q===o.qty){ toast('수량이 같아요'); break; }
+      await guard(()=>saveOvr(o, {qty:q}, {type:'qty', msg:'오더 수량 '+o.qty+' → '+q+'장'+(r?' ('+r+')':'')}, label(o)+' 오더 수량 '+o.qty+' → '+q+'장'+(r?' · '+r:''), ['recv','reorder']), '오더 수량을 바꿨습니다');
+      orderModal(id); break; }
+    case 'doRcEdit': { const o = BYID.get(id); const i = +el.dataset.i; const q = parseInt(val('m_rq'+i),10);
+      const cur = (ovr[o.id]&&Array.isArray(ovr[o.id].recv))?ovr[o.id].recv.slice():[]; const x = cur[i]; if(!x || !(q>=0)) break; if(q===Number(x.q)){ toast('수량이 같아요'); break; }
+      const old = x.q; cur[i] = Object.assign({}, x, {q}); if(q===0) cur.splice(i,1);
+      await guard(()=>saveOvr(o, {recv:cur}, {type:'recv', msg:'입고 수량 수정 '+old+' → '+q+'장 ('+fmtDY(x.d)+')'}, label(o)+' 입고 수량 수정 '+old+' → '+q+'장'), '입고 수량을 바꿨습니다');
+      orderModal(id); break; }
+    case 'doRcAdj': { const o = BYID.get(id); const q = parseInt(val('m_adj'),10); const d = val('m_adjd')||TODAY;
+      if(!q){ toast('더하거나 뺄 수량을 넣어주세요 (예: 5 또는 -3)'); break; }
+      const cur = (ovr[o.id]&&Array.isArray(ovr[o.id].recv))?ovr[o.id].recv:[];
+      await guard(()=>saveOvr(o, {recv:cur.concat([{q, d, by:MYID||'', adj:true}])}, {type:'recv', msg:'입고 정정 '+(q>0?'+':'')+q+'장 ('+d.slice(5).replace('-','.')+')'}, label(o)+' 입고 정정 '+(q>0?'+':'')+q+'장'), '입고를 정정했습니다');
+      orderModal(id); break; }
+    case 'recvKeep': case 'recvShort': { const P = S.pendRecv; S.pendRecv = null; if(!P) break; const o = BYID.get(P.id); if(!o) break; await recvOne(o, P.q, P.d, a==='recvShort'); closeModal(); break; }
     case 'mCancel': orderModal(id,'cancel'); break;
     case 'doCancel': {
-      const o = BYID.get(id); const q = parseInt(val('m_cq'),10); const r = val('m_cr2'); const m = val('m_cm');
+      const o = BYID.get(id); const all = (document.getElementById('m_call')||{}).checked; const q = all ? o.remain : parseInt(val('m_cq'),10);
+      let r = val('m_cr2'); if(r==='__') r = (val('m_crx')||'').trim() || '기타'; const m = val('m_cm');
       if(!(q>0)){ toast('빼는 수량을 넣어주세요'); break; }
       if(q>o.remain){ toast('남은 수량('+o.remain+'장)보다 많이 뺄 수 없습니다'); break; }
       const reason = r+(m?' · '+m:'');
-      const cur = (ovr[o.id]&&Array.isArray(ovr[o.id].cancel))?ovr[o.id].cancel:[];
-      await guard(()=>saveOvr(o, {cancel:cur.concat([{q, r:reason, d:TODAY, by:MYID||''}])}, {type:'cancel', msg:q+'장 빼기 ('+reason+')'}, label(o)+' '+q+'장 빼기 · '+reason), q+'장 뺐습니다');
+      if(q===o.remain){
+        await guard(()=>saveOvr(o, {closed:true, closeReason:reason}, {type:'close', msg:'취소 · 마감: '+reason+' (잔여 '+o.remain+'장)'}, label(o)+' 마감 · '+reason+' · '+o.remain+'장'), '남은 '+o.remain+'장을 빼고 마감했습니다');
+      } else {
+        const cur = (ovr[o.id]&&Array.isArray(ovr[o.id].cancel))?ovr[o.id].cancel:[];
+        await guard(()=>saveOvr(o, {cancel:cur.concat([{q, r:reason, d:TODAY, by:MYID||''}])}, {type:'cancel', msg:q+'장 빼기 ('+reason+')'}, label(o)+' '+q+'장 빼기 · '+reason), q+'장 뺐습니다');
+      }
       closeModal(); break; }
     case 'undoRecv': case 'undoCancel': {
       const o = BYID.get(id); const i = +el.dataset.i; const key = a==='undoRecv' ? 'recv' : 'cancel';
@@ -2661,7 +2710,7 @@ async function act(a, el){
     case 'syncClear': S.sync = {text:'', res:null, off:{}}; render(); break;
     case 'syncApply': await syncApply(); break;
     case 'regCat': { const C = REG_MENU.find(c=>c.k===el.dataset.c); S.reg.mode = (C.subs.find(x=>x.rec)||C.subs[0]).k; render(); break; }
-    case 'rcvOne': { const o = BYID.get(id); const q = parseInt(val('rq_'+id),10), d = val('rd_'+id) || TODAY; if(!(q>0)){ toast('입고 수량을 넣어주세요'); break; } const n = await recvApply([{o, q, d}]); if(n) toast(label(o)+' '+q+'장 입고'+(q>o.remain?' · 초과 입고 '+(q-o.remain)+'장으로 기록했어요':'')); break; }
+    case 'rcvOne': { const o = BYID.get(id); const q = parseInt(val('rq_'+id),10), d = val('rd_'+id) || TODAY; if(!(q>0)){ toast('입고 수량을 넣어주세요'); break; } if(!need('recv')) break; if(q < o.remain){ recvAsk(o, q, d); break; } await recvOne(o, q, d, false); break; }
     case 'rpCheck': { const t = (document.getElementById('rpT')||{}).value||''; S.rcv.paste = t; S.rcv.res = t.trim() ? recvPlan(t) : null; render(); break; }
     case 'rpApply': { const R = S.rcv.res; if(!R) break; const n = await recvApply(R.plan); if(n){ toast(n+'건 입고 처리했습니다'); S.rcv.res = null; S.rcv.paste = ''; render(); } break; }
     case 'regMode': S.reg.mode = el.dataset.m; render(); break;
@@ -2749,6 +2798,8 @@ async function saveBulk(){ if(!need('reorder')) return;
 // ---------- render ----------
 let refreshQ = 0;
 function refresh(){ if(refreshQ) return; refreshQ = setTimeout(()=>{ refreshQ = 0; rebuild(); STYLES = styles(); buildMix(); render(); }, 40); }
+let lightQ = 0;
+function lightRefresh(){ if(refreshQ || lightQ) return; lightQ = setTimeout(()=>{ lightQ = 0; render(); }, 40); }
 function refreshNow(){ clearTimeout(refreshQ); refreshQ = 0; rebuild(); STYLES = styles(); buildMix(); render(); }
 async function setCountry(f, kind){ if(!need('fac','fix')) return;
   if(!kind) return;
@@ -2756,6 +2807,7 @@ async function setCountry(f, kind){ if(!need('fac','fix')) return;
   await guard(async()=>{ await DB.doc('fac/'+facDocId(f)).set(Object.assign({}, cur, {name:f, kind, at:new Date().toISOString(), by:MYID||''})); await writeLog(f+' 국가: '+kind); }, f+' → '+kind);
 }
 function render(){
+  if(composing){ renderWait = true; return; }
   document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===S.tab)));
   const st = {connecting:['연결 중','팀 공유 저장소에 연결하는 중입니다'], on:['팀 실시간 공유 중','여기서 입력 · 수정한 내용은 팀원 모두에게 바로 똑같이 보입니다'], off:['보기 전용','로그인하지 않은 보기라 조회만 됩니다. claude.ai에 로그인해 열면 수정할 수 있습니다'], err:['저장소 연결 오류','지금은 저장되지 않습니다. 새로고침 해주세요']}[dbState] || ['',''];
   document.getElementById('foot').innerHTML = '<span>시트 기준 '+esc(SNAP.asof)+'</span>'+(stockAtFull()?'<span>재고 반영 '+esc(stockAtFull())+'</span>':'')+'<span>개발자 변제욱</span>'+(dbState==='err'?'<span style="color:var(--bad)">저장소 연결 오류 · 새로고침 해주세요</span>':'');
@@ -2809,11 +2861,17 @@ window.addEventListener('popstate', e => {
 document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if(b) setTab(b.dataset.tab); });
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]'); if(!el) return;
-  if(el.dataset.act==='bg'){ if(e.target===el) closeModal(); return; }
+  if(el.dataset.act==='bg'){ if(e.target===el && downOnBg) closeModal(); return; }
   if(el.tagName==='A') e.preventDefault();
   act(el.dataset.act, el);
 });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+let downOnBg = false;
+document.addEventListener('mousedown', e => { downOnBg = !!(e.target && e.target.classList && e.target.classList.contains('overlay')); }, true);
+// 한글 입력 (조합 중에는 화면을 다시 그리지 않음)
+let composing = false, renderWait = false;
+document.addEventListener('compositionstart', () => { composing = true; }, true);
+document.addEventListener('compositionend', e => { composing = false; if(renderWait){ renderWait = false; setTimeout(render, 0); } }, true);
 let tmr;
 document.addEventListener('input', e => {
   const t = e.target;
@@ -2851,6 +2909,9 @@ document.addEventListener('change', e => {
   if(t.dataset && t.dataset.plf!=null && S.pl.res){ S.pl.res.fresh[+t.dataset.plf].on = t.checked; render(); }
   if(t.dataset && t.dataset.pld!=null && S.pl.res){ S.pl.res.diff[+t.dataset.pld].on = t.checked; S.pl.diffOpen = true; render(); }
   if(t.dataset && t.dataset.tap){ S.team.perms[t.dataset.tap] = t.checked; }
+  if(t.id==='m_call'){ const q = document.getElementById('m_cq'); if(q){ q.disabled = t.checked; if(t.checked) q.value = q.max; } }
+  if(t.id==='m_cr2'){ const w = document.getElementById('m_crw'); if(w) w.hidden = t.value!=='__'; }
+  if(t.id==='m_eta'){ const h = document.getElementById('m_etaHint'); const o = BYID.get((document.querySelector('[data-act=doEta]')||{dataset:{}}).dataset.id); if(h && o && o.eta && t.value){ const dd = diffDays(t.value, o.eta); h.innerHTML = dd>0 ? '<b style="color:var(--bad)">입고 지연 예정 +'+dd+'일</b>로 기록돼요.' : dd<0 ? '<b style="color:var(--ok)">조기 입고 예정 ('+(-dd)+'일 앞당김)</b>으로 기록돼요.' : '예정일이 같아요.'; } }
   if(t.id==='taExt'){ S.team.ext = t.checked; render(); }
   if(t.id==='taFacs'){ S.team.facs = t.value; }
   if(t.dataset && t.dataset.tmname!=null){ teamSet(t.dataset.tmname, {name:t.value.trim()}); }
