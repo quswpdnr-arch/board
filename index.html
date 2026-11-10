@@ -2277,22 +2277,35 @@ async function rvQuick(b, patch, msg){
   await guard(async()=>{ await DB.doc('resv/'+safeId(b)).set(doc); if(msg) await writeLog((p?(p.n||p.en)+' '+p.opt+' ':'')+msg); }, msg || '저장했습니다');
 }
 // 판매 추이 (셀메이트 옵션별추이현황) 붙여넣기
+// 판매 추이 양식 (전 브랜드 공통): 셀메이트 판매 DB
+// 대표이미지 · 바코드번호 · 상품명 · 옵션내용 · 사입상품명 · 공급처명 · 상품분류 · 미발송수 · 현재고 · 주문수 · 취소주문수 · 반품주문수 · 판매가 · 원가 · 날짜별(YYYYMMDD) 주문수
+// 주간 판매 = 날짜 칸 중 최근 7일 합계 (마지막 날짜가 오늘이면 진행 중인 오늘은 빼고 그 전 7일) · 날짜 칸이 없으면 주문수
 function salesParse(text){
-  const rows = parseTSV(text).map(r=>r.map(x=>unwrapX(String(x||'').trim())));
-  const hi = rows.findIndex(r=>r.some(x=>/바코드/.test(x)) && r.some(x=>/주문수/.test(x)));
-  if(hi<0) return {err:'머리글(바코드번호 · 주문수)을 찾지 못했습니다. 셀메이트 옵션별추이현황을 머리글까지 복사해 주세요.'};
-  const H = rows[hi]; const ib = H.findIndex(x=>/바코드/.test(x)), io = H.findIndex(x=>x==='주문수'||/^주문수/.test(x)), iu = H.findIndex(x=>/미발송/.test(x));
-  const dates = H.map(x=>x.replace(/[^\d]/g,'')).filter(x=>/^20\d{6}$/.test(x)).sort();
+  const first = (text.split(/\r?\n/)[0]||''); const delim = first.includes('\t') ? '\t' : (first.split(',').length > 3 ? ',' : '\t');
+  const rows = parseDelim(text, delim).map(r=>r.map(x=>unwrapX(String(x||'').trim())));
+  const hi = rows.findIndex(r=>r.some(x=>/바코드/.test(x)) && (r.some(x=>/주문수/.test(x)) || r.some(x=>/^20\d{6}$/.test(x.replace(/[^\d]/g,'')))));
+  if(hi<0) return {err:'머리글(바코드번호 · 주문수 · 날짜)을 찾지 못했습니다. 셀메이트 판매 DB를 머리글까지 복사하거나 CSV로 올려주세요.'};
+  const H = rows[hi].map(x=>String(x).trim());
+  const ib = H.findIndex(x=>/바코드/.test(x)), io = H.findIndex(x=>x==='주문수'), iu = H.findIndex(x=>/미발송/.test(x));
+  const dcols = H.map((x,i)=>({i, d:x.replace(/[^\d]/g,'')})).filter(x=>/^20\d{6}$/.test(x.d) && /^[\d\s\-./]+$/.test(H[x.i])).sort((a,b)=>a.d.localeCompare(b.d));
+  const tdy = TODAY.replace(/-/g,'');
+  let use = dcols;
+  if(use.length && use[use.length-1].d === tdy && use.length > 7) use = use.slice(0, -1);
+  use = use.slice(-7);
+  if(!dcols.length && io<0) return {err:'주문수 칸이나 날짜 칸이 없습니다.'};
+  const num = v => parseInt(String(v||'0').replace(/,/g,''),10)||0;
   const items = {}; let n = 0;
-  for(const r of rows.slice(hi+1)){ const b = (r[ib]||'').trim(); if(!/^1-\d{10}$/.test(b)) continue; n++; const o = parseInt((r[io]||'0').replace(/,/g,''),10)||0, u = iu>=0 ? (parseInt((r[iu]||'0').replace(/,/g,''),10)||0) : 0; if(o||u) items[b] = [o,u]; }
+  for(const r of rows.slice(hi+1)){ const b = (r[ib]||'').trim(); if(!/^1-\d{10}$/.test(b)) continue; n++;
+    const o = use.length ? use.reduce((t,c)=>t+num(r[c.i]),0) : num(r[io]); const u = iu>=0 ? num(r[iu]) : 0;
+    if(o||u) items[b] = [o,u]; }
   const fd = d => d ? d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8) : '';
-  return {items, n, from: fd(dates[0]) || addDays(TODAY,-7), to: fd(dates[dates.length-1]) || TODAY};
+  return {items, n, from: use.length ? fd(use[0].d) : addDays(TODAY,-7), to: use.length ? fd(use[use.length-1].d) : TODAY, days: use.length};
 }
 function rvSalesModal(){
   const X = S.rvs || (S.rvs = {});
   let h = '<div class="mh"><div><h2>판매 추이 업데이트</h2><div class="muted" style="font-size:12.5px">지금: '+esc(salesLabel()||'없음')+'</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
-    '<div class="panel pad step"><p class="note" style="margin:0">셀메이트 <b>옵션별추이현황</b>을 일주일로 지정해 내려받은 뒤(본사요청출고 · 이구갤러리 · 협찬&amp;시딩 · 홀세일 제외) 머리글까지 붙여넣거나 CSV를 올리세요. 바코드별 <b>주문수 · 미발송수</b>만 읽습니다.</p>'+
-    '<textarea id="rvSalesT" rows="4" placeholder="바코드번호&#9;상품명&#9;옵션내용&#9;사입상품명&#9;미발송수&#9;…&#9;주문수 …">'+esc(X.text||'')+'</textarea>'+
+    '<div class="panel pad step"><p class="note" style="margin:0">셀메이트 <b>판매 DB</b>(대표이미지 · 바코드번호 · 상품명 · 옵션내용 · 사입상품명 · 공급처명 · 상품분류 · 미발송수 · 현재고 · 주문수 · 취소주문수 · 반품주문수 · 판매가 · 원가 · 날짜별 주문수) CSV를 올리거나 머리글까지 붙여넣으세요. 세 브랜드 모두 같은 양식이에요.</p><p class="note" style="margin:0"><b>주간 판매</b> = 날짜 칸 중 <b>최근 7일 합계</b> (마지막 날짜가 오늘이면 진행 중인 오늘은 빼고 그 전 7일) · <b>미발송</b> = 미발송수 칸.</p>'+
+    '<textarea id="rvSalesT" rows="4" placeholder="대표이미지&#9;바코드번호&#9;상품명&#9;옵션내용&#9;…&#9;미발송수&#9;현재고&#9;주문수&#9;…&#9;20261104&#9;20261105 …">'+esc(X.text||'')+'</textarea>'+
     '<div class="filters"><button class="btn pri" data-act="rvsCheck">읽기</button><label class="btn" for="rvSalesFile" style="cursor:pointer">CSV 파일 올리기</label><input type="file" id="rvSalesFile" accept=".csv,.tsv,.txt" hidden></div>'+
     (X.err?'<p class="note" style="color:var(--bad);margin:0">'+esc(X.err)+'</p>':'')+
     (X.res?'<div class="stats"><span>읽은 바코드 <b>'+nf(X.res.n)+'</b></span><span>판매 · 미발송 있는 바코드 <b>'+nf(Object.keys(X.res.items).length)+'</b></span><span>기간 <b>'+esc(fmtD(X.res.from).slice(0,5)+' ~ '+fmtD(X.res.to).slice(0,5))+'</b></span></div><div><button class="btn pri" data-act="rvsApply"'+(canDo('resv')?'':' disabled')+'>판매 추이 반영</button></div>':'')+'</div>';
