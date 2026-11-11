@@ -462,9 +462,32 @@ a.rvinc{cursor:pointer;color:inherit;text-decoration:none;white-space:nowrap}a.r
   .kpis{gap:8px}
   .cal{font-size:12px}
 }
+
+.men{font-size:12.5px;color:var(--fg);opacity:.78;margin:1px 0 2px;line-height:1.35}
+.expbtn{margin-left:auto;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.sechead .right + .expbtn{margin-left:8px}
+.themebtn{appearance:none;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:inherit;font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+.themebtn:hover{color:var(--fg)}
+.brandsw + .themebtn{margin-left:12px}.themebtn + .acct{margin-left:8px}
+.tabs .ti,.tabs .ts{display:none}
+.tabs .ti{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:640px){
+  .themebtn{padding:4px 8px}.themebtn span{display:none}
+  .hrow .brand{flex:1 1 auto;min-width:0}
+  .tabs{grid-template-columns:repeat(7,minmax(0,1fr))}
+  .tabs .tl{display:none}.tabs .ti,.tabs .ts{display:block}
+  .tabs button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:7px 0 6px;min-height:56px;font-size:10.5px;font-weight:600;white-space:nowrap;border-top:0;color:var(--muted)}
+  .tabs button + button::after{content:"";position:absolute;left:0;top:14px;bottom:14px;width:1px;background:var(--line)}
+  .tabs button::before{content:"";position:absolute;left:22%;right:22%;top:0;height:3px;border-radius:0 0 3px 3px;background:transparent}
+  .tabs button[aria-selected="true"]{background:none;color:var(--accent)}
+  .tabs button[aria-selected="true"]::before{background:var(--accent)}
+  .tabs button[aria-selected="true"] .ti{stroke-width:2.1}
+  .expbtn{order:9}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
+<script>(function(){ var t='light'; try{ t = localStorage.getItem('kb_theme') || 'light'; }catch(e){} document.documentElement.setAttribute('data-theme', t); })();</script>
 <style>
 #gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:16px}
 #gate[hidden]{display:none}
@@ -490,16 +513,17 @@ a.rvinc{cursor:pointer;color:inherit;text-decoration:none;white-space:nowrap}a.r
     <div class="hrow">
       <div class="brand" data-act="goHome" role="link" tabindex="0" title="대시보드로">노운베러 오더·입고 보드<span class="logo" role="img" aria-label="KNOWN BETTER"></span></div>
       <div id="brandSw" class="brandsw" role="tablist" aria-label="브랜드"></div>
+      <button id="themeBtn" class="themebtn" type="button" aria-label="화면 테마 바꾸기"></button>
       <div id="acct" class="acct"></div>
     </div>
     <nav class="tabs" role="tablist" id="tabs">
-      <button role="tab" data-tab="home">대시보드</button>
-      <button role="tab" data-tab="due">입고 예정</button>
-      <button role="tab" data-tab="resv">예약배송</button>
-      <button role="tab" data-tab="find">상품 조회</button>
-      <button role="tab" data-tab="fac">공장별 조회</button>
-      <button role="tab" data-tab="reg">등록 · 입고</button>
-      <button role="tab" data-tab="sched">일정 입력</button>
+      <button role="tab" data-tab="home"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.2 12 4l8 7.2V20h-5.2v-5.4H9.2V20H4z"/></svg><span class="tl">대시보드</span><span class="ts">홈</span></button>
+      <button role="tab" data-tab="due"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5 12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5 12 11.5l8.5-4M12 11.5v9"/></svg><span class="tl">입고 예정</span><span class="ts">입고 예정</span></button>
+      <button role="tab" data-tab="resv"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 2"/></svg><span class="tl">예약배송</span><span class="ts">예약배송</span></button>
+      <button role="tab" data-tab="find"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.5 15.5 4.7 4.7"/></svg><span class="tl">상품 조회</span><span class="ts">상품</span></button>
+      <button role="tab" data-tab="fac"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20V10.5l5 3v-3l5 3V6h3l1 0v14z"/><path d="M3.5 20h17"/></svg><span class="tl">공장별 조회</span><span class="ts">공장</span></button>
+      <button role="tab" data-tab="reg"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8.2v7.6M8.2 12h7.6"/></svg><span class="tl">등록 · 입고</span><span class="ts">등록·입고</span></button>
+      <button role="tab" data-tab="sched"><svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.8" y="5.2" width="16.4" height="15" rx="2.6"/><path d="M3.8 9.8h16.4M8.2 3.2v4M15.8 3.2v4"/></svg><span class="tl">일정 입력</span><span class="ts">일정</span></button>
     </nav>
   </div>
 </header>
@@ -849,7 +873,18 @@ function receiptsHtml(o){
 function setTab(t){ S.tab=t; try{localStorage.setItem('kb_tab',t);}catch(e){} render(); window.scrollTo(0,0); }
 
 // ---------- views ----------
+// ---------- 메뉴마다 엑셀(CSV) 내보내기 · 지금 화면의 검색 · 필터 그대로, 화면에 다 안 보이는 줄까지 전부
+let EXP = null;
+const ORD_H = ['바코드','제작품명','상품명','컬러,사이즈','공장','차수','오더일','오더수량','입고수량','잔여','예정일','예정일 구분','상태','비고'];
+const ordRow = o => [o.p.b,o.p.n,o.p.en,o.p.opt,o.f,o.round,o.od,o.qty,o.recv,o.remain,o.eta,o.etaKind==='fixed'?'확정':(o.etaKind?'예상':''),ST[o.status]||'',o.memo||''];
+const stockCells = p => hasStock(p) ? [availIn(p), p.stock, p.trans!=null?p.trans:'', p.hq!=null?p.hq:''] : ['','','',''];
+function expRun(){
+  if(!EXP) return;
+  const rows = EXP.rows(); if(rows.length<2){ toast('내보낼 줄이 없습니다'); return; }
+  saveCsv(brandName()+'_'+EXP.name+'_'+TODAY+'.csv', rows);
+}
 function viewHome(){
+  EXP = {name:'입고예정_차수별', rows:()=>[ORD_H].concat(ORDERS.filter(isOpen).sort((a,b)=>(a.eta||'9999').localeCompare(b.eta||'9999')).map(ordRow))};
   const open = ORDERS.filter(isOpen);
   const sum = a => a.reduce((s,o)=>s+o.remain,0);
   const late = open.filter(o=>o.status==='late'||o.status==='over');
@@ -985,7 +1020,7 @@ async function exportAll(){
 async function saveCsv(name, rows){
   const data = '﻿'+toTable(rows, ',');
   let dl = null; try{ dl = await window.claude.use('downloads'); }catch(e){}
-  if(!dl){ copyText(toTable(rows,'\t'), '이 보기에서는 파일 저장이 안 돼서 대신 복사했습니다. 엑셀에 붙여넣으세요.'); return; }
+  if(!dl){ try{ const u = URL.createObjectURL(new Blob([data], {type:'text/csv;charset=utf-8'})); const a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u), 4000); toast('저장했습니다 · '+name); }catch(e){ copyText(toTable(rows,'\t'), '이 보기에서는 파일 저장이 안 돼서 대신 복사했습니다. 엑셀에 붙여넣으세요.'); } return; }
   try{ await dl.save({filename:name, data}); toast('저장했습니다'); }catch(e){ if(e && e.code!=='declined') toast('저장하지 못했습니다: '+(e.message||e.code)); }
 }
 function copyText(t, msg){
@@ -1072,6 +1107,8 @@ function viewFind(){
     '<div class="filters"><input type="search" id="findQ" placeholder="예: 에비스, 1-0134820001, BLACK, 나르샤" value="'+esc(F.q)+'"></div>';
   let list = F.q ? searchStyles(F.q) : [...STYLES.values()].sort((a,b)=>lastOd(b).localeCompare(lastOd(a)));
   if(F.onlyOpen) list = list.filter(st=>st.prods.some(p=>p.orders.some(isOpen)));
+  { const L = list; EXP = {name:'상품조회', rows:()=>[['제작품명','상품명','컬러,사이즈','바코드','공장','국가','분류','오더 차수','입고 예정','가장 빠른 예정일','가용(오더 포함)','실 보유재고','트랜쇼','본사']].concat(
+      L.flatMap(st=>st.prods.map(p=>{ const op = p.orders.filter(isOpen); return [st.n, p.en, p.opt, p.b, p.curFac, countryOf(p.curFac), p.cat||'', p.orders.length, op.reduce((t,o)=>t+o.remain,0), op.map(o=>o.eta).filter(Boolean).sort()[0]||''].concat(stockCells(p)); })))}; }
   const optN = list.reduce((s,st)=>s+st.prods.length,0);
   h += '<div class="filters"><span class="note">'+(F.q?'검색 결과 ':'전체 ')+'상품 <b>'+nf(list.length)+'</b>종 · 컬러 <b>'+nf(optN)+'</b>개 · 최근 오더 순</span><label class="tog"><input type="checkbox" id="findOpen"'+(F.onlyOpen?' checked':'')+'> 입고 예정 남은 상품만</label></div>';
   h += findList(list, F.style) + '</div>';
@@ -1171,6 +1208,7 @@ function viewFac(){
   if(F.onlyOpen) list = list.filter(st=>st.prods.some(p=>p.orders.some(isOpen)));
   if(q) list = list.filter(st=>(st.n+' '+st.en+' '+st.prods.map(p=>p.b+' '+p.opt).join(' ')).toLowerCase().includes(q));
   list.sort(F.sort==='name' ? (a,b)=>(a.n||a.en).localeCompare(b.n||b.en,'ko') : (a,b)=>lastOd(b).localeCompare(lastOd(a)));
+  { const L = list, fn = F.f; EXP = {name:'공장별_'+fn, rows:()=>[ORD_H].concat(L.flatMap(st=>st.prods.flatMap(p=>p.orders.map(ordRow))))}; }
   const x = fs[F.f];
   h += '<div class="sec"><div class="sechead"><h2>'+esc(F.f)+'</h2>'+(fi.active?'':'<span class="chip st-closed">거래 중지</span>')+'<span class="sub">'+esc(contacts.join(' · '))+' · 리드타임 '+leadFor(F.f)+'일 · 상품 '+x.styles+'개 · 입고 예정 '+nf(x.rem)+'장'+(x.late?' · 지연 '+x.late+'건':'')+'</span><span class="right"><button class="btn sm" data-act="editFac" data-f="'+esc(F.f)+'">공장 정보</button></span></div>'+
     '<div class="filters"><input type="search" id="facQ" placeholder="이 공장 안에서 상품명 · 컬러 · 바코드 검색" value="'+esc(F.q)+'">'+
@@ -1185,6 +1223,7 @@ function viewFac(){
 }
 function viewReg(){
   const R = S.reg;
+  EXP = {name:'변경이력_최근', rows:()=>[['시각','종류','내용','입력한 사람']].concat(logs.map(l=>[fmtAt(l.at), l.type||'', l.msg||'', who(l.by)]))};
   let h = '';
   if(!canWrite()) h += '<div class="banner">'+(dbState==='connecting'?'저장소에 연결하는 중입니다…':'이 보기에서는 저장할 수 없습니다. 팀원으로 등록된 계정으로 로그인하면 등록·입고처리가 공유 저장됩니다.')+'</div>';
   let m = '';
@@ -1272,6 +1311,8 @@ function viewMng(){
   const off = rows.filter(r=>!r.i.active).length;
   if(!M.showOff) rows = rows.filter(r=>r.i.active);
   if(q) rows = rows.filter(r=>(r.f+' '+r.i.staff.join(' ')+' '+r.i.memo+' '+r.i.kind).toLowerCase().includes(q));
+  { const L = rows; EXP = {name:'공장관리', rows:()=>[['공장','국가','공장 담당','연락처','본사 담당','리드타임(일)','거래','상품 수','진행 중 오더','입고 예정','지연','최근 오더일','메모']].concat(
+      L.map(r=>[r.f, countryOf(r.f), r.i.contact||'', r.i.phone||'', r.i.staff.join(', '), leadFor(r.f), r.i.active?'거래 중':'거래 중지', r.styles.size, r.open, r.rem, r.late, r.last, r.i.memo||'']))}; }
   let h = '';
   if(!canWrite()) h += '<div class="banner">'+(dbState==='connecting'?'저장소에 연결하는 중입니다…':'이 보기에서는 저장할 수 없습니다. 팀원으로 등록된 계정으로 로그인하면 공장 등록·수정이 공유 저장됩니다.')+'</div>';
   h += '<div class="sec"><div class="sechead"><h2>공장 관리</h2><span class="sub">공장 '+rows.length+'곳'+(off?' · 거래 중지 '+off+'곳':'')+' · 공장 이름을 누르면 그 공장 조회로 이동</span><span class="right"><button class="btn pri" data-act="editFac" data-f=""'+(canWrite()?'':' disabled')+'>+ 새 공장 등록</button></span></div>'+
@@ -1378,6 +1419,8 @@ function viewFix(){
   let rows = all.filter(r=>X.type==='every' ? true : X.type==='all' ? r.iss.some(i=>i!=='nocat'&&i!=='fac'&&i!=='mix') : r.iss.includes(X.type));
   if(q) rows = rows.filter(r=>(r.p.b+' '+r.p.n+' '+r.p.en+' '+r.p.opt+' '+[...r.p.facs].join(' ')).toLowerCase().includes(q));
   rows.sort((a,b)=>(lastOdP(b.p)).localeCompare(lastOdP(a.p)));
+  { const L = rows; EXP = {name:'정보보정', rows:()=>[['확인할 것','공장','제작품명','컬러,사이즈','바코드','상품명(영문)','분류','오더 차수']].concat(
+      L.map(r=>[r.iss.map(i=>(ISS[i]||[i])[0]).join(' · '), [...r.p.facs].join('/'), r.p.n, r.p.opt, r.p.b, r.p.en, r.p.cat||'', r.p.orders.length]))}; }
   let h = '';
   if(!canWrite()) h += '<div class="banner">'+(dbState==='connecting'?'저장소에 연결하는 중입니다…':'이 보기에서는 저장할 수 없습니다. 팀원으로 등록된 계정으로 로그인하면 보정 내용이 공유 저장됩니다.')+'</div>';
   h += '<div class="sec"><div class="sechead"><h2>정보 보정</h2><span class="sub">바코드 · 제작품명 · 상품명이 비어 있거나 형식이 이상한 상품을 모아 바로 고칩니다. 칸을 고치고 줄 끝 저장, 또는 맨 아래 한 번에 저장.</span></div>'+
@@ -2290,6 +2333,9 @@ function viewResv(){
       ch: x=>chList().filter(c=>x.r.ch[c]).length, memo: x=>(x.r.cmt||'')+(x.r.memo||'')}[X.sk];
     if(key) a = a.slice().sort((x,y)=>{ const u = key(x), v = key(y); return (typeof u==='number' ? u-v : String(u).localeCompare(String(v),'ko')) * X.sd; });
   }
+  { const L = a; EXP = {name:'예약배송', rows:()=>[['바코드','제작품명','상품명','컬러,사이즈','공장','분류','노출 상태','할 일','재고 부족','주간 판매','출고 가능','실 보유재고','트랜쇼','본사','입고 예정','다음 입고 예정일','예약 차수','판매 채널','코멘트','메모']].concat(
+      L.map(x=>[x.p.b, x.p.n, x.p.en, x.p.opt, x.p.curFac, x.cat||'', x.st||'', x.acts.map(k=>(RV_ACT[k]||{}).t||k).join(' · '), x.lvl||'', x.s.wk, x.known?x.rest:'', x.known?x.p.stock:'', x.p.trans!=null?x.p.trans:'', x.p.hq!=null?x.p.hq:'', x.inc||0, x.next&&x.next.eta||'',
+        x.live.map(o=>(o.d||'날짜 없음')+(o.q?' '+o.q+'장':'')).join(' / '), chList().filter(c=>x.r.ch&&x.r.ch[c]).join(', '), x.r.cmt||'', x.r.memo||'']))}; }
   const sth = (k, label, cls, sub) => '<th class="sortable'+(cls?' '+cls:'')+(X.sk===k?' sorted':'')+'" data-act="rvSort" data-k="'+k+'" title="눌러서 정렬 (오름차순 → 내림차순 → 기본)">'+label+'<span class="sarr">'+(X.sk===k?(X.sd===1?'▲':'▼'):'↕')+'</span>'+(sub||'')+'</th>';
   const anyF = X.q || X.st || X.fac || X.cat || X.act;
   const card = (k,t,n,c,d) => '<button class="rvcard'+(X.act===k?' on':'')+'" data-act="rvAct" data-k="'+k+'" title="'+esc(t+' · '+d)+'"><span class="chip '+c+'">'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
@@ -2497,6 +2543,10 @@ function watchSums(){
   }
 }
 function viewAll(){
+  EXP = {name:'전체브랜드_입고예정', rows:()=>{ const out = [['브랜드','예정일','잔여','제작품명','컬러,사이즈','공장','상태','오더일']];
+    for(const k of ['tid','kb','frv']){ const L = liveSums[k], Sm = SUMS[k]; let open = (L ? L.open : Sm && Sm.open) || []; if(typeof open==='string'){ try{ open = JSON.parse(open); }catch(e){ open = []; } }
+      for(const r of open) out.push([brandName(k), r[0]||'', r[1], r[2], r[3], r[4], r[5]==='closed'?'마감':(!r[0]?'일정 미정':r[0]<TODAY?'지연':'진행 중'), r[6]||'']); }
+    return out; }};
   const add7 = addDays(TODAY, 7);
   const cards = []; const rows = [];
   for(const k of ['tid','kb','frv']){
@@ -2559,6 +2609,7 @@ function schedRows(){
 }
 function viewSched(){
   const X = S.sched; const {a, cnt, isNew} = schedRows();
+  { const L = a; EXP = {name:'일정입력', rows:()=>[ORD_H.concat(['담당'])].concat(L.map(o=>ordRow(o).concat([o.p.contact||''])))}; }
   const lock = !canDo('eta','recv','reorder');
   const tab = (k,t,n,d) => '<button class="rvcard'+(X.view===k?' on':'')+'" data-act="schView" data-k="'+k+'"><span>'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
   const dirty = Object.entries(X.edits).filter(([id,e])=>e && e.eta && BYID.get(id)).length;
@@ -2622,7 +2673,7 @@ function orderModal(id, mode){
   const o = BYID.get(id); if(!o) return;
   resolveNames(o.changes.map(c=>c.by).concat(o.rcAdd.map(r=>r.by)));
   const p = o.p;
-  let h = '<div class="mh">'+thumb(p,'l')+'<div><h2>'+esc(p.n||p.en)+' <span class="muted" style="font-weight:500">'+esc(o.round)+'</span></h2><div class="muted" style="font-size:12.5px">'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span></div></div><button class="btn sm x" data-act="close">닫기</button></div>';
+  let h = '<div class="mh">'+thumb(p,'l')+'<div><h2>'+esc(p.n||p.en)+' <span class="muted" style="font-weight:500">'+esc(o.round)+'</span></h2>'+(p.n&&p.en?'<div class="men">'+esc(p.en)+'</div>':'')+'<div class="muted" style="font-size:12.5px">'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span></div></div><button class="btn sm x" data-act="close">닫기</button></div>';
   h += '<dl class="kv"><dt>상태</dt><dd>'+chip(o.status)+(o.short?' <span class="chip st-late">미달 '+nf(o.short)+'장</span>':'')+(o.overQ?' <span class="chip st-soon">초과 '+nf(o.overQ)+'장</span>':'')+(o.closed&&o.closeReason?' <span class="muted">'+esc(o.closeReason)+'</span>':'')+'</dd><dt>공장</dt><dd>'+esc(o.f)+(p.contact?' · '+esc(p.contact):'')+'</dd><dt>오더일</dt><dd>'+(o.od||'초두')+'</dd><dt>수량</dt><dd>오더 <b>'+nf(o.qty)+'</b> · 입고 <b>'+nf(o.recv)+'</b> · 잔여 <b>'+nf(o.remain)+'</b></dd><dt>예정일</dt><dd>'+etaCell(o)+(o.etaKind==='est'?'<div class="note">'+esc(o.f)+' 평균 리드타임 '+leadFor(o.f)+'일로 계산한 예상일</div>':'')+(o.etaReason?'<div class="note">사유: '+esc(o.etaReason)+'</div>':'')+'</dd><dt>입고 내역</dt><dd>'+receiptsHtml(o)+'</dd>'+(o.memo?'<dt>비고</dt><dd>'+esc(o.memo)+'</dd>':'')+'</dl>';
   if(o.changes.length) h += '<div><h3 style="margin-bottom:6px">변경 기록</h3><div class="panel loglist">'+o.changes.slice().reverse().map(c=>'<div><span class="muted">'+esc(fmtAt(c.at,true).replace('-','.'))+'</span><span>'+esc(c.msg||'')+' <span class="muted">· '+esc(who(c.by))+'</span></span></div>').join('')+'</div></div>';
   const dis = canWrite() ? '' : ' disabled';
@@ -2837,6 +2888,7 @@ async function act(a, el){
     case 'roSave': await saveReorder(); break;
     case 'bulkSave': await saveBulk(); break;
     case 'copyBarcode': copyText(toTable(barcodeTable(),'\t'), '바코드 '+(barcodeTable().length-1)+'개를 복사했습니다. 엑셀에 붙여넣으세요.'); break;
+    case 'expView': expRun(); break;
     case 'csvBarcode': saveCsv('입고예정_바코드별_'+TODAY+'.csv', barcodeTable()); break;
     case 'csvOrders': saveCsv('입고예정_차수별_'+TODAY+'.csv', orderTable()); break;
   }
@@ -2949,14 +3001,21 @@ function render(){
   document.body.classList.toggle('mode-ext', isExt());
   if(isExt() && S.tab!=='sched'){ S.tab = 'sched'; }
   if(isExt() && BRAND==='all'){ setBrand('kb'); return; }
-  if(BRAND==='all'){ app.innerHTML = viewAll(); navSync(); return; }
+  EXP = null;
+  if(BRAND==='all'){ app.innerHTML = viewAll(); expInject(app); navSync(); return; }
   if(!BRAND_DATA[BRAND]){ app.innerHTML = brandEmpty(); navSync(); return; }
   pushSum();
   app.innerHTML = ({home:viewHome, resv:viewResv, sched:viewSched, mng:()=>{ S.tab='fac'; S.fac.view='mng'; return viewFac(); }, fac:viewFac, due:viewDue, cal:viewCal, find:viewFind, reg:viewReg, mng:viewMng, fix:viewFix}[S.tab]||viewHome)();
   if(fid){ const e = document.getElementById(fid); if(e){ e.focus(); try{ if(pos!=null) e.setSelectionRange(pos,pos); }catch(x){} } }
+  expInject(app);
   addBackButtons();
   navSync();
   loadThumbs();
+}
+function expInject(app){
+  if(!EXP || S.tab==='due') return;
+  const sh = app.querySelector('.sec .sechead') || app.querySelector('.sechead'); if(!sh || sh.querySelector('.expbtn')) return;
+  sh.insertAdjacentHTML('beforeend', '<button class="btn sm expbtn" data-act="expView" title="지금 화면의 검색 · 필터 그대로 전체를 엑셀(CSV)로 저장"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>엑셀 내보내기</button>');
 }
 // 검색 중이면 검색창 앞에 '‹ 전체' 버튼
 function addBackButtons(){
@@ -2990,6 +3049,9 @@ window.addEventListener('popstate', e => {
   navPopping = true; try{ render(); } finally { navPopping = false; }
 });
 document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if(b) setTab(b.dataset.tab); });
+function themeSync(){ const d = document.documentElement.getAttribute('data-theme')==='dark'; const b = document.getElementById('themeBtn'); if(b){ b.innerHTML = d ? '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span>밝게</span>' : '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg><span>어둡게</span>'; b.title = d ? '흰 배경으로 보기' : '어두운 배경으로 보기'; } }
+document.getElementById('themeBtn').addEventListener('click', ()=>{ const n = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', n); try{ localStorage.setItem('kb_theme', n); }catch(e){} themeSync(); });
+themeSync();
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]'); if(!el) return;
   if(el.dataset.act==='bg'){ if(e.target===el && downOnBg) closeModal(); return; }
