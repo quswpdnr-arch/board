@@ -416,6 +416,52 @@ a.rvinc{cursor:pointer;color:inherit;text-decoration:none;white-space:nowrap}a.r
 .mstk span{display:grid;line-height:1.25}
 .mstk small{font-size:10.5px;color:var(--muted);white-space:nowrap}
 .mstk b{font-size:13px;color:var(--fg);font-variant-numeric:tabular-nums}
+
+/* ── 모바일 (휴대폰) ── 데스크톱은 그대로, 640px 이하에서만 적용 */
+@media (max-width:640px){
+  html{-webkit-text-size-adjust:100%}
+  body{padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
+  header.top{position:static}
+  .hrow{padding-block:10px 8px;gap:8px}
+  .brand{font-size:16px;gap:8px}.brand .logo{height:9px;width:88px}
+  .acct{font-size:11.5px;margin-left:auto}
+  /* 아래 고정 탭바 */
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:15;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;background:var(--panel);border-top:1px solid var(--line);padding:0 max(2px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(2px,env(safe-area-inset-left,0px));box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+  .tabs button{padding:8px 2px 9px;font-size:11.5px;line-height:1.25;white-space:normal;word-break:keep-all;text-align:center;border-bottom:0;border-top:2px solid transparent;min-height:52px}
+  .tabs button[aria-selected="true"]{border-top-color:var(--accent);border-bottom:0;color:var(--accent);background:var(--accent-soft)}
+  body.mode-ext .tabs{display:none}body.mode-ext{padding-bottom:0}
+  main{padding-block:14px 24px}
+  .toast{bottom:calc(72px + env(safe-area-inset-bottom,0px));max-width:calc(100vw - 32px)}
+  /* 입력칸: 아이폰 확대 방지 · 폭 맞춤 */
+  input,select,textarea{font-size:16px!important}
+  input[type=search]{min-width:0;flex:1 1 100%}
+  .filters{gap:6px}.filters > select{flex:1 1 auto;min-width:0}
+  .sechead{flex-wrap:wrap}.sechead .sub{display:block;width:100%}
+  /* 표 → 카드 */
+  table.mcard{display:block;font-size:13.5px}
+  table.mcard thead{display:none}
+  table.mcard tbody,table.mcard tfoot{display:block}
+  table.mcard tr{display:block;border:1px solid var(--line);border-radius:10px;margin:0 0 8px;padding:8px 12px;background:var(--panel)}
+  table.mcard tr.isopen,table.mcard tr.schdirty{border-color:var(--accent)}
+  table.mcard td,table.mcard th{display:block;padding:5px 0!important;border:0!important;text-align:right;min-width:0!important;white-space:normal!important;width:auto!important;overflow:hidden}
+  table.mcard td::before,table.mcard th::before{content:attr(data-l);float:left;color:var(--muted);font-size:12px;font-weight:500;text-align:left;max-width:42%;margin-right:12px;line-height:1.6}
+  table.mcard td + td{border-top:1px dashed var(--line)!important}
+  table.mcard td[data-l=""]::before,table.mcard th[data-l=""]::before{display:none}
+  table.mcard td[data-l=""]{text-align:left}
+  table.mcard td:first-child{display:block;text-align:left;padding-bottom:6px!important}
+  table.mcard td:first-child::before{display:none}
+  table.mcard td input:not([type=checkbox]):not([type=radio]),table.mcard td select{width:min(62vw,240px)!important;min-width:0!important}
+  table.mcard td[colspan]{display:block;text-align:center}
+  table.mcard td.c,table.mcard td.num{text-align:right!important}
+  .panel.tw,.tw{overflow:visible;background:none;border:0;box-shadow:none}
+  .alltbl{min-width:0}.rvtbl td:first-child{min-width:0}
+  /* 모달 → 화면 가득 */
+  .overlay{padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));align-items:flex-start}
+  .modal{width:100%;padding:14px;border-radius:12px;gap:12px}
+  .modal .filters .btn{flex:1 1 auto}
+  .kpis{gap:8px}
+  .cal{font-size:12px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -2869,6 +2915,28 @@ async function setCountry(f, kind){ if(!need('fac','fix')) return;
   const cur = facDocs[f] || {name:f, contact:'', phone:'', memo:'', lead:'', active:true};
   await guard(async()=>{ await DB.doc('fac/'+facDocId(f)).set(Object.assign({}, cur, {name:f, kind, at:new Date().toISOString(), by:MYID||''})); await writeLog(f+' 국가: '+kind); }, f+' → '+kind);
 }
+
+// ── 모바일: 표를 카드로 볼 수 있게 칸 이름(data-l)을 붙임 · 640px 이하에서만 동작
+const MOB = window.matchMedia('(max-width:640px)');
+function mobLabel(){
+  if(!MOB.matches) return;
+  document.querySelectorAll('#app table, #modalRoot table').forEach(t=>{
+    const hr = t.tHead && t.tHead.rows.length ? t.tHead.rows[t.tHead.rows.length-1] : null;
+    if(!hr){ return; }
+    if(!t.classList.contains('mcard')){
+      const heads = []; for(const th of hr.cells){ const c = th.cloneNode(true); c.querySelectorAll('.sarr').forEach(x=>x.remove()); const tx = c.textContent.replace(/\s+/g,' ').trim(); for(let i=0;i<(th.colSpan||1);i++) heads.push(tx); }
+      t._mh = heads; t.classList.add('mcard');
+    }
+    for(const tb of t.tBodies) for(const tr of tb.rows){
+      if(tr.cells[0] && tr.cells[0].hasAttribute('data-l')) continue;
+      let c = 0; for(const td of tr.cells){ td.setAttribute('data-l', (td.colSpan>1 && tr.cells.length===1) ? '' : (t._mh[c]||'')); c += td.colSpan||1; }
+    }
+  });
+  const on = document.querySelector('#tabs button[aria-selected="true"]');
+}
+let mobPend = false;
+new MutationObserver(()=>{ if(mobPend || !MOB.matches) return; mobPend = true; requestAnimationFrame(()=>{ mobPend = false; mobLabel(); }); }).observe(document.body, {childList:true, subtree:true});
+(MOB.addEventListener ? MOB.addEventListener('change', ()=>{ if(MOB.matches) mobLabel(); else document.querySelectorAll('table.mcard').forEach(t=>t.classList.remove('mcard')); }) : 0);
 function render(){
   if(composing){ renderWait = true; return; }
   document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.tab===S.tab)));
