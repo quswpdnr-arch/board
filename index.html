@@ -543,6 +543,8 @@ a.rvinc{cursor:pointer;color:inherit;text-decoration:none;white-space:nowrap}a.r
 
 .syrc{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-top:5px;font-size:12px;color:var(--fg);border:1px dashed var(--line);border-radius:6px;padding:3px 8px;width:max-content;max-width:100%;cursor:pointer}
 .syrc small{color:var(--muted);font-size:11px}.syrc.on{border-style:solid;border-color:var(--accent);background:color-mix(in srgb, var(--accent) 6%, transparent)}
+.spadd{appearance:none;font:inherit;font-size:11.5px;font-weight:700;color:var(--accent);background:transparent;border:1px dashed var(--accent);border-radius:6px;padding:4px 7px;cursor:pointer;white-space:nowrap}
+.spadd:hover{background:var(--accent-soft)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -1229,6 +1231,7 @@ function splitCells(o){
   const one = r => '<span class="sp'+(r.add?' add':'')+'"><b>'+nf(r.q)+'</b><small>'+(r.d?r.d.slice(5).replace('-','.'):esc(r.l||''))+'</small></span>';
   for(let i=0;i<6;i++){
     if(i===5 && all.length>6){ const rest = all.slice(5); out.push('<td class="spc">'+one({q:rest.reduce((s,r)=>s+r.q,0), d:rest[rest.length-1].d, l:'외 '+(rest.length-1)})+'<small class="muted">+'+(rest.length-1)+'회</small></td>'); }
+    else if(!all[i] && i===all.length && isOpen(o) && o.remain>0 && canWrite() && canDo('recv')) out.push('<td class="spc"><button class="spadd" data-act="mRecv" data-id="'+o.id+'" title="남은 '+nf(o.remain)+'장 중 이번에 들어온 만큼 입고 기록 (여러 번 나눠 넣어도 돼요)">+ 입고</button></td>');
     else out.push('<td class="spc">'+(all[i]?one(all[i]):'')+'</td>');
   }
   return out.join('');
@@ -1242,7 +1245,7 @@ function styleBlock(st, open){
   let h = '<article class="panel sblock"><header class="shead">'+styleThumb(st,'l')+'<div class="stitle"><span class="sfac">'+esc(st.f)+(st.contact&&st.contact!==st.f?' · '+esc(st.contact):'')+'<span class="cfield">국가 '+countrySel('data-scountry="'+esc(st.key)+'"', countryP(st.prods[0]))+'</span></span><h3>'+esc(st.n||st.en)+'</h3><span class="sen">'+esc([st.en, st.cat].filter(Boolean).join(' · '))+'</span>'+
     (mv.length?'<span class="mvline">'+mv.map(c=>'<span class="chip st-soon">'+esc(c.from)+' → '+esc(c.to)+(c.date?' · '+esc(fmtDY(c.date))+(c.auto?'~':''):'')+'</span>').join(' ')+'</span>':'')+'</div>'+
     '<div class="sstats"><span>컬러 <b>'+st.prods.length+'</b></span><span>최근 오더 <b>'+(lo?fmtDY(lo):'초두')+'</b></span>'+(rem?'<span class="chip st-open">입고 예정 '+nf(rem)+'장</span>':'<span class="chip st-done">입고 완료</span>')+(lateN?'<span class="chip st-late">지연 '+lateN+'</span>':'')+'<button class="btn sm" data-act="chgFac" data-k="'+esc(st.key)+'"'+(canWrite()?'':' disabled')+'>공장 변경</button><button class="btn sm" data-act="editStyle" data-n="'+esc(st.n||st.en)+'">정보 수정</button><button class="btn sm danger" data-act="delStyle" data-k="'+esc(st.key)+'"'+(canWrite()?'':' disabled')+'>삭제</button></div></header>';
-  h += '<div class="tw"><table class="otbl"><thead><tr><th>차수</th><th>리오더 날짜</th><th class="num">수량</th><th>입고일정</th><th class="spc">1차</th><th class="spc">2차</th><th class="spc">3차</th><th class="spc">4차</th><th class="spc">5차</th><th class="spc">6차</th><th class="num">잔여량</th><th>상태</th><th>비고</th></tr></thead>';
+  h += '<div class="tw"><table class="otbl"><thead><tr><th>차수</th><th>리오더 날짜</th><th class="num">수량</th><th>입고일정</th><th class="spc" title="한 차수 안에서 나눠 들어온 1번째 입고">입고 1회</th><th class="spc" title="한 차수 안에서 나눠 들어온 2번째 입고">입고 2회</th><th class="spc" title="한 차수 안에서 나눠 들어온 3번째 입고">입고 3회</th><th class="spc" title="한 차수 안에서 나눠 들어온 4번째 입고">입고 4회</th><th class="spc" title="한 차수 안에서 나눠 들어온 5번째 입고">입고 5회</th><th class="spc" title="한 차수 안에서 나눠 들어온 6번째 입고">입고 6회</th><th class="num">잔여량</th><th>상태</th><th>비고</th></tr></thead>';
   for(const p of st.prods){
     const po = p.orders; const tq = po.reduce((s,o)=>s+o.qty,0), tr = po.reduce((s,o)=>s+o.recv,0), pr = po.filter(isOpen).reduce((s,o)=>s+o.remain,0);
     h += '<tbody class="cgroup"><tr class="crow"><td colspan="13"><div class="cline">'+thumb(p,'xs')+'<b>'+esc(p.opt)+'</b><span class="mono muted">'+esc(p.b||'바코드 없음')+'</span>'+(p.isNew?'<span class="chip st-open">보드에서 등록</span>':'')+(hasStock(p)?'<span class="stk" title="'+esc(stkTip())+'">가용(오더 포함) <b>'+nf(availIn(p))+'</b> · 실 보유재고 <b>'+nf(p.stock)+'</b></span>':'')+'<span class="cbtn"><button class="btn sm" data-act="quickReorder" data-b="'+esc(p.key)+'"'+(canWrite()?'':' disabled')+'>+ 리오더</button></span></div></td></tr>';
