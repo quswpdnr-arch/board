@@ -553,6 +553,29 @@ tr:hover .spadd.more,.spadd.more:focus-visible{opacity:1}
 .otbl > thead{display:none}
 .otbl tr.shrow th{font-size:11.5px;font-weight:600;color:var(--muted);background:color-mix(in srgb, var(--muted) 7%, transparent);padding-top:5px;padding-bottom:5px;border-bottom:1px solid var(--line);white-space:nowrap}
 table.mcard tr.shrow{display:none}
+
+.prlist{display:grid;padding:4px}
+.prpick{appearance:none;display:flex;align-items:center;gap:10px;border:0;border-top:1px solid var(--line);background:none;padding:8px 10px;font:inherit;color:var(--fg);text-align:left;cursor:pointer}
+.prpick:first-child{border-top:0}.prpick:hover{background:color-mix(in srgb, var(--accent) 5%, transparent)}
+.prpick .pname{flex:1;min-width:0}
+.prcard{padding:0;overflow:hidden}
+.prhead{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.prhead .pname{display:grid}.prhead .pname b{font-size:15px}.prhead .pname small{font-size:12px;color:var(--muted)}
+.prrow{padding:10px 14px;border-top:1px solid var(--line)}.prrow:first-of-type{border-top:0}
+.prrow.on{background:color-mix(in srgb, var(--accent) 4%, transparent)}
+.prtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.prtop .pname{flex:1;min-width:180px;display:grid}.prtop .pname small{font-size:12px;color:var(--muted)}
+.prq{display:flex;align-items:center;gap:6px;margin-left:auto}.prq input{width:96px;text-align:right;font-size:15px;font-weight:600}
+.pralloc{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+.prarrow{font-size:12px;color:var(--muted);margin-right:2px}
+.prc{font-size:12.5px;border-radius:6px;padding:4px 9px;border:1px solid var(--line);white-space:nowrap}
+.prc b{font-weight:700}
+.prc.fill{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.prc.part{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.prc.late{background:color-mix(in srgb, #d97706 13%, transparent);color:#b45309;border-color:transparent}
+.prc.over{background:color-mix(in srgb, var(--bad) 12%, transparent);color:var(--bad);border-color:transparent}
+.prchk{display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:6px;color:var(--fg)}.prchk.bad{color:var(--bad)}
+.prfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px;border-top:1px solid var(--line);background:var(--sunk)}
+@media (max-width:640px){ .prq{margin-left:0;width:100%}.prq input{flex:1} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -651,6 +674,7 @@ const S = {
   sync: {text:'', res:null, off:{}, rc:{}},
   stk: {text:'', res:null},
   rcv: {q:'', fac:'', paste:'', res:null, all:false},
+  pr: {q:'', style:null, qty:{}, short:{}, over:{}, d:''},
   pl: {text:'', res:null},
   sm: {},
   rv: {q:'', st:'', fac:'', cat:'', act:'', all:false, n:150, sk:'', sd:1},
@@ -1311,11 +1335,12 @@ function viewReg(){
   let m = '';
   if(R.mode==='sync') m += regSync();
   const mp = modePerm(R.mode);
-  if(mp && canWrite() && !canDo(...mp)) m += lockedHtml(({sync:'리오더',re:'리오더',bulk:'리오더',rlist:'입고 처리',rpaste:'입고 처리',sm:'재고 업데이트 · 상품 등록',new:'상품 등록'})[R.mode]||'이 메뉴');
+  if(mp && canWrite() && !canDo(...mp)) m += lockedHtml(({sync:'리오더',re:'리오더',bulk:'리오더',pr:'입고 처리',rlist:'입고 처리',rpaste:'입고 처리',sm:'재고 업데이트 · 상품 등록',new:'상품 등록'})[R.mode]||'이 메뉴');
   else {
   if(R.mode==='sm') m += smHtml();
   if(R.mode==='plist' || R.mode==='stock'){ R.mode = 'sm'; m += smHtml(); }
   if(R.mode==='new') m += regNew();
+  if(R.mode==='pr') m += recvByProd();
   if(R.mode==='rlist') m += recvList();
   if(R.mode==='rpaste') m += recvPaste();
   if(R.mode==='re') m += regRe();
@@ -1959,7 +1984,8 @@ const REG_MENU = [
     {k:'re', t:'한 상품씩 직접 입력', d:'상품을 찾아 컬러별 수량만 입력'},
     {k:'bulk', t:'바코드 · 수량 붙여넣기', d:'바코드와 수량 두 칸만 있는 목록'}]},
   {k:'recv', t:'입고 처리', d:'물건이 들어왔을 때', perm:['recv'], subs:[
-    {k:'rlist', t:'목록에서 입고 처리', d:'입고 기다리는 오더를 찾아 수량만 입력', rec:true},
+    {k:'pr', t:'상품별 입고', d:'상품 · 컬러별로 들어온 수량만 넣으면 차수에 자동으로 나눠 넣기', rec:true},
+    {k:'rlist', t:'목록에서 입고 처리', d:'입고 기다리는 오더를 찾아 수량만 입력'},
     {k:'rpaste', t:'바코드 · 수량 붙여넣기', d:'들어온 물량 목록을 한 번에 입고'}]},
   {k:'prod', t:'상품 · 재고 등록', d:'새 상품 · 재고 업데이트', subs:[
     {k:'sm', t:'셀메이트 목록', d:'셀메이트 목록 한 번 붙여넣기로 재고 업데이트와 신규 상품 등록', rec:true, perm:['stock','reg']},
@@ -1976,6 +2002,98 @@ function regMenu(){
     return '<div class="rgrp'+(c.k===cat?' on':'')+'"><button class="rhead" data-act="'+(one?'regMode" data-m="'+c.subs[0].k:'regCat" data-c="'+c.k)+'"><span class="rt"><b>'+c.t+'</b>'+((cp=>cp.length && !canDo(...cp) && canWrite())(c.perm || [].concat(...c.subs.map(x=>x.perm||[]))) ? '<i class="lock" title="권한 없음">🔒</i>' : '')+'</span>'+(one?'':'<i class="chev" aria-hidden="true"></i>')+'</button>'+
       (one?'':'<div class="ritems">'+c.subs.map(x=>'<button class="ritem'+(x.k===R.mode?' on':'')+'" data-act="regMode" data-m="'+x.k+'">'+x.t+(x.rec?'<i class="rec">추천</i>':'')+'</button>').join('')+'</div>')+'</div>';
   }).join('')+'</nav>';
+}
+// ---------- 입고 처리: 상품별 (수량만 넣으면 먼저 오더한 차수부터 자동으로 나눔) ----------
+const prRoundN = o => { const m = String(o.round||'').match(/\d+/); return m ? +m[0] : 0; };
+function prAlloc(p, q){
+  const out = []; let left = q;
+  const opens = p.orders.filter(o=>isOpen(o) && o.remain>0).sort((a,b)=>(a.od||'').localeCompare(b.od||'') || prRoundN(a)-prRoundN(b));
+  for(const o of opens){ if(left<=0) break; const t = Math.min(left, o.remain); left -= t; out.push({o, q:t, kind: t===o.remain ? 'fill' : 'part', rest:o.remain-t}); }
+  if(left>0){
+    const lates = p.orders.filter(o=>!isOpen(o) && o.qty>o.recv && !/취소/.test(o.closeReason||'')).sort((a,b)=>(b.od||'').localeCompare(a.od||''));
+    for(const o of lates){ if(left<=0) break; const t = Math.min(left, o.qty-o.recv); left -= t; out.push({o, q:t, kind:'late'}); }
+  }
+  const any = p.orders.length>0;
+  return {out, over:left, noOrder: !any && q>0, lastPart: out.filter(x=>x.kind==='part').pop()||null, opens};
+}
+function prChips(a){
+  const c = a.out.map(x=>'<span class="prc '+x.kind+'"><b>'+esc(x.o.round)+'</b> '+nf(x.q)+'장'+(x.kind==='part'?' · 남은 '+nf(x.rest)+'장 받을 예정':x.kind==='late'?' · 추가 입고':' · 완료')+'</span>');
+  if(a.over>0) c.push('<span class="prc over">'+(a.noOrder?'오더 없는 입고 '+nf(a.over)+'장':'오더보다 '+nf(a.over)+'장 많음 · 확인 필요')+'</span>');
+  return c.length ? '<span class="prarrow">자동으로 →</span>'+c.join('') : '';
+}
+function recvByProd(){
+  const X = S.pr; if(!X.d) X.d = TODAY;
+  const st = X.style && STYLES.get(X.style);
+  let h = '<div class="sec"><div class="sechead"><h2>상품별 입고</h2><span class="sub">상품을 찾고 컬러마다 들어온 수량만 넣으면 먼저 오더한 차수부터 자동으로 나눠 넣어요 · 차수를 몰라도 돼요</span></div>'+
+    '<div class="filters"><input type="search" id="prQ" placeholder="바코드를 찍거나 제작품명 · 상품명 · 컬러 입력" value="'+esc(X.q)+'" autocomplete="off"><label class="f" style="flex-direction:row;align-items:center;gap:6px;margin:0"><span class="note" style="white-space:nowrap">입고일</span><input type="date" id="prD" value="'+esc(X.d)+'" style="width:140px"></label></div>';
+  if(X.q && !st){
+    const L = searchStyles(X.q).slice(0, 12);
+    h += L.length ? '<div class="panel prlist">'+L.map(s=>{ const rem = s.prods.reduce((t,p)=>t+p.orders.filter(isOpen).reduce((u,o)=>u+o.remain,0),0);
+      return '<button class="prpick" data-act="prPick" data-k="'+esc(s.key)+'">'+styleThumb(s,'s')+'<span class="pname"><b>'+esc(s.n||s.en)+'</b><small>'+esc(s.f)+' · 컬러 '+s.prods.length+'</small></span>'+(rem?'<span class="chip st-open">입고 예정 '+nf(rem)+'장</span>':'<span class="chip st-done">입고 완료</span>')+'</button>'; }).join('')+'</div>'
+      : '<div class="panel empty">찾는 상품이 없어요. 바코드 · 제작품명 · 상품명 · 컬러로 찾을 수 있어요.</div>';
+  }
+  if(!X.q && !st) h += '<div class="panel pad empty" style="display:block">상품을 찾으면 컬러가 한 화면에 나와요. 바코드 스캐너로 찍으면 그 컬러에 1장씩 더해져요.</div>';
+  if(st){
+    let tot = 0, bad = 0;
+    h += '<div class="panel prcard"><div class="prhead">'+styleThumb(st,'l')+'<div class="pname"><b>'+esc(st.n||st.en)+'</b><small>'+esc(st.en||'')+'</small><small>'+esc(st.f)+' · 컬러 '+st.prods.length+'</small></div><button class="btn sm" data-act="prClear" style="margin-left:auto">다른 상품</button></div>';
+    for(const p of st.prods){
+      const q = Math.max(0, parseInt(X.qty[p.key],10)||0); tot += q;
+      const a = prAlloc(p, q);
+      const openTxt = a.opens.length ? '남은 오더 '+a.opens.map(o=>esc(o.round)+' '+nf(o.remain)+'장').join(' · ') : '진행 중 오더 없음';
+      const lack = p.orders.filter(o=>!isOpen(o) && o.qty>o.recv && !/취소/.test(o.closeReason||'')).slice(-1)[0];
+      const needOver = a.over>0 && !a.noOrder && !X.over[p.key]; if(needOver) bad++;
+      h += '<div class="prrow'+(q?' on':'')+'"><div class="prtop">'+thumb(p,'s')+'<div class="pname"><b>'+esc(p.opt)+'</b><small><span class="mono">'+esc(isNoB(p.b)?'바코드 없음':p.b)+'</span> · '+openTxt+(lack&&!a.opens.length?' · 지난 '+esc(lack.round)+' '+nf(lack.qty-lack.recv)+'장 미달':'')+'</small></div>'+
+        '<label class="prq"><span class="note">들어온 수량</span><input type="number" min="0" inputmode="numeric" data-prq="'+esc(p.key)+'" value="'+(q||'')+'" placeholder="0"><span class="note">장</span></label></div>'+
+        (q ? '<div class="pralloc">'+prChips(a)+'</div>' : '')+
+        (q && a.lastPart ? '<label class="prchk"><input type="checkbox" data-prshort="'+esc(p.key)+'"'+(X.short[p.key]?' checked':'')+'> '+esc(a.lastPart.o.round)+' 남은 '+nf(a.lastPart.rest)+'장은 안 들어와요 (미달 마감)</label>' : '')+
+        (q && a.over>0 && !a.noOrder ? '<label class="prchk bad"><input type="checkbox" data-prover="'+esc(p.key)+'"'+(X.over[p.key]?' checked':'')+'> 오더보다 많은 '+nf(a.over)+'장도 기록 (가장 최근 차수에 초과 입고)</label>' : '')+
+        (q && a.noOrder ? '<p class="note" style="margin:6px 0 0">이 컬러는 오더가 없어요 · 저장하면 <b>오더 없는 입고</b>(샘플 · 교환 등)로 따로 기록돼요</p>' : '')+
+      '</div>';
+    }
+    h += '<div class="prfoot"><span class="note">합계 <b style="color:var(--fg)">'+nf(tot)+'장</b> · 입고일 '+esc(fmtDY(X.d))+(bad?' · <b style="color:var(--bad)">초과 수량 확인 필요 '+bad+'건</b>':'')+'</span><span><button class="btn" data-act="prReset">비우기</button> <button class="btn pri" data-act="prSave"'+(tot&&!bad&&canWrite()?'':' disabled')+'>입고 저장</button></span></div></div>';
+  }
+  // 오늘 입고한 내역 (되돌리기)
+  const today = [];
+  for(const o of ORDERS) (o.rcAdd||[]).forEach((r,i)=>{ if(r.d===X.d && !r.adj) today.push({o, r, i}); });
+  if(today.length){
+    h += '<div class="sec"><div class="sechead"><h3 style="margin:0">'+esc(fmtDY(X.d))+' 입고한 내역 '+today.length+'건</h3><span class="sub">잘못 넣었으면 되돌리기</span></div><div class="panel loglist">'+
+      today.slice().reverse().map(t=>'<div><span class="rc add">'+nf(t.r.q)+'장</span><span><a href="#" data-act="openOrder" data-id="'+t.o.id+'" style="color:inherit">'+esc((t.o.p.n||t.o.p.en)+' '+t.o.p.opt+' · '+t.o.round)+'</a> <span class="muted">· '+esc(who(t.r.by))+'</span></span><button class="btn sm" data-act="prUndo" data-id="'+t.o.id+'" data-i="'+t.i+'"'+(canWrite()?'':' disabled')+'>되돌리기</button></div>').join('')+'</div></div>';
+  }
+  return h+'</div>';
+}
+async function prSave(){
+  if(!need('recv')) return;
+  const X = S.pr; const st = X.style && STYLES.get(X.style); if(!st) return;
+  const at = new Date().toISOString(); const d = X.d || TODAY;
+  const n = await guardN(async()=>{
+    let cnt = 0;
+    for(const p of st.prods){
+      const q = Math.max(0, parseInt(X.qty[p.key],10)||0); if(!q) continue;
+      const a = prAlloc(p, q); const parts = [];
+      for(const x of a.out){
+        const patch = {recv:((ovr[x.o.id]&&Array.isArray(ovr[x.o.id].recv))?ovr[x.o.id].recv:[]).concat([{q:x.q, d, by:MYID||'', src:'prod'}])};
+        if(x===a.lastPart && X.short[p.key]){ patch.closed = true; patch.closeReason = '미달 마감 ('+x.rest+'장 미입고)'; }
+        await saveOvr(x.o, patch, {type:'recv', msg:(x.kind==='late'?'추가 입고 ':'입고 ')+x.q+'장 ('+d.slice(5).replace('-','.')+') · 상품별 입고'+(patch.closed?' · 미달 '+x.rest+'장 마감':'')}, null, ['recv']);
+        parts.push(x.o.round+' '+x.q+(x.kind==='late'?'(추가)':''));
+      }
+      if(a.over>0){
+        if(a.noOrder){
+          const ref = await DB.collection('ord').add({b:p.b, f:p.curFac, round:'기타 입고', od:d, qty:a.over, eta:'', memo:'오더 없는 입고 (샘플 · 교환 등)', src:'상품별 입고', at, by:MYID||''});
+          if(ref && ref.id) await DB.doc('ovr/n_'+ref.id).set({recv:[{q:a.over, d, by:MYID||'', src:'prod'}], log:[{at, by:MYID||'', type:'recv', msg:'오더 없는 입고 '+a.over+'장'}]});
+          parts.push('오더 없는 입고 '+a.over);
+        } else if(X.over[p.key]){
+          const tgt = (a.out.length ? a.out[a.out.length-1].o : p.orders.slice().sort((x,y)=>(y.od||'').localeCompare(x.od||''))[0]);
+          const cur = (ovr[tgt.id]&&Array.isArray(ovr[tgt.id].recv))?ovr[tgt.id].recv:[];
+          await saveOvr(tgt, {recv:cur.concat([{q:a.over, d, by:MYID||'', src:'prod'}])}, {type:'recv', msg:'초과 입고 '+a.over+'장 ('+d.slice(5).replace('-','.')+') · 상품별 입고'}, null, ['recv']);
+          parts.push(tgt.round+' 초과 '+a.over);
+        }
+      }
+      await writeLog('상품별 입고: '+(st.n||st.en)+' '+p.opt+' '+q+'장 → '+parts.join(' · '), a.out.length ? a.out[0].o.id : '');
+      cnt++;
+    }
+    return cnt;
+  });
+  if(n){ toast(n+'개 컬러 입고를 저장했습니다'); X.qty = {}; X.short = {}; X.over = {}; render(); }
 }
 // ---------- 입고 처리: 목록 ----------
 function recvList(){
@@ -3080,6 +3198,12 @@ async function act(a, el){
     case 'bulkSave': await saveBulk(); break;
     case 'copyBarcode': copyText(toTable(barcodeTable(),'\t'), '바코드 '+(barcodeTable().length-1)+'개를 복사했습니다. 엑셀에 붙여넣으세요.'); break;
     case 'expView': expRun(); break;
+    case 'prPick': S.pr.style = el.dataset.k; S.pr.q = ''; S.pr.qty = {}; S.pr.short = {}; S.pr.over = {}; render(); { const f = document.querySelector('[data-prq]'); if(f) f.focus(); } break;
+    case 'prClear': S.pr.style = null; S.pr.qty = {}; S.pr.short = {}; S.pr.over = {}; render(); { const f = document.getElementById('prQ'); if(f) f.focus(); } break;
+    case 'prReset': S.pr.qty = {}; S.pr.short = {}; S.pr.over = {}; render(); break;
+    case 'prSave': await prSave(); break;
+    case 'prUndo': { if(!need('recv')) break; const o = BYID.get(id); const i = +el.dataset.i; const cur = (ovr[o.id]&&Array.isArray(ovr[o.id].recv))?ovr[o.id].recv.slice():[]; const x = cur[i]; if(!x) break; cur.splice(i,1);
+      await guard(()=>saveOvr(o, {recv:cur}, {type:'undo', msg:'입고 '+x.q+'장 되돌림'}, label(o)+' 입고 '+x.q+'장 되돌림', ['recv']), '되돌렸습니다'); break; }
     case 'logCat': S.logCat = el.dataset.k; render(); break;
     case 'csvBarcode': saveCsv('입고예정_바코드별_'+TODAY+'.csv', barcodeTable()); break;
     case 'csvOrders': saveCsv('입고예정_차수별_'+TODAY+'.csv', orderTable()); break;
@@ -3254,6 +3378,19 @@ document.addEventListener('click', e => {
   act(el.dataset.act, el);
 });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+// 상품별 입고: 바코드 스캐너(찍고 Enter) → 그 컬러에 1장씩 더하기
+document.addEventListener('keydown', e => {
+  if(e.key!=='Enter' || !e.target || e.target.id!=='prQ') return;
+  const v = e.target.value.trim(); if(!v) return;
+  const p = [...PRODS.values()].find(x=>x.b===v);
+  if(!p){ return; }
+  e.preventDefault(); clearTimeout(tmr);
+  const X = S.pr; const k = styleKey(p);
+  if(X.style!==k){ X.style = k; X.short = {}; X.over = {}; }
+  X.qty[p.key] = String((parseInt(X.qty[p.key],10)||0) + 1); X.q = '';
+  render(); const f = document.getElementById('prQ'); if(f) f.focus();
+  toast(p.opt+' +1장 (지금 '+X.qty[p.key]+'장)');
+});
 let downOnBg = false;
 document.addEventListener('mousedown', e => { downOnBg = !!(e.target && e.target.classList && e.target.classList.contains('overlay')); }, true);
 // 한글 입력 (조합 중에는 화면을 다시 그리지 않음)
@@ -3269,6 +3406,8 @@ document.addEventListener('input', e => {
   if(t.id==='dueQ'){ S.due.q = t.value; S.showMore=0; clearTimeout(tmr); tmr=setTimeout(render,180); }
   if(t.dataset && t.dataset.fx){ const k = t.dataset.fx; S.fix.edits[k] = S.fix.edits[k]||{}; S.fix.edits[k][t.dataset.k] = t.value; t.classList.add('dirty'); }
   if(t.id==='fixQ'){ S.fix.q = t.value; S.fix.n = 60; clearTimeout(tmr); tmr=setTimeout(render,200); }
+  if(t.id==='prQ'){ S.pr.q = t.value; if(S.pr.style && t.value.trim()) S.pr.style = null; clearTimeout(tmr); tmr = setTimeout(()=>{ render(); const f = document.getElementById('prQ'); if(f){ f.focus(); try{ f.setSelectionRange(f.value.length, f.value.length); }catch(e){} } }, 250); }
+  if(t.dataset && t.dataset.prq!=null){ S.pr.qty[t.dataset.prq] = t.value; clearTimeout(tmr); const k = t.dataset.prq; tmr = setTimeout(()=>{ render(); const f = document.querySelector('[data-prq="'+CSS.escape(k)+'"]'); if(f){ f.focus(); try{ const v = f.value; f.value = ''; f.value = v; }catch(e){} } }, 350); }
   if(t.id==='rcvQ'){ S.rcv.q = t.value; clearTimeout(tmr); tmr=setTimeout(render,200); }
   if(t.id==='rvQ'){ S.rv.q = t.value; S.rv.n = 150; clearTimeout(tmr); tmr=setTimeout(render,200); }
   if(t.id==='rvSalesT'){ S.rvs = S.rvs || {}; S.rvs.text = t.value; }
@@ -3348,6 +3487,9 @@ document.addEventListener('change', e => {
   if(t.id==='syncAll'){ if(S.sync.res) S.sync.res.plan.forEach((x,i)=>S.sync.off[i] = !t.checked); render(); }
   if(t.id==='rcvFac'){ S.rcv.fac = t.value; render(); }
   if(t.id==='rcvAll'){ S.rcv.all = t.checked; render(); }
+  if(t.id==='prD'){ S.pr.d = t.value || TODAY; render(); }
+  if(t.dataset && t.dataset.prshort!=null){ S.pr.short[t.dataset.prshort] = t.checked; }
+  if(t.dataset && t.dataset.prover!=null){ S.pr.over[t.dataset.prover] = t.checked; render(); }
   if(t.id==='rvSt'){ S.rv.st = t.value; render(); }
   if(t.id==='rvFac'){ S.rv.fac = t.value; render(); }
   if(t.id==='rvCat'){ S.rv.cat = t.value; render(); }
