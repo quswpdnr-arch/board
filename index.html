@@ -550,6 +550,9 @@ tr:hover .spadd.more,.spadd.more:focus-visible{opacity:1}
 @media (hover:none){.spadd.more{opacity:.85}}
 .rcvtbl tr.lhead td{background:var(--sunk);font-size:12.5px;color:var(--muted);padding-top:10px;padding-bottom:10px}
 .rcvtbl tr.lrow td{background:color-mix(in srgb, var(--muted) 4%, transparent)}
+.otbl > thead{display:none}
+.otbl tr.shrow th{font-size:11.5px;font-weight:600;color:var(--muted);background:color-mix(in srgb, var(--muted) 7%, transparent);padding-top:5px;padding-bottom:5px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.mcard tr.shrow{display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -1251,10 +1254,11 @@ function styleBlock(st, open){
   let h = '<article class="panel sblock"><header class="shead">'+styleThumb(st,'l')+'<div class="stitle"><span class="sfac">'+esc(st.f)+(st.contact&&st.contact!==st.f?' · '+esc(st.contact):'')+'<span class="cfield">국가 '+countrySel('data-scountry="'+esc(st.key)+'"', countryP(st.prods[0]))+'</span></span><h3>'+esc(st.n||st.en)+'</h3><span class="sen">'+esc([st.en, st.cat].filter(Boolean).join(' · '))+'</span>'+
     (mv.length?'<span class="mvline">'+mv.map(c=>'<span class="chip st-soon">'+esc(c.from)+' → '+esc(c.to)+(c.date?' · '+esc(fmtDY(c.date))+(c.auto?'~':''):'')+'</span>').join(' ')+'</span>':'')+'</div>'+
     '<div class="sstats"><span>컬러 <b>'+st.prods.length+'</b></span><span>최근 오더 <b>'+(lo?fmtDY(lo):'초두')+'</b></span>'+(rem?'<span class="chip st-open">입고 예정 '+nf(rem)+'장</span>':'<span class="chip st-done">입고 완료</span>')+(lateN?'<span class="chip st-late">지연 '+lateN+'</span>':'')+'<button class="btn sm" data-act="chgFac" data-k="'+esc(st.key)+'"'+(canWrite()?'':' disabled')+'>공장 변경</button><button class="btn sm" data-act="editStyle" data-n="'+esc(st.n||st.en)+'">정보 수정</button><button class="btn sm danger" data-act="delStyle" data-k="'+esc(st.key)+'"'+(canWrite()?'':' disabled')+'>삭제</button></div></header>';
-  h += '<div class="tw"><table class="otbl"><thead><tr><th>차수</th><th>리오더 날짜</th><th class="num">수량</th><th>입고일정</th><th class="spc" title="한 차수 안에서 나눠 들어온 1번째 입고">입고 1회</th><th class="spc" title="한 차수 안에서 나눠 들어온 2번째 입고">입고 2회</th><th class="spc" title="한 차수 안에서 나눠 들어온 3번째 입고">입고 3회</th><th class="spc" title="한 차수 안에서 나눠 들어온 4번째 입고">입고 4회</th><th class="spc" title="한 차수 안에서 나눠 들어온 5번째 입고">입고 5회</th><th class="spc" title="한 차수 안에서 나눠 들어온 6번째 입고">입고 6회</th><th class="num">잔여량</th><th>상태</th><th>비고</th></tr></thead>';
+  const OTH = '<th>차수</th><th>리오더 날짜</th><th class="num">수량</th><th>입고일정</th>'+[1,2,3,4,5,6].map(i=>'<th class="spc" title="이 차수가 나눠 들어온 '+i+'번째 입고">'+i+'차</th>').join('')+'<th class="num">잔여량</th><th>상태</th><th>비고</th>';
+  h += '<div class="tw"><table class="otbl"><thead><tr><th>차수</th><th>리오더 날짜</th><th class="num">수량</th><th>입고일정</th><th class="spc" title="이 차수가 나눠 들어온 1번째 입고">1차</th><th class="spc" title="이 차수가 나눠 들어온 2번째 입고">2차</th><th class="spc" title="이 차수가 나눠 들어온 3번째 입고">3차</th><th class="spc" title="이 차수가 나눠 들어온 4번째 입고">4차</th><th class="spc" title="이 차수가 나눠 들어온 5번째 입고">5차</th><th class="spc" title="이 차수가 나눠 들어온 6번째 입고">6차</th><th class="num">잔여량</th><th>상태</th><th>비고</th></tr></thead>';
   for(const p of st.prods){
     const po = p.orders; const tq = po.reduce((s,o)=>s+o.qty,0), tr = po.reduce((s,o)=>s+o.recv,0), pr = po.filter(isOpen).reduce((s,o)=>s+o.remain,0);
-    h += '<tbody class="cgroup"><tr class="crow"><td colspan="13"><div class="cline">'+thumb(p,'xs')+'<b>'+esc(p.opt)+'</b><span class="mono muted">'+esc(p.b||'바코드 없음')+'</span>'+(p.isNew?'<span class="chip st-open">보드에서 등록</span>':'')+(hasStock(p)?'<span class="stk" title="'+esc(stkTip())+'">가용(오더 포함) <b>'+nf(availIn(p))+'</b> · 실 보유재고 <b>'+nf(p.stock)+'</b></span>':'')+'<span class="cbtn"><button class="btn sm" data-act="quickReorder" data-b="'+esc(p.key)+'"'+(canWrite()?'':' disabled')+'>+ 리오더</button></span></div></td></tr>';
+    h += '<tbody class="cgroup"><tr class="crow"><td colspan="13"><div class="cline">'+thumb(p,'xs')+'<b>'+esc(p.opt)+'</b><span class="mono muted">'+esc(p.b||'바코드 없음')+'</span>'+(p.isNew?'<span class="chip st-open">보드에서 등록</span>':'')+(hasStock(p)?'<span class="stk" title="'+esc(stkTip())+'">가용(오더 포함) <b>'+nf(availIn(p))+'</b> · 실 보유재고 <b>'+nf(p.stock)+'</b></span>':'')+'<span class="cbtn"><button class="btn sm" data-act="quickReorder" data-b="'+esc(p.key)+'"'+(canWrite()?'':' disabled')+'>+ 리오더</button></span></div></td></tr><tr class="shrow">'+OTH+'</tr>';
     let pf = null;
     for(const o of po){
       if(pf && o.f!==pf) h += '<tr class="mvrow"><td colspan="13">↓ 여기부터 <b>'+esc(o.f)+'</b> 생산 ('+esc(pf)+'에서 이관'+(o.od?' · '+esc(fmtDY(o.od))+' 오더부터':'')+')</td></tr>';
