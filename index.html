@@ -540,6 +540,9 @@ a.rvinc{cursor:pointer;color:inherit;text-decoration:none;white-space:nowrap}a.r
 .tecell:has(input:checked){border-color:var(--accent);background:color-mix(in srgb, var(--accent) 5%, transparent)}
 .tecell input{margin-top:2px}.tecell span{display:grid}.tecell b{font-size:13px}.tecell small{font-size:11.5px;color:var(--muted)}
 @media (max-width:640px){ .trow{grid-template-columns:32px minmax(0,1fr) auto;row-gap:6px}.troles,.tperms{grid-column:2 / -1}.tact{grid-column:3;grid-row:1}.tegrid{grid-template-columns:1fr} }
+
+.syrc{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-top:5px;font-size:12px;color:var(--fg);border:1px dashed var(--line);border-radius:6px;padding:3px 8px;width:max-content;max-width:100%;cursor:pointer}
+.syrc small{color:var(--muted);font-size:11px}.syrc.on{border-style:solid;border-color:var(--accent);background:color-mix(in srgb, var(--accent) 6%, transparent)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -635,7 +638,7 @@ const S = {
   fac: {f:'', q:'', sort:'recent', onlyOpen:false, n:15, view:'list'},
   mng: {q:'', showOff:false},
   fix: {type:'all', q:'', edits:{}, n:60, paste:'', pasteRes:null, pasteMsg:''},
-  sync: {text:'', res:null, off:{}},
+  sync: {text:'', res:null, off:{}, rc:{}},
   stk: {text:'', res:null},
   rcv: {q:'', fac:'', paste:'', res:null},
   pl: {text:'', res:null},
@@ -768,7 +771,7 @@ function facForOrder(o, open){
 function addOrder(o){
   const v = ovr[o.id] || {};
   const add = Array.isArray(v.recv) ? v.recv : [];
-  o.rcAdd = add.map(x => ({q:Number(x.q)||0, d:x.d||'', by:x.by, add:true}));
+  o.rcAdd = add.map(x => ({q:Number(x.q)||0, d:x.d||'', by:x.by, add:true, src:x.src||''}));
   const addQ = o.rcAdd.reduce((s,x)=>s+x.q,0);
   o.recv = o.recv0 + addQ;
   if(v.qty!=null && v.qty!==''){ o.qty = Number(v.qty); o.rem0 = Math.max(0, o.qty - o.recv0); }
@@ -1745,15 +1748,25 @@ function roPlan(text){
       logs.push({type:'eta', from:curFixed, to:eta, msg:tag+' · 예정일 '+(curFixed?fmtDY(curFixed):'미정')+' → '+fmtDY(eta)+' (리오더 시트)'});
     }
     if(reason && reason!==o.etaReason && !String(o.memo||'').includes(reason) && isOpen(o)){ patch.reason = reason; ch.push('사유: '+reason); }
+    // 시트의 '입고완료' · 입고 수량은 참고만: 이미 끝난 오더(잔여 0 · 미달 마감)는 건드리지 않고,
+    // 남은 수량이 있을 때만 '입고도 기록' 체크 칸을 보여줌 (기본 꺼짐 · 물류 입고 처리가 기준)
     let recvQ = 0;
-    if(done && !o.closed && qty - o.recv > 0) recvQ = qty - o.recv;   // 시트 수량 기준으로 아직 안 잡힌 만큼만
-    else if(part && part > o.recv && !o.closed) recvQ = part - o.recv;
-    const newQty = patch.qty!=null ? patch.qty : o.qty; const over = recvQ>0 ? Math.max(0, o.recv + recvQ - newQty) : 0;
-    if(recvQ>0){ ch.push((done?'입고완료':'입고 '+nf(part)+'장까지')+' → +'+nf(recvQ)+'장'+(over?' (오더보다 '+nf(over)+'장 많음)':'')); }
-    if(!ch.length){ same++; continue; }
-    plan.push({type: recvQ>0 ? 'recv' : (patch.eta||patch.reason ? 'eta' : 'qty'), over, p, o, od, qty, patch, logs, recvQ, recvD: (eta && eta<=TODAY ? eta : TODAY), label: recvQ>0 ? '입고 반영' : (shift==='late' ? '일정 지연 예정' : shift==='early' ? '조기 입고 예상' : shift==='set' ? '일정 확정' : patch.reason ? '사유 반영' : '오더 수량 변경'), shift, text: ch.join(' · ')});
+    if(isOpen(o) && o.remain>0){
+      if(done) recvQ = o.remain;
+      else if(part && part > o.recv) recvQ = Math.min(part - o.recv, o.remain);
+    }
+    const over = 0;
+    const sheetRecv = recvQ>0 ? (done ? '시트에 입고완료' : '시트에 입고 '+nf(part)+'장') + ' · 보드 잔여 '+nf(o.remain)+'장' : '';
+    if(!ch.length && !recvQ){ same++; continue; }
+    plan.push({type: !ch.length ? 'recv' : (patch.eta||patch.reason ? 'eta' : 'qty'), over, p, o, od, qty, patch, logs, recvQ, sheetRecv, recvD: (eta && eta<=TODAY ? eta : TODAY), label: !ch.length ? '시트 입고 확인' : (shift==='late' ? '일정 지연 예정' : shift==='early' ? '조기 입고 예상' : shift==='set' ? '일정 확정' : patch.reason ? '사유 반영' : '오더 수량 변경'), shift, text: ch.join(' · ')});
   }
   return {plan, miss, same, skipped, dup, header, total: rows.length - start};
+}
+function syncRcBox(x, i){
+  const q = x.type==='new' ? ((x.done||x.part) ? (x.done ? x.qty : Math.min(x.part, x.qty)) : 0) : x.recvQ;
+  if(!q) return '';
+  const on = !!(S.sync.rc||{})[i];
+  return '<label class="syrc'+(on?' on':'')+'"><input type="checkbox" data-syncrc="'+i+'"'+(on?' checked':'')+'> 입고 +'+nf(q)+'장도 기록 <small>'+esc(x.sheetRecv || '시트에 입고완료')+' · 물류 입고 확인 후 체크</small></label>';
 }
 function regSync(){
   const Y = S.sync;
@@ -1764,11 +1777,12 @@ function regSync(){
   const R = Y.res;
   if(R){
     const cnt = t => R.plan.filter(x=>x.type===t).length;
-    h += '<div class="stats"><span>읽은 줄 <b>'+nf(R.total)+'</b></span><span>신규 리오더 <b style="color:var(--accent)">'+cnt('new')+'</b></span><span>일정 반영 <b style="color:var(--info)">'+cnt('eta')+'</b>'+(R.plan.some(x=>x.shift==='late')?' · 지연 예정 '+R.plan.filter(x=>x.shift==='late').length:'')+(R.plan.some(x=>x.shift==='early')?' · 조기 입고 '+R.plan.filter(x=>x.shift==='early').length:'')+'</span><span>입고 반영 <b style="color:var(--ok)">'+cnt('recv')+'</b></span><span>오더 수량 변경 <b style="color:var(--warn)">'+R.plan.filter(x=>x.patch&&x.patch.qty!=null).length+'</b></span>'+(R.plan.some(x=>x.over)?'<span>초과 입고 <b style="color:var(--bad)">'+R.plan.filter(x=>x.over).length+'</b></span>':'')+(cnt('cancel')?'<span>오더 취소 <b style="color:var(--bad)">'+cnt('cancel')+'</b></span>':'')+'<span>이미 같음 <b>'+nf(R.same)+'</b></span>'+(R.miss.length?'<span>보드에 없는 바코드 <b style="color:var(--bad)">'+R.miss.length+'</b></span>':'')+(R.dup?'<span>시트 안 중복 <b>'+R.dup+'</b></span>':'')+'</div>';
+    h += '<div class="stats"><span>읽은 줄 <b>'+nf(R.total)+'</b></span><span>신규 리오더 <b style="color:var(--accent)">'+cnt('new')+'</b></span><span>일정 반영 <b style="color:var(--info)">'+cnt('eta')+'</b>'+(R.plan.some(x=>x.shift==='late')?' · 지연 예정 '+R.plan.filter(x=>x.shift==='late').length:'')+(R.plan.some(x=>x.shift==='early')?' · 조기 입고 '+R.plan.filter(x=>x.shift==='early').length:'')+'</span><span>시트 입고 확인 <b style="color:var(--ok)">'+R.plan.filter(x=>x.recvQ>0 || (x.type==='new' && (x.done||x.part))).length+'</b> <small class="muted">(체크한 것만 입고로 기록)</small></span><span>오더 수량 변경 <b style="color:var(--warn)">'+R.plan.filter(x=>x.patch&&x.patch.qty!=null).length+'</b></span>'+(R.plan.some(x=>x.over)?'<span>초과 입고 <b style="color:var(--bad)">'+R.plan.filter(x=>x.over).length+'</b></span>':'')+(cnt('cancel')?'<span>오더 취소 <b style="color:var(--bad)">'+cnt('cancel')+'</b></span>':'')+'<span>이미 같음 <b>'+nf(R.same)+'</b></span>'+(R.miss.length?'<span>보드에 없는 바코드 <b style="color:var(--bad)">'+R.miss.length+'</b></span>':'')+(R.dup?'<span>시트 안 중복 <b>'+R.dup+'</b></span>':'')+'</div>';
     if(!R.header) h += '<p class="note" style="margin:0">머리글 줄이 없어 리오더 시트 기본 열 순서(리오더 날짜 · 바코드 · 담당 · 공장 · … · 합계 · 입고일정 · 사유 · 예약배송 · 비고)로 읽었습니다.</p>';
     if(R.plan.length){
       h += '<div class="tw" style="max-height:420px;overflow:auto"><table><thead><tr><th><input type="checkbox" id="syncAll"'+(Object.values(Y.off).some(Boolean)?'':' checked')+' aria-label="전체 선택"></th><th>구분</th><th>상품</th><th>리오더 날짜</th><th>차수</th><th>바뀌는 내용</th></tr></thead><tbody>'+
-        R.plan.map((x,i)=>{ const qc = x.patch && x.patch.qty!=null && x.type!=='qty'; return '<tr'+(x.type==='cancel'||x.over?' class="xchg"':x.patch&&x.patch.qty!=null?' class="qchg"':'')+'><td><input type="checkbox" data-sync="'+i+'"'+(Y.off[i]?'':' checked')+'></td><td style="white-space:nowrap"><span class="chip '+(x.shift==='late'?'st-late':x.shift==='early'?'st-done':({new:'st-done',eta:'st-open',recv:'st-done',qty:'st-soon',cancel:'st-late'})[x.type])+'">'+x.label+'</span>'+(qc?' <span class="chip st-soon">오더 수량 변경</span>':'')+(x.over?' <span class="chip st-late">초과 입고</span>':'')+'</td><td><b>'+esc(x.p.n||x.p.en)+'</b> '+esc(x.p.opt)+' <span class="mono muted">'+esc(x.p.b)+'</span></td><td class="num">'+fmtDY(x.od)+'</td><td>'+esc(x.o?x.o.round:nextRound(x.p))+'</td><td class="muted">'+(x.patch&&x.patch.qty!=null?'<b class="qtxt">오더 수량 '+nf(x.o.qty)+' → '+nf(x.patch.qty)+'장</b>'+(x.text.replace(/^수량 [\d,]+ → [\d,]+( · )?/,'')?' · ':'')+esc(x.text.replace(/^수량 [\d,]+ → [\d,]+( · )?/,'')):esc(x.text))+'</td></tr>'; }).join('')+'</tbody></table></div>'+
+        R.plan.map((x,i)=>{ const qc = x.patch && x.patch.qty!=null && x.type!=='qty'; return '<tr'+(x.type==='cancel'||x.over?' class="xchg"':x.patch&&x.patch.qty!=null?' class="qchg"':'')+'><td><input type="checkbox" data-sync="'+i+'"'+(Y.off[i]?'':' checked')+'></td><td style="white-space:nowrap"><span class="chip '+(x.shift==='late'?'st-late':x.shift==='early'?'st-done':({new:'st-done',eta:'st-open',recv:'st-done',qty:'st-soon',cancel:'st-late'})[x.type])+'">'+x.label+'</span>'+(qc?' <span class="chip st-soon">오더 수량 변경</span>':'')+(x.over?' <span class="chip st-late">초과 입고</span>':'')+'</td><td><b>'+esc(x.p.n||x.p.en)+'</b> '+esc(x.p.opt)+' <span class="mono muted">'+esc(x.p.b)+'</span></td><td class="num">'+fmtDY(x.od)+'</td><td>'+esc(x.o?x.o.round:nextRound(x.p))+'</td><td class="muted">'+(x.patch&&x.patch.qty!=null?'<b class="qtxt">오더 수량 '+nf(x.o.qty)+' → '+nf(x.patch.qty)+'장</b>'+(x.text.replace(/^수량 [\d,]+ → [\d,]+( · )?/,'')?' · ':'')+esc(x.text.replace(/^수량 [\d,]+ → [\d,]+( · )?/,'')):esc(x.text))+syncRcBox(x,i)+'</td></tr>'; }).join('')+'</tbody></table></div>'+
+        '<p class="note" style="margin:0">입고는 <b>물류팀이 입고 처리에서 넣은 것</b>이 기준이에요. 시트의 "입고완료"는 참고로만 보여주고, 이미 끝난 오더(미달 마감 포함)는 건드리지 않아요. 실제로 들어온 게 확인된 줄만 "입고도 기록"을 체크하세요.</p>'+
         '<div><button class="btn pri" data-act="syncApply"'+(canWrite()?'':' disabled')+'>선택한 '+(R.plan.length-Object.values(Y.off).filter(Boolean).length)+'건 반영</button></div>';
     } else h += '<div class="empty">새로 반영할 내용이 없습니다. 보드가 리오더 시트와 같은 상태입니다.</div>';
     if(R.miss.length) h += '<details><summary class="note" style="cursor:pointer">보드에 없는 바코드 '+R.miss.length+'건 (신규 상품 등록 또는 정보 보정에서 바코드를 연결하면 다음 붙여넣기 때 반영됩니다)</summary><div class="tw"><table><thead><tr><th>바코드</th><th>제작품명</th><th>컬러,사이즈</th><th>공장</th><th>리오더 날짜</th><th class="num">수량</th></tr></thead><tbody>'+
@@ -1778,18 +1792,20 @@ function regSync(){
 }
 async function syncApply(){ if(!need('reorder')) return;
   const R = S.sync.res; if(!R) return;
-  const picks = R.plan.filter((x,i)=>!S.sync.off[i]);
-  if(!picks.length){ toast('반영할 줄을 고르세요'); return; }
+  const RC = S.sync.rc || {};
+  const picks = R.plan.map((x,i)=>Object.assign({}, x, {_rc: !!RC[i]})).filter((x,i)=>!S.sync.off[i] && !(x.type==='recv' && !x._rc));
+  if(!picks.length){ toast('반영할 줄을 고르세요 · 시트 입고는 "입고도 기록"을 체크해야 반영돼요'); return; }
   const at = new Date().toISOString(); const c = {new:0, eta:0, recv:0, qty:0, cancel:0};
   const n = await guardN(async()=>{
     for(const x of picks){
       if(x.type==='new'){
         const ref = await DB.collection('ord').add({b:x.p.b, f:x.p.curFac, round:nextRound(x.p), od:x.od, qty:x.qty, eta:x.eta||'', memo:(x.reason||''), src:'리오더 시트', at, by:MYID||''});
-        if((x.done || x.part) && ref && ref.id){ const q = x.done ? x.qty : Math.min(x.part, x.qty); await DB.doc('ovr/n_'+ref.id).set({recv:[{q, d:(x.eta && x.eta<=TODAY ? x.eta : TODAY), by:MYID||''}], log:[{at, by:MYID||'', type:'recv', msg:'입고 '+q+'장 (리오더 시트)'}]}); }
+        if((x.done || x.part) && x._rc && ref && ref.id){ const q = x.done ? x.qty : Math.min(x.part, x.qty); await DB.doc('ovr/n_'+ref.id).set({recv:[{q, d:(x.eta && x.eta<=TODAY ? x.eta : TODAY), by:MYID||'', src:'sheet'}], log:[{at, by:MYID||'', type:'recv', msg:'입고 '+q+'장 (리오더 시트 · 확인 후 기록)'}]}); c.recv++; }
         c.new++; continue;
       }
       const o = x.o; const cur = Object.assign({}, ovr[o.id]||{}); const patch = Object.assign({}, x.patch); const logs = (x.logs||[]).slice();
-      if(x.recvQ>0){ patch.recv = (Array.isArray(cur.recv)?cur.recv:[]).concat([{q:x.recvQ, d:x.recvD, by:MYID||''}]); logs.push({type:'recv', msg:'입고 '+x.recvQ+'장'+(x.over?' · 초과 입고 +'+x.over+'장':'')+' (리오더 시트)'}); }
+      if(x.recvQ>0 && x._rc && x.recvQ<=o.remain){ patch.recv = (Array.isArray(cur.recv)?cur.recv:[]).concat([{q:x.recvQ, d:x.recvD, by:MYID||'', src:'sheet'}]); logs.push({type:'recv', msg:'입고 '+x.recvQ+'장 (리오더 시트 · 확인 후 기록)'}); if(x.type!=='recv') c.recv++; }
+      if(!Object.keys(patch).length && !logs.length) continue;
       const next = Object.assign(cur, patch);
       next.log = (Array.isArray(next.log)?next.log:[]).concat(logs.map(l=>Object.assign({at, by:MYID||''}, l))).slice(-40);
       await DB.doc('ovr/'+o.id).set(next);
@@ -1798,7 +1814,7 @@ async function syncApply(){ if(!need('reorder')) return;
     await writeLog('리오더 시트 반영: 신규 '+c.new+' · 일정 '+c.eta+' · 입고 '+c.recv+' · 수량 '+c.qty+(c.cancel?' · 취소 '+c.cancel:'')+'건');
     return picks.length;
   });
-  if(n){ toast(n+'건 반영했습니다'); S.sync.res = null; S.sync.off = {}; render(); }
+  if(n){ toast(n+'건 반영했습니다'); S.sync.res = null; S.sync.off = {}; S.sync.rc = {}; render(); }
 }
 
 // ---------- 상품 목록(셀메이트 양식) 붙여넣기로 신규 등록 ----------
@@ -2808,7 +2824,7 @@ function orderModal(id, mode){
   const dis = canWrite() ? '' : ' disabled';
   if(!mode){
     h += '<div class="filters"><button class="btn pri" data-act="mRecv" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>입고 처리</button><button class="btn" data-act="mEta" data-id="'+o.id+'"'+dis+'>일정 수정</button><button class="btn" data-act="mCancel" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>취소 · 마감</button><button class="btn" data-act="mQty" data-id="'+o.id+'"'+dis+'>수량 수정</button><button class="btn danger" data-act="mDel" data-id="'+o.id+'"'+dis+'>이 차수 삭제</button></div>';
-    const ed = o.rcAdd.map((r,i)=>'<div><span class="rc add">'+fmtDY(r.d)+' · '+(r.q>0?'':'')+nf(r.q)+'장</span><span>'+(r.adj?'입고 정정':'입고')+' · '+esc(who(r.by))+'</span><span class="rbtn2"><button class="btn sm" data-act="mQty" data-id="'+o.id+'"'+dis+'>수정</button><button class="btn sm" data-act="undoRecv" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></span></div>').concat((o.cancels||[]).map((r,i)=>'<div><span class="rc cx">−'+nf(r.q)+'</span><span>'+esc(r.r||'빼기')+' · '+esc(fmtDY(r.d))+' · '+esc(who(r.by))+'</span><button class="btn sm" data-act="undoCancel" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></div>'));
+    const ed = o.rcAdd.map((r,i)=>'<div><span class="rc add">'+fmtDY(r.d)+' · '+(r.q>0?'':'')+nf(r.q)+'장</span><span>'+(r.adj?'입고 정정':'입고')+(r.src==='sheet'?' <span class="chip st-open">리오더 시트</span>':'')+' · '+esc(who(r.by))+'</span><span class="rbtn2"><button class="btn sm" data-act="mQty" data-id="'+o.id+'"'+dis+'>수정</button><button class="btn sm" data-act="undoRecv" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></span></div>').concat((o.cancels||[]).map((r,i)=>'<div><span class="rc cx">−'+nf(r.q)+'</span><span>'+esc(r.r||'빼기')+' · '+esc(fmtDY(r.d))+' · '+esc(who(r.by))+'</span><button class="btn sm" data-act="undoCancel" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></div>'));
     if(ed.length) h += '<div><h3 style="margin-bottom:6px">보드에서 입력한 입고 · 빼기</h3><div class="panel undolist">'+ed.join('')+'</div><p class="note" style="margin:4px 0 0">잘못 누른 입고나 빼기는 되돌리기로 취소할 수 있습니다.</p></div>';
     if((ovr[o.id]||{}).closed) h += '<div class="filters"><span class="note" style="margin:0">취소 · 마감한 오더예요 · 잘못 눌렀다면</span><button class="btn sm" data-act="reopenOrd" data-id="'+o.id+'"'+dis+'>다시 열기</button></div>';
     if(!canWrite()) h += '<p class="note" style="margin:0">저장이 켜진 보기에서만 처리할 수 있습니다.</p>';
@@ -2988,7 +3004,7 @@ async function act(a, el){
     case 'calDay': S.calSel = (S.calSel===el.dataset.d ? null : el.dataset.d); render(); break;
     case 'pickStyle': S.find.style = el.dataset.k; render(); { const d=document.getElementById('detail'); if(d) d.scrollIntoView({block:'start'}); } break;
     case 'quickReorder': { const p = PRODS.get(el.dataset.b); S.reg.mode='re'; S.reg.ro={q:p.n||p.b, style:styleKey(p), sel:{}}; setTab('reg'); break; }
-    case 'syncPreview': { const t = (document.getElementById('syncT')||{}).value||''; S.sync.text = t; S.sync.off = {}; S.sync.res = t.trim() ? roPlan(t) : null; if(!t.trim()) toast('리오더 시트 내용을 붙여넣어 주세요'); render(); break; }
+    case 'syncPreview': { const t = (document.getElementById('syncT')||{}).value||''; S.sync.text = t; S.sync.off = {}; S.sync.rc = {}; S.sync.res = t.trim() ? roPlan(t) : null; if(!t.trim()) toast('리오더 시트 내용을 붙여넣어 주세요'); render(); break; }
     case 'plCheck': { const t = (document.getElementById('plT')||{}).value||''; if(!t.trim()){ toast('상품 목록을 붙여넣어 주세요'); break; } plRun(t, ''); break; }
     case 'stCheck': { const t = (document.getElementById('stT')||{}).value||''; if(!t.trim()){ toast('셀메이트 재고 목록을 붙여넣어 주세요'); break; } stockRun(t, ''); break; }
     case 'stApply': await stockApply(); break;
@@ -3238,6 +3254,7 @@ document.addEventListener('change', e => {
   if(t.id==='facSort'){ S.fac.sort=t.value; render(); }
   if(t.dataset && t.dataset.fx){ render(); }
   if(t.dataset && t.dataset.sync!=null){ S.sync.off[t.dataset.sync] = !t.checked; render(); }
+  if(t.dataset && t.dataset.syncrc!=null){ (S.sync.rc = S.sync.rc || {})[t.dataset.syncrc] = t.checked; if(t.checked) S.sync.off[t.dataset.syncrc] = false; render(); }
   if(t.dataset && t.dataset.plf!=null && S.pl.res){ S.pl.res.fresh[+t.dataset.plf].on = t.checked; render(); }
   if(t.dataset && t.dataset.pld!=null && S.pl.res){ S.pl.res.diff[+t.dataset.pld].on = t.checked; S.pl.diffOpen = true; render(); }
   if(t.id==='te_ext'){ const g = document.getElementById('te_grid'); const fi = document.getElementById('te_facs'); if(g){ g.classList.toggle('off', t.checked); g.querySelectorAll('input').forEach(i=>{ i.disabled = t.checked; }); } if(fi) fi.hidden = !t.checked; }
