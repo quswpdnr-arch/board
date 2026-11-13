@@ -25,6 +25,7 @@ try{
 if(window.__EMU){ connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true }); connectFirestoreEmulator(fs, '127.0.0.1', 8080); }
 
 let me = null, isAdmin = false, started = false, memberName = '', memberAdmins = [];
+let customName = '';
 const brandKey = () => (typeof BRAND !== 'undefined' && BRAND !== 'all') ? BRAND : 'kb';
 const isBrandAdmin = br => isAdmin || memberAdmins.includes(br || brandKey());
 
@@ -62,8 +63,9 @@ onAuthStateChanged(auth, async user => {
   let ok = (await memberP) || isAdmin;
   if(!ok){ deniedScreen(email); return; }
   // 이름 기록은 바뀌었을 때만, 기다리지 않고
-  const nm = memberName || user.displayName || email.split('@')[0];
-  try{ if(localStorage.getItem('kb_user_'+user.uid) !== nm){ setDoc(doc(fs, 'users', user.uid), { name: nm, email, at: new Date().toISOString() }).then(()=>{ try{ localStorage.setItem('kb_user_'+user.uid, nm); }catch(e){} }).catch(()=>{}); } }catch(e){}
+  try{ const ud = await getDoc(doc(fs, 'users', user.uid)); if(ud.exists() && ud.data().custom && ud.data().name) customName = ud.data().name; }catch(e){}
+  const nm = customName || memberName || user.displayName || email.split('@')[0];
+  if(!customName) try{ if(localStorage.getItem('kb_user_'+user.uid) !== nm){ setDoc(doc(fs, 'users', user.uid), { name: nm, email, at: new Date().toISOString() }).then(()=>{ try{ localStorage.setItem('kb_user_'+user.uid, nm); }catch(e){} }).catch(()=>{}); } }catch(e){}
   let snapText = '';
   try{ const r = await snapP; if(r.e) throw r.e; snapText = r.t; }
   catch(e){ show('<h1>데이터를 불러오지 못했어요</h1><p class="gerr">'+esc(e.code||e.message)+'</p><p>Firestore 규칙(설명서 4단계)이 제대로 게시됐는지 확인해 주세요.</p><button class="gbtn ghost" onclick="location.reload()">다시 시도</button>'); return; }
@@ -165,7 +167,7 @@ function watchUsers(){
 }
 const userShim = {
   id: async () => me.uid,
-  me: async () => ({ id: me.uid, name: memberName || me.displayName || me.email, email: String(me.email || '').toLowerCase() }),
+  me: async () => ({ id: me.uid, name: myName(), email: String(me.email || '').toLowerCase() }),
   isOwner: () => isBrandAdmin(), canEdit: () => true, can: () => true,
   profiles: async ids => {
     watchUsers();
@@ -193,10 +195,35 @@ function start(snapText){
   window.claude = { use: async n => n === 'db' ? dbShim : n === 'user' ? userShim : n === 'downloads' ? dlShim : null };
   const sc = document.createElement('script'); sc.textContent = document.getElementById('app-src').textContent; document.body.appendChild(sc);
   gate.hidden = true;
-  const acct = document.getElementById('acct');
-  acct.innerHTML = '<span>'+esc(memberName || me.displayName || me.email)+(isAdmin ? ' · 관리자' : isBrandAdmin() ? ' · 팀장' : '')+'</span><button class="btn sm ghost" id="aOut">로그아웃</button>';
-  document.getElementById('aOut').onclick = () => signOut(auth);
+  acctUI();
 }
+// 계정: 이름 칩을 누르면 이름 바꾸기 · 로그아웃
+function acctUI(){
+  const acct = document.getElementById('acct'); if(!acct) return;
+  const nm = myName(); const role = isAdmin ? '관리자' : isBrandAdmin() ? '팀장' : '';
+  acct.innerHTML = '<button class="acctbtn" id="aBtn" type="button" aria-haspopup="true" aria-expanded="false" title="내 계정"><span class="av">'+esc((nm||'?').trim().slice(0,1).toUpperCase())+'</span><span class="an">'+esc(nm)+'</span>'+(role?'<span class="ar">'+role+'</span>':'')+'</button>'+
+    '<div class="acctpop" id="aPop" hidden><div><b>'+esc(nm)+'</b>'+(role?' <span class="muted">· '+role+'</span>':'')+'<div class="em">'+esc(me.email||'')+'</div></div>'+
+    '<label>보드에 보일 이름<input id="aName" value="'+esc(nm)+'" maxlength="30"></label><div class="row"><button class="btn sm pri" id="aSave" type="button">이름 저장</button><button class="btn sm" id="aOut" type="button">로그아웃</button></div></div>';
+  const pop = document.getElementById('aPop'), btn = document.getElementById('aBtn');
+  btn.onclick = e => { e.stopPropagation(); pop.hidden = !pop.hidden; btn.setAttribute('aria-expanded', String(!pop.hidden)); if(!pop.hidden) document.getElementById('aName').focus(); };
+  pop.onclick = e => e.stopPropagation();
+  document.addEventListener('click', () => { if(!pop.hidden){ pop.hidden = true; btn.setAttribute('aria-expanded','false'); } });
+  document.getElementById('aOut').onclick = () => signOut(auth);
+  const save = async () => {
+    const v = document.getElementById('aName').value.trim(); if(!v) return;
+    const email = String(me.email||'').toLowerCase();
+    try{
+      await setDoc(doc(fs, 'users', me.uid), { name: v, email, custom: true, at: new Date().toISOString() });
+      try{ const md = await getDoc(doc(fs, 'members', email)); if(md.exists()) await setDoc(doc(fs, 'members', email), Object.assign({}, md.data(), { name: v })); }catch(e){}
+      customName = v; memberName = memberName ? v : memberName; try{ localStorage.setItem('kb_user_'+me.uid, v); }catch(e){}
+      if(userNames) userNames[me.uid] = v;
+      acctUI();
+    }catch(e){ alert('이름을 저장하지 못했어요: '+(e.code||e.message)); }
+  };
+  document.getElementById('aSave').onclick = save;
+  document.getElementById('aName').onkeydown = e => { if(e.key==='Enter') save(); };
+}
+const myName = () => customName || memberName || me.displayName || String(me.email||'').split('@')[0];
 
 // ---------- 관리자: 시트 데이터 교체 (팀원 · 권한 화면에서 사용) ----------
 window.__boardAdmin = {
