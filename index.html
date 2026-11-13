@@ -545,6 +545,11 @@ a.rvinc{cursor:pointer;color:inherit;text-decoration:none;white-space:nowrap}a.r
 .syrc small{color:var(--muted);font-size:11px}.syrc.on{border-style:solid;border-color:var(--accent);background:color-mix(in srgb, var(--accent) 6%, transparent)}
 .spadd{appearance:none;font:inherit;font-size:11.5px;font-weight:700;color:var(--accent);background:transparent;border:1px dashed var(--accent);border-radius:6px;padding:4px 7px;cursor:pointer;white-space:nowrap}
 .spadd:hover{background:var(--accent-soft)}
+.spadd.more{border-color:var(--line);color:var(--muted);font-weight:600;opacity:0;transition:opacity .12s}
+tr:hover .spadd.more,.spadd.more:focus-visible{opacity:1}
+@media (hover:none){.spadd.more{opacity:.85}}
+.rcvtbl tr.lhead td{background:var(--sunk);font-size:12.5px;color:var(--muted);padding-top:10px;padding-bottom:10px}
+.rcvtbl tr.lrow td{background:color-mix(in srgb, var(--muted) 4%, transparent)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -642,7 +647,7 @@ const S = {
   fix: {type:'all', q:'', edits:{}, n:60, paste:'', pasteRes:null, pasteMsg:''},
   sync: {text:'', res:null, off:{}, rc:{}},
   stk: {text:'', res:null},
-  rcv: {q:'', fac:'', paste:'', res:null},
+  rcv: {q:'', fac:'', paste:'', res:null, all:false},
   pl: {text:'', res:null},
   sm: {},
   rv: {q:'', st:'', fac:'', cat:'', act:'', all:false, n:150, sk:'', sd:1},
@@ -1231,6 +1236,7 @@ function splitCells(o){
   const one = r => '<span class="sp'+(r.add?' add':'')+'"><b>'+nf(r.q)+'</b><small>'+(r.d?r.d.slice(5).replace('-','.'):esc(r.l||''))+'</small></span>';
   for(let i=0;i<6;i++){
     if(i===5 && all.length>6){ const rest = all.slice(5); out.push('<td class="spc">'+one({q:rest.reduce((s,r)=>s+r.q,0), d:rest[rest.length-1].d, l:'외 '+(rest.length-1)})+'<small class="muted">+'+(rest.length-1)+'회</small></td>'); }
+    else if(!all[i] && i===all.length && !isOpen(o) && o.qty>0 && canWrite() && canDo('recv')) out.push('<td class="spc"><button class="spadd more" data-act="mRecv" data-id="'+o.id+'" title="입고 완료된 차수에 늦게 들어온 수량 추가">+ 추가</button></td>');
     else if(!all[i] && i===all.length && isOpen(o) && o.remain>0 && canWrite() && canDo('recv')) out.push('<td class="spc"><button class="spadd" data-act="mRecv" data-id="'+o.id+'" title="남은 '+nf(o.remain)+'장 중 이번에 들어온 만큼 입고 기록 (여러 번 나눠 넣어도 돼요)">+ 입고</button></td>');
     else out.push('<td class="spc">'+(all[i]?one(all[i]):'')+'</td>');
   }
@@ -1974,14 +1980,31 @@ function recvList(){
   if(X.fac) a = a.filter(o=>o.f===X.fac);
   if(q) a = a.filter(o=>(o.p.b+' '+o.p.n+' '+o.p.en+' '+o.p.opt+' '+o.f).toLowerCase().includes(q));
   a.sort((x,y)=>(x.eta||'9').localeCompare(y.eta||'9'));
-  let h = '<div class="sec"><div class="sechead"><h2>목록에서 입고 처리</h2><span class="sub">입고 기다리는 오더 '+a.length+'건 · 들어온 수량과 날짜를 확인하고 입고 버튼</span></div>'+
-    '<div class="filters"><input type="search" id="rcvQ" placeholder="바코드 · 제작품명 · 컬러 · 공장 검색" value="'+esc(X.q)+'"><select id="rcvFac"><option value="">전체 공장</option>'+[...new Set(ORDERS.filter(isOpen).map(o=>o.f))].sort((x,y)=>x.localeCompare(y,'ko')).map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select></div>'+
+  let h = '<div class="sec"><div class="sechead"><h2>목록에서 입고 처리</h2><span class="sub">입고 기다리는 오더 '+a.length+'건 · 들어온 수량과 날짜를 확인하고 입고 버튼 · 이미 끝난 차수에 늦게 들어온 건 검색하거나 "입고 완료 차수도 보기"를 켜세요</span></div>'+
+    '<div class="filters"><input type="search" id="rcvQ" placeholder="바코드 · 제작품명 · 컬러 · 공장 검색" value="'+esc(X.q)+'"><select id="rcvFac"><option value="">전체 공장</option>'+[...new Set(ORDERS.filter(isOpen).map(o=>o.f))].sort((x,y)=>x.localeCompare(y,'ko')).map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select><label class="tog"><input type="checkbox" id="rcvAll"'+(X.all?' checked':'')+'> 입고 완료 차수도 보기</label></div>'+
     '<div class="panel tw"><table class="rcvtbl"><thead><tr><th>상품 · 컬러,사이즈 · 바코드</th><th>공장</th><th>차수 · 오더일</th><th>예정일</th><th class="num">잔여</th>'+stockTh()+'<th>입고 수량</th><th>입고일</th><th></th></tr></thead><tbody>';
-  if(!a.length) h += '<tr><td colspan="10" class="empty">입고를 기다리는 오더가 없습니다.</td></tr>';
+  if(!a.length) h += '<tr><td colspan="10" class="empty">'+(q||X.all?'입고를 기다리는 오더 중에는 없어요 · 이미 끝난 차수는 아래에서 추가 입고할 수 있어요':'입고를 기다리는 오더가 없습니다.')+'</td></tr>';
   for(const o of a.slice(0,200)){
     h += '<tr><td><div class="pc">'+thumb(o.p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(o.p.key)+'" title="상품 조회로 이동">'+esc(o.p.n||o.p.en)+'</a><small>'+esc(o.p.opt)+' · <span class="mono">'+esc(o.p.b)+'</span></small></div></div></td><td>'+flink(o.f)+'</td><td style="white-space:nowrap">'+esc(o.round)+'<small class="odsub">'+(o.od?fmtDY(o.od)+' 오더':'초두')+'</small></td><td style="white-space:nowrap">'+etaCell(o)+'</td><td class="num"><b>'+nf(o.remain)+'</b></td><td class="num">'+stockCell(o.p)+'</td>'+
       '<td><input type="number" min="1" id="rq_'+o.id+'" style="width:58px" value="'+o.remain+'" data-rem="'+o.remain+'"><small class="odsub overq" hidden>초과 입고</small></td><td><input type="date" id="rd_'+o.id+'" value="'+TODAY+'" style="width:122px;padding-left:6px;padding-right:4px"></td>'+
       '<td><div class="rbtns"><button class="btn sm pri" data-act="rcvOne" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+'>입고</button><button class="btn sm" data-act="mDelay" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="입고 예정일 수정 (앞당기기 · 미루기)">수정</button><button class="btn sm" data-act="mCancel" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="불량 · 미입고 수량 빼기">빼기</button></div></td></tr>';
+  }
+  if(q || X.all){
+    let dn = ORDERS.filter(o=>!isOpen(o) && o.qty>0 && (!q || (o.p.b+' '+o.p.n+' '+o.p.en+' '+o.p.opt+' '+o.f).toLowerCase().includes(q)));
+    if(X.fac) dn = dn.filter(o=>o.f===X.fac);
+    const lastRc = o => rcAll(o).map(r=>r.d).filter(Boolean).sort().pop() || o.od || '';
+    dn.sort((x,y)=>lastRc(y).localeCompare(lastRc(x)));
+    const lim = q ? 40 : 80;
+    if(dn.length){
+      h += '<tr class="lhead"><td colspan="10"><b>입고 완료된 차수 '+nf(dn.length)+'건</b> · 다 끝난 뒤 늦게 들어온 수량은 <b>추가 입고</b>로 넣으세요 · 최근 입고 순'+(dn.length>lim?' (위 '+lim+'건 · 검색하면 더 찾을 수 있어요)':'')+'</td></tr>';
+      for(const o of dn.slice(0,lim)){
+        const lack = Math.max(0, o.qty - o.recv);
+        h += '<tr class="lrow"><td><div class="pc">'+thumb(o.p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(o.p.key)+'" title="상품 조회로 이동">'+esc(o.p.n||o.p.en)+'</a><small>'+esc(o.p.opt)+' · <span class="mono">'+esc(o.p.b)+'</span></small></div></div></td><td>'+flink(o.f)+'</td><td style="white-space:nowrap">'+esc(o.round)+'<small class="odsub">'+(o.od?fmtDY(o.od)+' 오더':'초두')+'</small></td>'+
+          '<td>'+chip(o.status)+'<small class="odsub">마지막 입고 '+(lastRc(o)?fmtDY(lastRc(o)):'—')+'</small></td><td class="num">'+nf(o.qty)+'<small class="odsub">입고 '+nf(o.recv)+(lack?' · <b style="color:var(--bad)">미달 '+nf(lack)+'</b>':'')+'</small></td><td class="num">'+stockCell(o.p)+'</td>'+
+          '<td><input type="number" min="1" id="rq_'+o.id+'" style="width:58px" value="'+(lack||1)+'" data-rem="0"></td><td><input type="date" id="rd_'+o.id+'" value="'+TODAY+'" style="width:122px;padding-left:6px;padding-right:4px"></td>'+
+          '<td><div class="rbtns"><button class="btn sm" data-act="rcvOne" data-id="'+o.id+'"'+(canWrite()?'':' disabled')+' title="이미 입고 완료된 차수에 늦게 들어온 수량을 더해요">추가 입고</button></div></td></tr>';
+      }
+    }
   }
   return h+'</tbody></table></div></div>';
 }
@@ -2803,9 +2826,9 @@ function recvAsk(o, q, d){
 }
 async function recvOne(o, q, d, closeShort){
   const cur = (ovr[o.id]&&Array.isArray(ovr[o.id].recv))?ovr[o.id].recv:[];
-  const ov = Math.max(0, q - o.remain); const short = Math.max(0, o.remain - q);
+  const late = o.remain===0; const ov = late ? Math.max(0, o.recv + q - o.qty) : Math.max(0, q - o.remain); const short = late ? 0 : Math.max(0, o.remain - q);
   const patch = {recv:cur.concat([{q,d,by:MYID||''}])}; if(closeShort && short>0){ patch.closed = true; patch.closeReason = '미달 마감 ('+short+'장 미입고)'; }
-  const msg = '입고 '+q+'장 ('+d.slice(5).replace('-','.')+')'+(ov?' · 초과 입고 +'+ov+'장':'')+(closeShort&&short?' · 미달 '+short+'장 취소 · 마감':'');
+  const msg = (late?'추가 입고 ':'입고 ')+q+'장 ('+d.slice(5).replace('-','.')+')'+(late?' · 입고 완료 차수에 늦게 들어옴':'')+(ov?' · 초과 입고 +'+ov+'장':'')+(closeShort&&short?' · 미달 '+short+'장 취소 · 마감':'');
   return guard(()=>saveOvr(o, patch, {type:'recv', msg}, label(o)+' '+msg), ov ? '입고 처리했습니다 · 초과 입고 '+ov+'장' : (closeShort&&short ? '입고 처리하고 미달 '+short+'장은 마감했습니다' : '입고 처리했습니다'));
 }
 async function schSave(ids){
@@ -2836,13 +2859,13 @@ function orderModal(id, mode){
   if(o.changes.length) h += '<div><h3 style="margin-bottom:6px">변경 기록</h3><div class="panel loglist">'+o.changes.slice().reverse().map(c=>'<div><span class="muted">'+esc(fmtAt(c.at,true).replace('-','.'))+'</span><span>'+esc(c.msg||'')+' <span class="muted">· '+esc(who(c.by))+'</span></span></div>').join('')+'</div></div>';
   const dis = canWrite() ? '' : ' disabled';
   if(!mode){
-    h += '<div class="filters"><button class="btn pri" data-act="mRecv" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>입고 처리</button><button class="btn" data-act="mEta" data-id="'+o.id+'"'+dis+'>일정 수정</button><button class="btn" data-act="mCancel" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>취소 · 마감</button><button class="btn" data-act="mQty" data-id="'+o.id+'"'+dis+'>수량 수정</button><button class="btn danger" data-act="mDel" data-id="'+o.id+'"'+dis+'>이 차수 삭제</button></div>';
+    h += '<div class="filters">'+(o.remain>0?'<button class="btn pri" data-act="mRecv" data-id="'+o.id+'"'+dis+'>입고 처리</button>':'<button class="btn pri" data-act="mRecv" data-id="'+o.id+'"'+dis+' title="입고 완료된 차수에 늦게 들어온 수량을 더해요">추가 입고</button>')+'<button class="btn" data-act="mEta" data-id="'+o.id+'"'+dis+'>일정 수정</button><button class="btn" data-act="mCancel" data-id="'+o.id+'"'+dis+(o.remain>0?'':' disabled')+'>취소 · 마감</button><button class="btn" data-act="mQty" data-id="'+o.id+'"'+dis+'>수량 수정</button><button class="btn danger" data-act="mDel" data-id="'+o.id+'"'+dis+'>이 차수 삭제</button></div>';
     const ed = o.rcAdd.map((r,i)=>'<div><span class="rc add">'+fmtDY(r.d)+' · '+(r.q>0?'':'')+nf(r.q)+'장</span><span>'+(r.adj?'입고 정정':'입고')+(r.src==='sheet'?' <span class="chip st-open">리오더 시트</span>':'')+' · '+esc(who(r.by))+'</span><span class="rbtn2"><button class="btn sm" data-act="mQty" data-id="'+o.id+'"'+dis+'>수정</button><button class="btn sm" data-act="undoRecv" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></span></div>').concat((o.cancels||[]).map((r,i)=>'<div><span class="rc cx">−'+nf(r.q)+'</span><span>'+esc(r.r||'빼기')+' · '+esc(fmtDY(r.d))+' · '+esc(who(r.by))+'</span><button class="btn sm" data-act="undoCancel" data-id="'+o.id+'" data-i="'+i+'"'+dis+'>되돌리기</button></div>'));
     if(ed.length) h += '<div><h3 style="margin-bottom:6px">보드에서 입력한 입고 · 빼기</h3><div class="panel undolist">'+ed.join('')+'</div><p class="note" style="margin:4px 0 0">잘못 누른 입고나 빼기는 되돌리기로 취소할 수 있습니다.</p></div>';
     if((ovr[o.id]||{}).closed) h += '<div class="filters"><span class="note" style="margin:0">취소 · 마감한 오더예요 · 잘못 눌렀다면</span><button class="btn sm" data-act="reopenOrd" data-id="'+o.id+'"'+dis+'>다시 열기</button></div>';
     if(!canWrite()) h += '<p class="note" style="margin:0">저장이 켜진 보기에서만 처리할 수 있습니다.</p>';
   }
-  if(mode==='recv') h += '<div class="panel pad step"><h3>입고 처리</h3><div class="formgrid"><label class="f">입고 수량<input type="number" id="m_q" min="1" value="'+o.remain+'"></label><label class="f">입고일 (출고일)<input type="date" id="m_d" value="'+TODAY+'"></label></div><div class="filters"><button class="btn pri" data-act="doRecv" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
+  if(mode==='recv') h += '<div class="panel pad step"><h3>'+(o.remain>0?'입고 처리':'추가 입고')+'</h3>'+(o.remain>0?'':'<p class="note" style="margin:0">이미 입고 완료된 차수예요 (오더 '+nf(o.qty)+' · 입고 '+nf(o.recv)+(o.qty>o.recv?' · 미달 '+nf(o.qty-o.recv):'')+'). 늦게 들어온 수량만 넣으면 이 차수 입고에 더해져요.</p>')+'<div class="formgrid"><label class="f">입고 수량<input type="number" id="m_q" min="1" value="'+(o.remain>0?o.remain:Math.max(1,o.qty-o.recv))+'"></label><label class="f">입고일 (출고일)<input type="date" id="m_d" value="'+TODAY+'"></label></div><div class="filters"><button class="btn pri" data-act="doRecv" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
   if(mode==='delay'){ const base = o.eta && o.eta > TODAY ? o.eta : TODAY;
     const rvw = rvOf(p.b); const rvl = (rvw.rounds||[]).filter(x=>!x.done && x.d);
     h += '<div class="panel pad step"><h3>일정 수정</h3>'+(isResvSt(rvw.st) && rvl.length ? '<p class="note" style="margin:0;color:var(--bad)">이 상품은 예약배송 중이에요 (출고 '+rvl.map(x=>fmtD(x.d).slice(0,5)+(x.q?' · '+x.q+'장':'')).join(', ')+'). 저장 후 예약배송 탭에서 출고일도 맞춰주세요.</p>' : '')+'<p class="note" style="margin:0">지금 예정일 '+(o.eta?fmtDY(o.eta)+' ('+(o.etaKind==='fixed'?'확정':'예상')+')':'미정')+' · 남은 '+nf(o.remain)+'장</p>'+
@@ -3320,6 +3343,7 @@ document.addEventListener('change', e => {
   }
   if(t.id==='syncAll'){ if(S.sync.res) S.sync.res.plan.forEach((x,i)=>S.sync.off[i] = !t.checked); render(); }
   if(t.id==='rcvFac'){ S.rcv.fac = t.value; render(); }
+  if(t.id==='rcvAll'){ S.rcv.all = t.checked; render(); }
   if(t.id==='rvSt'){ S.rv.st = t.value; render(); }
   if(t.id==='rvFac'){ S.rv.fac = t.value; render(); }
   if(t.id==='rvCat'){ S.rv.cat = t.value; render(); }
