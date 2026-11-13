@@ -517,6 +517,29 @@ a.rvinc{cursor:pointer;color:inherit;text-decoration:none;white-space:nowrap}a.r
 .acctpop .row{display:flex;gap:6px}.acctpop .row .btn{flex:1}
 .hrow{position:relative}
 @media (max-width:640px){ .acctbtn .an,.acctbtn .ar{display:none}.acctbtn{padding:3px} .acctpop{right:8px} .pname small.pen{max-width:none} }
+
+.rvtbl tr.rvdelay td{background:color-mix(in srgb, var(--bad) 6%, transparent)}
+.rvtbl tr.rvdelay td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+.dlytag{display:inline-block;font-size:11px;font-weight:700;color:var(--bad);background:color-mix(in srgb, var(--bad) 12%, transparent);border-radius:4px;padding:1px 6px;margin-bottom:3px;white-space:nowrap}
+.tlist{display:grid;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.trow{display:grid;grid-template-columns:34px minmax(170px,1.2fr) minmax(110px,.8fr) minmax(0,2.4fr) auto;gap:12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.trow:first-child{border-top:0}.trow.me{background:color-mix(in srgb, var(--muted) 6%, transparent)}
+.trow:hover:not(.me){background:color-mix(in srgb, var(--accent) 4%, transparent)}
+.tav{width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:13px}
+.trow.me .tav{background:var(--accent);color:#fff}
+.tid{display:grid;min-width:0}.tid b{font-size:13.5px}.tid small{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.troles,.tperms{display:flex;flex-wrap:wrap;gap:4px;min-width:0}
+.rbadge{font-size:11px;font-weight:700;color:#7c3aed;background:color-mix(in srgb, #8b5cf6 13%, transparent);border-radius:4px;padding:1px 6px;white-space:nowrap}.rbadge.sup{color:var(--accent);background:var(--accent-soft)}
+.pchip{font-size:11.5px;color:var(--fg);background:color-mix(in srgb, var(--muted) 12%, transparent);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.pchip.all{color:var(--accent);background:var(--accent-soft);font-weight:700}.pchip.none{color:var(--muted)}.pchip.ext{color:#b45309;background:color-mix(in srgb, #d97706 13%, transparent)}
+.linkbtn{appearance:none;border:0;background:none;padding:0;font:inherit;font-size:13px;font-weight:700;color:var(--accent);cursor:pointer;text-align:left}.linkbtn.need::before{content:"+ "}
+.tegrp{display:grid;gap:6px;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.tegh{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.tepre{display:flex;gap:4px;flex-wrap:wrap}
+.tegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.tegrid.off{opacity:.45}
+.tecell{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer}
+.tecell:has(input:checked){border-color:var(--accent);background:color-mix(in srgb, var(--accent) 5%, transparent)}
+.tecell input{margin-top:2px}.tecell span{display:grid}.tecell b{font-size:13px}.tecell small{font-size:11.5px;color:var(--muted)}
+@media (max-width:640px){ .trow{grid-template-columns:32px minmax(0,1fr) auto;row-gap:6px}.troles,.tperms{grid-column:2 / -1}.tact{grid-column:3;grid-row:1}.tegrid{grid-template-columns:1fr} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -2164,20 +2187,63 @@ function regTeam(){
       '<textarea id="tmAdd" rows="3" placeholder="김지수 kim@gmail.com&#10;이민호 lee@gmail.com&#10;park@gmail.com">'+esc(X.add)+'</textarea>'+
       '<div class="tperm"><span class="note">추가할 사람 권한</span>'+(X.ext?'<span class="note">일정 입력만</span>':'<label class="tall"><input type="checkbox" id="taAll"'+(PERMS.every(p=>X.perms[p.k])?' checked':'')+'> <b>전체</b></label>'+PERMS.map(p=>'<label><input type="checkbox" data-tap="'+p.k+'"'+(X.perms[p.k]?' checked':'')+'> '+p.t+'</label>').join(''))+'<label class="extchk"><input type="checkbox" id="taExt"'+(X.ext?' checked':'')+'> 외부 실장님 <small>(일정 입력 화면만)</small></label>'+(X.ext?'<input id="taFacs" value="'+esc(X.facs||'')+'" placeholder="공장 이름 (쉼표 · 비우면 전체)" style="width:200px">':'')+'</div>'+
       '<div id="tmBox">'+teamAddBox()+'</div></div>'+
-    '<div class="panel tw"><table class="ttbl"><thead><tr><th>이메일</th><th>이름</th><th class="c">전체</th>'+PERMS.map(p=>'<th class="c">'+p.t+'</th>').join('')+'<th class="c tbadm">브랜드 관리자<small class="thsub">팀장</small></th><th class="c">외부 실장님<small class="thsub">일정 입력 화면만</small></th><th></th></tr></thead><tbody>'+
-      '<tr class="tadmin"><td class="mono">'+esc(ME.email||'(나)')+'</td><td>'+(isSuper()?'전체 관리자':'관리자')+'</td><td class="c">●</td>'+PERMS.map(()=>'<td class="c">●</td>').join('')+'<td class="c">'+(isSuper()?'전체':'')+'</td><td></td><td></td></tr>'+
-      (list.length ? list.map(m=>{ const pm = m.perms || ALLP();
-        return '<tr><td class="mono">'+esc(m.email)+'</td><td><input class="tname'+(m.name?'':' need')+'" data-tmname="'+esc(m.email)+'" value="'+esc(m.name||'')+'" placeholder="이름 입력"></td>'+
-          '<td class="c"><input type="checkbox" data-tmall="'+esc(m.email)+'"'+(PERMS.every(p=>pm[p.k])?' checked':'')+' aria-label="'+esc(m.email)+' 전체 권한"></td>'+
-          PERMS.map(p=>'<td class="c"><input type="checkbox" data-tmp="'+esc(m.email)+'" data-k="'+p.k+'"'+(pm[p.k]?' checked':'')+' aria-label="'+esc(m.email)+' '+p.t+'"></td>').join('')+
-          '<td class="c tbadm"><span class="badm">'+BADM.map(([k,t])=>'<label title="'+t+' 관리자"><input type="checkbox" data-tma="'+esc(m.email)+'" data-k="'+k+'"'+((m.admins||[]).includes(k)?' checked':'')+(isSuper()?'':' disabled')+'> '+t+'</label>').join('')+'</span></td>'+
-          '<td class="c text"><label class="chk"><input type="checkbox" data-tmx="'+esc(m.email)+'"'+(m.ext?' checked':'')+'> 외부</label>'+(m.ext?'<input data-tmf="'+esc(m.email)+'" value="'+esc((m.facs||[]).join(', '))+'" placeholder="공장 (쉼표 · 비우면 전체)" style="width:150px;margin-top:4px">':'')+'</td>'+
-          '<td><button class="btn sm ghost" data-act="tmDel" data-e="'+esc(m.email)+'">삭제</button></td></tr>'; }).join('')
-        : '<tr><td colspan="'+(PERMS.length+6)+'" class="empty">아직 등록된 팀원이 없습니다.</td></tr>')+
-    '</tbody></table></div><p class="note">이름은 칸을 벗어나면 저장됩니다. 권한 체크는 바로 저장되고, 그 사람이 다음에 보드를 열거나 새로고침하면 적용됩니다. <b>외부 실장님</b>으로 체크하면 그 계정은 <b>일정 입력</b> 화면만 보이고(다른 메뉴 · 전체 현황 숨김) 날짜만 넣을 수 있어요. 공장 칸에 이름을 적으면 그 공장 오더만 보여요. <b>브랜드 관리자</b>(팀장)는 그 브랜드에서 모든 메뉴 + 팀원 추가 · 권한 체크 + 시트 데이터 교체를 할 수 있어요. 브랜드 관리자 지정은 전체 관리자만 할 수 있습니다.</p>'+
+    teamList(list)+
+
     (window.__boardAdmin ? '<div class="panel pad step"><h3>시트 기준 데이터 교체</h3><p class="note" style="margin:0">오더 체크 엑셀을 새로 정리해 Claude에게 받은 데이터 파일(knownbetter-sheet-브랜드-….json)이 있을 때만 쓰세요. 파일에 적힌 브랜드로 들어가고, 팀원이 보드에서 입력한 기록은 그대로 유지됩니다. 현재 '+esc(brandName())+' 시트 기준 '+esc(SNAP.asof)+'</p><div class="filters"><label class="btn" for="snapFile" style="cursor:pointer">데이터 파일 선택</label><input type="file" id="snapFile" accept=".json" hidden><span class="note" id="snapProg"></span></div></div>' : '')+
     '</div>';
   return h;
+}
+// 권한 설명 (권한 설정 창)
+const PERM_D = {reorder:'리오더 등록 · 수량 수정 · 취소', recv:'입고 처리 · 수량 정정', eta:'입고 예정일 입력', reg:'신규 상품 등록', stock:'셀메이트 재고 업데이트', resv:'예약배송 상태 · 차수 · 플랫폼', fix:'정보 보정 · 공장 변경', fac:'공장 정보 관리'};
+const PRESETS = [['all','전체 권한', ()=>Object.fromEntries(PERMS.map(p=>[p.k,true]))], ['view','조회만', ()=>Object.fromEntries(PERMS.map(p=>[p.k,false]))], ['resv','예약배송 담당', ()=>Object.fromEntries(PERMS.map(p=>[p.k,['resv','stock','eta'].includes(p.k)]))], ['recv','입고 담당', ()=>Object.fromEntries(PERMS.map(p=>[p.k,['recv','reorder','eta'].includes(p.k)]))]];
+function permSummary(m){
+  if(m.ext) return '<span class="pchip ext">외부 실장님 · 일정 입력만'+((m.facs||[]).length?' · '+esc(m.facs.join(', ')):'')+'</span>';
+  const pm = m.perms || ALLP(); const on = PERMS.filter(p=>pm[p.k]);
+  if(on.length===PERMS.length) return '<span class="pchip all">전체 권한</span>';
+  if(!on.length) return '<span class="pchip none">조회만</span>';
+  return on.map(p=>'<span class="pchip">'+p.t+'</span>').join('');
+}
+function teamList(list){
+  const X = S.team; const q = (X.q||'').trim().toLowerCase(); const f = X.f || '';
+  const cnt = {all:list.length, lead:list.filter(m=>(m.admins||[]).length).length, ext:list.filter(m=>m.ext).length, noname:list.filter(m=>!m.name).length};
+  let L = list;
+  if(f==='lead') L = L.filter(m=>(m.admins||[]).length); else if(f==='ext') L = L.filter(m=>m.ext); else if(f==='noname') L = L.filter(m=>!m.name);
+  if(q) L = L.filter(m=>(m.email+' '+(m.name||'')).toLowerCase().includes(q));
+  const chip = (k,t,n) => n||k==='' ? '<button class="lcat'+(f===k?' on':'')+'" data-act="tmF" data-k="'+k+'">'+t+' <b>'+n+'</b></button>' : '';
+  const av = n => '<span class="tav">'+esc((n||'?').trim().slice(0,1).toUpperCase())+'</span>';
+  return '<div class="panel pad step"><div class="sechead" style="margin:0"><h3>팀원 '+list.length+'명</h3><span class="sub">권한은 <b>관리자</b>와 <b>팀장</b>만 바꿀 수 있어요 · 줄 끝 <b>권한 설정</b>을 눌러 바꾸세요</span></div>'+
+    '<div class="filters" style="margin:0"><input type="search" id="tmQ" placeholder="이름 · 이메일 검색" value="'+esc(X.q||'')+'"><span class="lcats" style="margin:0">'+chip('','전체',cnt.all)+chip('lead','팀장',cnt.lead)+chip('ext','외부 실장님',cnt.ext)+chip('noname','이름 없음',cnt.noname)+'</span></div>'+
+    '<div class="tlist">'+
+      '<div class="trow me">'+av(ME.name||ME.email)+'<div class="tid"><b>'+esc(ME.name||'나')+'</b><small>'+esc(ME.email||'')+'</small></div><div class="troles"><span class="rbadge sup">'+(isSuper()?'전체 관리자':'팀장')+'</span></div><div class="tperms"><span class="pchip all">전체 권한</span></div><div></div></div>'+
+      (L.length ? L.map(m=>'<div class="trow">'+av(m.name||m.email)+'<div class="tid">'+(m.name?'<b>'+esc(m.name)+'</b>':'<button class="linkbtn need" data-act="tmEdit" data-e="'+esc(m.email)+'">이름 넣기</button>')+'<small>'+esc(m.email)+'</small></div>'+
+        '<div class="troles">'+(m.admins||[]).map(k=>'<span class="rbadge">팀장 · '+esc((BADM.find(b=>b[0]===k)||[k,k])[1])+'</span>').join('')+'</div>'+
+        '<div class="tperms">'+permSummary(m)+'</div>'+
+        '<div class="tact"><button class="btn sm" data-act="tmEdit" data-e="'+esc(m.email)+'">권한 설정</button></div></div>').join('')
+        : '<div class="empty" style="display:block;padding:18px">'+(list.length?'조건에 맞는 팀원이 없습니다.':'아직 등록된 팀원이 없습니다.')+'</div>')+
+    '</div><p class="note" style="margin:0">바꾼 권한은 그 사람이 다음에 보드를 열거나 새로고침하면 적용돼요. 조회는 모두 가능하고, 체크한 메뉴만 입력 · 수정할 수 있어요.</p></div>';
+}
+function teamEditModal(e){
+  const m = members[e]; if(!m || !isAdmin()) return;
+  const pm = Object.assign(ALLP(), m.perms||{});
+  openModal('<div class="mh"><div><h2>권한 설정</h2><div class="muted" style="font-size:12.5px">'+esc(m.email)+'</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
+    '<label class="f">이름<input id="te_name" value="'+esc(m.name||'')+'" placeholder="보드에 보일 이름" maxlength="30"></label>'+
+    '<div class="tegrp"><div class="tegh"><b>메뉴 권한</b><span class="tepre">'+PRESETS.map(([k,t])=>'<button class="btn sm" data-act="tePre" data-k="'+k+'" type="button">'+t+'</button>').join('')+'</span></div>'+
+      '<div class="tegrid'+(m.ext?' off':'')+'" id="te_grid">'+PERMS.map(p=>'<label class="tecell"><input type="checkbox" data-tep="'+p.k+'"'+(pm[p.k]?' checked':'')+(m.ext?' disabled':'')+'><span><b>'+p.t+'</b><small>'+(PERM_D[p.k]||'')+'</small></span></label>').join('')+'</div></div>'+
+    '<div class="tegrp"><label class="tecell wide"><input type="checkbox" id="te_ext"'+(m.ext?' checked':'')+'><span><b>외부 실장님</b><small>일정 입력 화면만 보이고 날짜만 넣을 수 있어요</small></span></label>'+
+      '<input id="te_facs" value="'+esc((m.facs||[]).join(', '))+'" placeholder="담당 공장 (쉼표로 구분 · 비우면 전체 공장)"'+(m.ext?'':' hidden')+'></div>'+
+    (isSuper() ? '<div class="tegrp"><b>팀장 (브랜드 관리자)</b><small class="muted" style="display:block;margin:2px 0 6px">그 브랜드의 팀원 추가 · 권한 설정 · 데이터 교체를 할 수 있어요 · 전체 관리자만 지정할 수 있어요</small><div class="tperm" style="margin:0">'+BADM.map(([k,t])=>'<label><input type="checkbox" data-tea="'+k+'"'+((m.admins||[]).includes(k)?' checked':'')+'> '+t+'</label>').join('')+'</div></div>' : '')+
+    '<div class="filters" style="justify-content:space-between"><button class="btn ghost danger" data-act="tmDel" data-e="'+esc(m.email)+'">팀원 삭제</button><span><button class="btn" data-act="close">취소</button> <button class="btn pri" data-act="tmSave" data-e="'+esc(m.email)+'">저장</button></span></div>');
+}
+async function teamSave(e){
+  const m = members[e]; if(!m || !isAdmin()) return;
+  const name = val('te_name'); const ext = !!(document.getElementById('te_ext')||{}).checked;
+  const perms = {}; document.querySelectorAll('[data-tep]').forEach(i=>{ perms[i.dataset.tep] = ext ? i.dataset.tep==='eta' : i.checked; });
+  const patch = {name, perms, ext, facs: ext ? val('te_facs').split(/[,，\n]/).map(x=>x.trim()).filter(Boolean) : (m.facs||[])};
+  if(isSuper()){ const ad = []; document.querySelectorAll('[data-tea]').forEach(i=>{ if(i.checked) ad.push(i.dataset.tea); }); patch.admins = ad; }
+  await teamSet(e, patch);
+  const on = PERMS.filter(p=>perms[p.k]).map(p=>p.t);
+  await writeLog('팀원 권한 변경: '+(name||e)+' · '+(ext?'외부 실장님':on.length===PERMS.length?'전체 권한':on.length?on.join(', '):'조회만')+(patch.admins&&patch.admins.length?' · 팀장 '+patch.admins.map(k=>(BADM.find(b=>b[0]===k)||[k,k])[1]).join(', '):''));
+  toast((name||e)+' 권한을 저장했습니다'); closeModal();
 }
 async function teamAdd(){
   if(!isAdmin()) return;
@@ -2198,7 +2264,7 @@ async function teamSet(e, patch){
 }
 async function teamDel(e){
   if(!isAdmin()) return;
-  try{ await DB.doc('members/'+e).delete(); await writeLog('팀원 삭제: '+e); toast(e+' 삭제했습니다'); }catch(err){ toast(errMsg(err)); }
+  try{ await DB.doc('members/'+e).delete(); await writeLog('팀원 삭제: '+e); toast(e+' 삭제했습니다'); closeModal(); }catch(err){ toast(errMsg(err)); }
 }
 
 // ---------- 셀메이트 목록 붙여넣기 (재고 업데이트 + 신규 상품 등록) ----------
@@ -2296,6 +2362,7 @@ let resvDocs = {}, salesDoc = null;
 const RV0 = SNAP.resv0 || {}, SL0 = SNAP.sales0 || null;
 const RV_ACT = {
   toResv:   {t:'예약 전환 필요', d:'재고 0 · 입고 예정 있음', c:'st-soon'},
+  delay:    {t:'일정 지연',     d:'리오더 예정일 밀림 · 지연 예상', c:'st-late'},
   risk:     {t:'예약일 확인',   d:'출고일이 입고보다 빠름', c:'st-late'},
   noRound:  {t:'예약 차수 입력', d:'출고일 · 수량 없음', c:'st-soon'},
   qc:       {t:'검수 필요',     d:'본사 재고 → 트랜쇼 이동', c:'st-soon'},
@@ -2355,7 +2422,15 @@ function rvCalc(p){
   const rleft = live.map(x=>{ const q = +x.q||0; const use = Math.min(q, deficit); deficit -= use; return q - use; });
   const ravail = (rest||0) + rq;   // 예약 차수까지 합친 가용 (미발송 제외)
   if(isResvSt(st) && live.length && rq>0 && known && ravail<=0 && !saleOff(r)) acts.push('roundOut');
-  return {p, r, s, st, auto, opens, inc, next, known, rest, rq, ravail, rleft, total, lvl, acts, shipFrom, live, wh, cat:rvCatOf(p)};
+  // 리오더 예정일이 뒤로 밀렸거나(일정 변경) 예정일이 지났는데 안 들어온 오더
+  let pushDays = 0, lateO = null;
+  for(const o of opens){
+    for(const c of (o.changes||[])) if(c.type==='eta' && c.from && c.to && c.to > c.from) pushDays = Math.max(pushDays, diffDays(c.to, c.from));
+    if(!lateO && (o.status==='late' || o.status==='over')) lateO = o;
+  }
+  const delay = pushDays>0 || !!lateO;
+  if(delay && st!=='단종') acts.unshift('delay');
+  return {p, r, s, st, auto, opens, inc, next, known, rest, rq, ravail, rleft, total, lvl, acts, shipFrom, live, wh, cat:rvCatOf(p), delay, pushDays, lateO};
 }
 function rvRows(){
   const out = [];
@@ -2408,12 +2483,12 @@ function viewResv(){
   const lock = !canDo('resv'); const CATS = catList().map(c=>c.n);
   for(const x of a.slice(0, X.n)){
     const p = x.p, r = x.r;
-    h += '<tr'+(x.acts.length?' class="rvneed"':'')+'><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(p.key)+'">'+esc(p.n||p.en)+'</a>'+(p.n&&p.en?'<small class="pen" title="'+esc(p.en)+'">'+esc(p.en)+'</small>':'')+'<small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+flink(p.curFac)+'</small><select class="catsel" data-rvcat="'+esc(normK(p.n||p.b))+'" title="분류 (담당 분담)"'+(lock?' disabled':'')+'>'+CATS.map(c=>'<option'+(c===x.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="__new">+ 분류 관리…</option></select></div></div></td>'+
+    h += '<tr class="'+(x.acts.length?'rvneed':'')+(x.delay?' rvdelay':'')+'"><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(p.key)+'">'+esc(p.n||p.en)+'</a>'+(p.n&&p.en?'<small class="pen" title="'+esc(p.en)+'">'+esc(p.en)+'</small>':'')+'<small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+flink(p.curFac)+'</small><select class="catsel" data-rvcat="'+esc(normK(p.n||p.b))+'" title="분류 (담당 분담)"'+(lock?' disabled':'')+'>'+CATS.map(c=>'<option'+(c===x.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="__new">+ 분류 관리…</option></select></div></div></td>'+
       '<td><select class="rvsel st-'+(x.st==='예약배송'?'open':x.st==='임시예약배송'?'soon':x.st==='단종(예정)'?'over':x.st==='품절'?'late':x.st==='단종'?'none':'done')+'" data-rvst="'+esc(p.b)+'"'+(lock?' disabled':'')+'>'+RV_ST.map(s=>'<option'+(s===x.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+'</td>'+
       '<td>'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d)+'">'+RV_ACT[k].t+'</span>').join(' ')+(x.lvl?' <span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
       '<td class="num">'+(x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')+(x.s.unsent?'<small class="odsub">미발송 '+nf(x.s.unsent)+'</small>':'')+'</td>'+
       '<td class="num">'+(x.known?(x.rq>0?'<span class="ravail'+(x.ravail<=0?' bad':'')+'" title="출고 가능 재고 + 예약 차수 수량 (미발송 제외)">예약 포함 가용 <b>'+nf(x.ravail)+'</b></span>':'')+'<b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b> <span class="muted">/ '+nf(p.stock)+'</span>'+(x.wh?'<small class="odsub">트랜쇼 '+nf(p.trans)+' · 본사 '+nf(p.hq)+(p.hq>0?' (검수)':'')+'</small>':''):'<span class="muted">—</span>')+'</td>'+
-      '<td>'+(x.next?'<a class="rvinc" data-act="openOrder" data-id="'+x.next.id+'">'+(x.next.eta?fmtD(x.next.eta).slice(0,5)+' <small>'+(x.next.etaKind==='fixed'?'확정':'예상')+'</small>':'미정')+' · '+nf(x.next.remain)+'장</a>'+(x.opens.length>1?'<small class="odsub">전체 '+x.opens.length+'건 · '+nf(x.inc)+'장</small>':'')+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':''):'<span class="muted">없음</span>')+'</td>'+
+      '<td>'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+(x.next?'<a class="rvinc" data-act="openOrder" data-id="'+x.next.id+'">'+(x.next.eta?fmtD(x.next.eta).slice(0,5)+' <small>'+(x.next.etaKind==='fixed'?'확정':'예상')+'</small>':'미정')+' · '+nf(x.next.remain)+'장</a>'+(x.opens.length>1?'<small class="odsub">전체 '+x.opens.length+'건 · '+nf(x.inc)+'장</small>':'')+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':''):'<span class="muted">없음</span>')+'</td>'+
       '<td>'+(x.live.length?x.live.map((o,i)=>'<span class="rvround'+(x.shipFrom&&o.d&&o.d<x.shipFrom?' bad':'')+'">'+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+(o.q?' · '+nf(o.q)+'장':'')+'</span>'+(o.q&&x.known?'<small class="rleft'+(x.rleft[i]<=0?' bad':'')+'">'+(x.rleft[i]<=0?'예약 수량 소진':'남은 '+nf(x.rleft[i])+'장')+'</small>':'')).join(''):'')+'<button class="btn sm ghost" data-act="rvEdit" data-b="'+esc(p.b)+'">'+(x.live.length?'수정':'+ 차수')+'</button></td>'+
       '<td><div class="rvchs"><span class="rvch"><em class="rvcl">예약</em><button class="rvc all'+(chList().every(c=>r.ch[c])?' on':'')+'" data-act="rvChAll" data-b="'+esc(p.b)+'" data-tip="예약 설정 · 전체 반영 / 해제"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(r.ch[c]?' on':'')+'" data-act="rvCh" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · 예약 '+(r.ch[c]?'설정 완료':'미설정')+'" aria-label="'+esc(c)+' 예약 설정"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span>'+
         '<span class="rvch sell"><em class="rvcl">판매</em><button class="rvc all'+(chList().every(c=>sellOn(r,c))?' on':'')+'" data-act="rvSellAll" data-b="'+esc(p.b)+'" data-tip="판매 중 · 전체 켜기 / 끄기"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(sellOn(r,c)?' on':'')+'" data-act="rvSell" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · '+(sellOn(r,c)?'판매 중':'판매 안 함')+'" aria-label="'+esc(c)+' 판매"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span></div></td>'+
@@ -2919,6 +2994,10 @@ async function act(a, el){
     case 'stApply': await stockApply(); break;
     case 'smCheck': { const t = (document.getElementById('smT')||{}).value||''; if(!t.trim()){ toast('셀메이트 목록을 붙여넣어 주세요'); break; } smRun(t, ''); break; }
     case 'tmAdd': await teamAdd(); break;
+    case 'tmEdit': teamEditModal(el.dataset.e); break;
+    case 'tmSave': await teamSave(el.dataset.e); break;
+    case 'tmF': S.team.f = el.dataset.k; render(); break;
+    case 'tePre': { const fn = (PRESETS.find(x=>x[0]===el.dataset.k)||[])[2]; if(fn){ const v = fn(); document.querySelectorAll('[data-tep]').forEach(i=>{ i.checked = !!v[i.dataset.tep]; }); } break; }
     case 'tmDel': { if(el.dataset.sure){ await teamDel(el.dataset.e); } else { el.dataset.sure = '1'; el.textContent = '정말 삭제'; el.classList.add('danger'); setTimeout(()=>{ if(el.isConnected){ delete el.dataset.sure; el.textContent = '삭제'; el.classList.remove('danger'); } }, 3000); } break; }
     case 'goHome': setTab('home'); break;
     case 'plClear': S.pl = {text:'', res:null}; render(); break;
@@ -3145,6 +3224,7 @@ document.addEventListener('input', e => {
   if(t.id==='fixPaste'){ S.fix.paste = t.value; }
   if(t.id==='mngQ'){ S.mng.q = t.value; clearTimeout(tmr); tmr=setTimeout(render,200); }
   if(t.id==='facQ'){ S.fac.q = t.value; S.fac.n=15; clearTimeout(tmr); tmr=setTimeout(render,200); }
+  if(t.id==='tmQ'){ S.team.q = t.value; clearTimeout(tmr); tmr = setTimeout(render, 200); }
   if(t.id==='findQ'){ S.find.q = t.value; S.find.style=null; S.find.n=300; S.find.from=''; clearTimeout(tmr); tmr=setTimeout(render,200); }
   if(t.id==='roQ'){ S.reg.ro.q = t.value; S.reg.ro.style=null; clearTimeout(tmr); tmr=setTimeout(render,200); }
   if(t.id==='bulkT'){ S.reg.bulk = t.value; clearTimeout(tmr); tmr=setTimeout(render,400); }
@@ -3160,6 +3240,7 @@ document.addEventListener('change', e => {
   if(t.dataset && t.dataset.sync!=null){ S.sync.off[t.dataset.sync] = !t.checked; render(); }
   if(t.dataset && t.dataset.plf!=null && S.pl.res){ S.pl.res.fresh[+t.dataset.plf].on = t.checked; render(); }
   if(t.dataset && t.dataset.pld!=null && S.pl.res){ S.pl.res.diff[+t.dataset.pld].on = t.checked; S.pl.diffOpen = true; render(); }
+  if(t.id==='te_ext'){ const g = document.getElementById('te_grid'); const fi = document.getElementById('te_facs'); if(g){ g.classList.toggle('off', t.checked); g.querySelectorAll('input').forEach(i=>{ i.disabled = t.checked; }); } if(fi) fi.hidden = !t.checked; }
   if(t.dataset && t.dataset.tap){ S.team.perms[t.dataset.tap] = t.checked; const a = document.getElementById('taAll'); if(a) a.checked = PERMS.every(p=>S.team.perms[p.k]); }
   if(t.id==='taAll'){ for(const p of PERMS) S.team.perms[p.k] = t.checked; document.querySelectorAll('[data-tap]').forEach(i=>i.checked = t.checked); }
   if(t.dataset && t.dataset.tmall){ const e = t.dataset.tmall; const m = members[e]; if(m){ teamSet(e, {perms:Object.fromEntries(PERMS.map(p=>[p.k, t.checked])), ext:false}); writeLog(e+' 권한 전체 '+(t.checked?'켬':'끔')); } }
