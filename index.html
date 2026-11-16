@@ -383,7 +383,7 @@ body.mode-all #tabs{display:none}
 .rvcard{display:grid;grid-template-columns:1fr auto;gap:1px 4px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 8px;cursor:pointer;font:inherit;color:inherit}.rvcard small{grid-column:1/-1}
 .rvcard b{font-size:16px}.rvcard .chip{font-size:11px;padding:1px 6px;white-space:nowrap}.rvcard small{font-size:10.5px;color:var(--muted);line-height:1.3;grid-column:1/-1;white-space:normal;word-break:keep-all;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rvcards:not(.schcards){grid-template-columns:repeat(auto-fill,minmax(min(196px,calc(50% - 3px)),1fr))}.rvcard{align-content:start;align-items:center}.rvcard .chip{justify-self:start;max-width:100%;overflow:hidden;text-overflow:ellipsis}.rvcard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
-.rvtbl td{vertical-align:top}.rvtbl td:first-child{min-width:220px}.rvtbl td.ck:first-child{min-width:0;width:30px}.rvtbl td.ck + td{min-width:220px}.rvtbl td.rvmemo{min-width:140px}
+.rvtbl td{vertical-align:top}.rvtbl td:first-child{min-width:220px}.rvtbl td.ck:first-child{min-width:0;width:30px}.rvtbl td.ck + td{min-width:220px}.rvtbl td.rvmemo{min-width:0;width:104px}
 .rvsel{font-size:12.5px;padding:3px 22px 3px 8px;min-height:0;height:auto;width:auto;border-radius:8px;font-weight:600}
 .rvround{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--sunk);border:1px solid var(--line);margin:0 4px 4px 0;white-space:nowrap}.rvround.bad{border-color:var(--bad);color:var(--bad)}
 .rvch{display:inline-flex;gap:2px;flex-wrap:nowrap}.rvc{font:inherit;font-size:10.5px;width:21px;height:21px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;padding:0}.rvc.on{background:var(--ok);border-color:var(--ok);color:#fff}
@@ -590,6 +590,16 @@ table.mcard tr.shrow{display:none}
 .expbtn.infl{margin-left:auto}
 .mselall{display:none}@media (max-width:640px){.mselall{display:inline-flex}}
 @media (max-width:640px){ .bulkbar{bottom:calc(66px + env(safe-area-inset-bottom,0px))}.bulkbar .bgrp{flex:1 1 100%}.bulkbar select,.bulkbar input{flex:1} }
+.rvtbl th,.rvtbl td{padding-left:7px;padding-right:7px}
+.rvtbl th.ck,.rvtbl td.ck{padding-left:14px!important;padding-right:4px!important;width:34px}
+.rvtbl td.ck + td{min-width:0!important;width:228px;max-width:228px}
+.rvtbl td.ck + td .pname small{overflow:hidden;text-overflow:ellipsis}
+.rvtbl .rvsel{width:110px;max-width:110px}
+.rvtbl .rvc{width:19px;height:20px;font-size:10px}.rvtbl .rvch{gap:1px}.rvtbl .rvc.all{width:auto;padding:0 4px}
+.rvtbl .rvmemo{min-width:0;width:104px;max-width:110px}.rvtbl .rvmemo small{max-width:104px;word-break:break-all}
+.rvtbl td:nth-child(6){max-width:128px}.rvtbl td:nth-child(6) .odsub{white-space:normal}.rvtbl td:nth-child(7){min-width:108px;max-width:132px}.rvtbl td:nth-child(7) .rvinc{white-space:normal}.rvtbl th:last-child{width:104px}
+.rvtbl .rvcl{width:18px;font-size:9.5px}
+.rvtbl th .thsub{white-space:normal}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
