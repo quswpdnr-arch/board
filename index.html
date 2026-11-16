@@ -577,13 +577,12 @@ table.mcard tr.shrow{display:none}
 .prfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px;border-top:1px solid var(--line);background:var(--sunk)}
 @media (max-width:640px){ .prq{margin-left:0;width:100%}.prq input{flex:1} }
 
-.rvcard .rvt{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rvcard .gdot,.glegend .gdot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block;background:var(--gc)}
-.rvcard b{color:var(--gc)}.rvcard.zero b{color:var(--muted)}.rvcard.zero .gdot{opacity:.45}
-.rvcard.on{border-color:var(--gc);box-shadow:inset 0 0 0 1px var(--gc)}
-.g-urgent{--gc:var(--bad)}.g-todo{--gc:#d97706}.g-check{--gc:var(--info)}.g-ok{--gc:var(--ok)}
-.glegend{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--muted);margin:-4px 0 10px}.glegend span{display:inline-flex;align-items:center;gap:5px}
-.chip.gchip{background:color-mix(in srgb, var(--gc) 13%, transparent);color:var(--gc)}
+.kc-violet{background:#f1ebff;color:#6d28d9}.kc-red{background:#fde8e8;color:#c81e1e}.kc-orange{background:#ffedd5;color:#c2410c}.kc-amber{background:#fdf3c7;color:#92400e}
+.kc-blue{background:#e1ecff;color:#1d4ed8}.kc-green{background:#dcf5e3;color:#15803d}.kc-pink{background:#fce7f3;color:#be185d}.kc-teal{background:#d5f5ef;color:#0f766e}
+.kc-gray{background:#ececea;color:#57534e}.kc-fuchsia{background:#fae8ff;color:#a21caf}.kc-brown{background:#f3e8dc;color:#7c4a1e}.kc-indigo{background:#e6e8ff;color:#4338ca}
+:root[data-theme="dark"] .kc-violet{background:#3b2a63;color:#d6c6ff}:root[data-theme="dark"] .kc-red{background:#4a1f1f;color:#ffb4b4}:root[data-theme="dark"] .kc-orange{background:#4a2a14;color:#ffc79a}:root[data-theme="dark"] .kc-amber{background:#45360f;color:#f6d77a}
+:root[data-theme="dark"] .kc-blue{background:#1e2f55;color:#a9c4ff}:root[data-theme="dark"] .kc-green{background:#173a24;color:#9fe3b4}:root[data-theme="dark"] .kc-pink{background:#4a1d36;color:#ffb3d6}:root[data-theme="dark"] .kc-teal{background:#143c37;color:#93e6d8}
+:root[data-theme="dark"] .kc-gray{background:#33322f;color:#cfcac2}:root[data-theme="dark"] .kc-fuchsia{background:#45194d;color:#f2b6ff}:root[data-theme="dark"] .kc-brown{background:#3d2b1c;color:#e3c3a0}:root[data-theme="dark"] .kc-indigo{background:#272a5a;color:#bfc4ff}
 .rvtbl th.ck,.rvtbl td.ck{width:30px;text-align:center;padding-left:8px;padding-right:2px}
 .rvtbl tr.rvsel-on td{background:color-mix(in srgb, var(--accent) 7%, transparent)}
 .bulkbar{position:sticky;bottom:10px;z-index:12;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:10px 0 0;padding:10px 14px;background:var(--panel);border:1px solid var(--accent);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
@@ -2549,18 +2548,17 @@ function rvSuggest(p, k){
 }
 let resvDocs = {}, salesDoc = null;
 const RV0 = SNAP.resv0 || {}, SL0 = SNAP.sales0 || null;
-// 할 일 색은 뜻으로 4가지만: 빨강 바로 처리 · 주황 오늘 할 일 · 파랑 확인 · 초록 좋은 소식
 const RV_ACT = {
-  delay:    {t:'일정 지연',     d:'리오더 예정일 밀림 · 지연 예상', c:'g-urgent'},
-  risk:     {t:'예약일 확인',   d:'출고일이 입고보다 빠름', c:'g-urgent'},
-  toSold:   {t:'품절 처리 필요', d:'재고 · 입고 예정 없음', c:'g-urgent'},
-  roundOut: {t:'예약 수량 소진', d:'다음 차수 · 리오더 필요', c:'g-urgent'},
-  toResv:   {t:'예약 전환 필요', d:'재고 0 · 입고 예정 있음', c:'g-todo'},
-  noRound:  {t:'예약 차수 입력', d:'출고일 · 수량 없음', c:'g-todo'},
-  toEnd:    {t:'단종 전환 필요', d:'단종(예정) · 재고 소진', c:'g-todo'},
-  qc:       {t:'검수 필요',     d:'본사 재고 → 트랜쇼 이동', c:'g-check'},
-  reopen:   {t:'판매 재개 검토', d:'재고나 입고 예정 생김', c:'g-check'},
-  toNormal: {t:'일반 전환 가능', d:'트랜쇼 · 본사 재고 입고', c:'g-ok'}
+  toResv:   {t:'예약 전환 필요', d:'재고 0 · 입고 예정 있음', c:'kc-violet'},
+  delay:    {t:'일정 지연',     d:'리오더 예정일 밀림 · 지연 예상', c:'kc-red'},
+  risk:     {t:'예약일 확인',   d:'출고일이 입고보다 빠름', c:'kc-orange'},
+  noRound:  {t:'예약 차수 입력', d:'출고일 · 수량 없음', c:'kc-amber'},
+  qc:       {t:'검수 필요',     d:'본사 재고 → 트랜쇼 이동', c:'kc-blue'},
+  toNormal: {t:'일반 전환 가능', d:'트랜쇼 · 본사 재고 입고', c:'kc-green'},
+  toSold:   {t:'품절 처리 필요', d:'재고 · 입고 예정 없음', c:'kc-pink'},
+  reopen:   {t:'판매 재개 검토', d:'재고나 입고 예정 생김', c:'kc-teal'},
+  toEnd:    {t:'단종 전환 필요', d:'단종(예정) · 재고 소진', c:'kc-gray'},
+  roundOut: {t:'예약 수량 소진', d:'다음 차수 · 리오더 필요', c:'kc-fuchsia'}
 };
 const sellOn = (r, c) => !(r.sell && r.sell[c]===false);   // 따로 끄지 않았으면 판매 중
 function rvOf(b){
@@ -2661,14 +2659,14 @@ function viewResv(){
     '<span class="bgrp" style="margin-left:auto"><button class="btn sm" data-act="bkExp">선택 엑셀 내려받기</button><button class="btn sm ghost" data-act="bkClear">선택 해제</button></span></div>';
   const sth = (k, label, cls, sub) => '<th class="sortable'+(cls?' '+cls:'')+(X.sk===k?' sorted':'')+'" data-act="rvSort" data-k="'+k+'" title="눌러서 정렬 (오름차순 → 내림차순 → 기본)">'+label+'<span class="sarr">'+(X.sk===k?(X.sd===1?'▲':'▼'):'↕')+'</span>'+(sub||'')+'</th>';
   const anyF = X.q || X.st || X.fac || X.cat || X.act;
-  const card = (k,t,n,c,d) => '<button class="rvcard '+c+(X.act===k?' on':'')+(n?'':' zero')+'" data-act="rvAct" data-k="'+k+'" title="'+esc(t+' · '+d)+'"><span class="rvt"><i class="gdot" aria-hidden="true"></i>'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
+  const card = (k,t,n,c,d) => '<button class="rvcard'+(X.act===k?' on':'')+'" data-act="rvAct" data-k="'+k+'" title="'+esc(t+' · '+d)+'"><span class="chip '+c+'">'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
   let h = '<div class="sec"><div class="sechead"><h2>예약배송</h2><span class="sub">재고 · 입고 예정 · 판매 추이를 합쳐 오늘 처리할 것만 골라 보여드립니다 · 판매 추이 '+esc(salesLabel())+' · 재고 '+esc(stockAtLabel())+'</span>'+
     '<span class="right"><button class="btn sm" data-act="rvSales">판매 추이 업데이트</button> <button class="btn sm" data-act="catMng">분류 · 담당자</button> <button class="btn sm" data-act="chMng">판매 채널</button></span></div>'+
     '<div class="rvcards">'+
       Object.entries(RV_ACT).map(([k,v])=>card(k, v.t, cnt[k], v.c, v.d)).join('')+
-      card('lvl','재고 부족', urg+warn, 'g-urgent', '긴급 '+urg+' · 주의 '+warn)+
-      card('resv','예약배송 중', inResv, 'g-ok', '예약 판매 중')+
-    '</div><div class="glegend"><span class="g-urgent"><i class="gdot"></i>바로 처리</span><span class="g-todo"><i class="gdot"></i>오늘 할 일</span><span class="g-check"><i class="gdot"></i>확인</span><span class="g-ok"><i class="gdot"></i>좋은 소식</span></div>'+
+      card('lvl','재고 부족', urg+warn, 'kc-brown', '긴급 '+urg+' · 주의 '+warn)+
+      card('resv','예약배송 중', inResv, 'kc-indigo', '예약 판매 중')+
+    '</div>'+
     '<div class="filters"><input type="search" id="rvQ" placeholder="바코드 · 제작품명 · 컬러 · 공장 검색" value="'+esc(X.q)+'">'+
       '<select id="rvSt"><option value="">노출 상태 전체</option>'+RV_ST.map(s=>'<option'+(s===X.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+
       '<select id="rvCat"><option value="">전체 분류</option>'+catList().map(c=>'<option value="'+esc(c.n)+'"'+(c.n===X.cat?' selected':'')+'>'+esc(c.n)+(c.owner?' · '+esc(c.owner):'')+' ('+c.c+')</option>').join('')+'</select>'+
@@ -2685,7 +2683,7 @@ function viewResv(){
     const p = x.p, r = x.r;
     h += '<tr class="'+(x.acts.length?'rvneed':'')+(x.delay?' rvdelay':'')+(SEL[p.b]?' rvsel-on':'')+'"><td class="ck"><input type="checkbox" data-rvselb="'+esc(p.b)+'"'+(SEL[p.b]?' checked':'')+' aria-label="선택"></td><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(p.key)+'">'+esc(p.n||p.en)+'</a>'+(p.n&&p.en?'<small class="pen" title="'+esc(p.en)+'">'+esc(p.en)+'</small>':'')+'<small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+flink(p.curFac)+'</small><select class="catsel" data-rvcat="'+esc(normK(p.n||p.b))+'" title="분류 (담당 분담)"'+(lock?' disabled':'')+'>'+CATS.map(c=>'<option'+(c===x.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="__new">+ 분류 관리…</option></select></div></div></td>'+
       '<td><select class="rvsel st-'+(x.st==='예약배송'?'open':x.st==='임시예약배송'?'soon':x.st==='단종(예정)'?'over':x.st==='품절'?'late':x.st==='단종'?'none':'done')+'" data-rvst="'+esc(p.b)+'"'+(lock?' disabled':'')+'>'+RV_ST.map(s=>'<option'+(s===x.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+'</td>'+
-      '<td>'+x.acts.map(k=>'<span class="chip gchip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d)+'">'+RV_ACT[k].t+'</span>').join(' ')+(x.lvl?' <span class="chip gchip '+(x.lvl==='긴급'?'g-urgent':'g-todo')+'">재고 '+x.lvl+'</span>':'')+'</td>'+
+      '<td>'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d)+'">'+RV_ACT[k].t+'</span>').join(' ')+(x.lvl?' <span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
       '<td class="num">'+(x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')+(x.s.unsent?'<small class="odsub">미발송 '+nf(x.s.unsent)+'</small>':'')+'</td>'+
       '<td class="num">'+(x.known?(x.rq>0?'<span class="ravail'+(x.ravail<=0?' bad':'')+'" title="출고 가능 재고 + 예약 차수 수량 (미발송 제외)">예약 포함 가용 <b>'+nf(x.ravail)+'</b></span>':'')+'<b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b> <span class="muted">/ '+nf(p.stock)+'</span>'+(x.wh?'<small class="odsub">트랜쇼 '+nf(p.trans)+' · 본사 '+nf(p.hq)+(p.hq>0?' (검수)':'')+'</small>':''):'<span class="muted">—</span>')+'</td>'+
       '<td>'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+(x.next?'<a class="rvinc" data-act="openOrder" data-id="'+x.next.id+'">'+(x.next.eta?fmtD(x.next.eta).slice(0,5)+' <small>'+(x.next.etaKind==='fixed'?'확정':'예상')+'</small>':'미정')+' · '+nf(x.next.remain)+'장</a>'+(x.opens.length>1?'<small class="odsub">전체 '+x.opens.length+'건 · '+nf(x.inc)+'장</small>':'')+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':''):'<span class="muted">없음</span>')+'</td>'+
