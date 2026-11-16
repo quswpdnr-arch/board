@@ -604,7 +604,8 @@ table.mcard tr.shrow{display:none}
 .rvtbl td:nth-child(8){min-width:108px;max-width:132px}.rvtbl td:nth-child(8) .rvinc{white-space:normal}
 .rvtbl td.rvacts{width:96px}.rvtbl td.rvacts .chip{display:flex;width:fit-content;margin:0 0 4px;white-space:nowrap}.rvtbl td.rvacts .chip:last-child{margin-bottom:0}
 .whls{display:flex;flex-direction:column;gap:1px;margin-top:3px}.whl{display:flex;justify-content:space-between;gap:8px;font-size:11px;line-height:1.35;color:var(--muted);white-space:nowrap}.whl b{color:var(--fg);font-weight:600}.whl.hq b{color:var(--info)}.whl.offl{opacity:.8}
-.whtop{white-space:nowrap}.rvsales .whl{font-size:12px}.rvsales .whl b{font-size:13px}.rvtbl td.rvsales{min-width:0;width:88px}.rvtbl th.rvsalesh{white-space:normal;width:88px;line-height:1.25}.rvtbl th:last-child{width:104px}
+.whtop{white-space:nowrap}.rvsales .whl{font-size:12px}.rvsales .whl b{font-size:13px}.rvtbl td.rvsales{min-width:0;width:96px;padding-left:22px!important}.rvtbl th.rvsalesh{width:96px;line-height:1.3;padding-left:22px!important;text-align:left}.rvtbl th.rvsalesh .thsub{display:block;white-space:nowrap;font-weight:400;margin:1px 0 0}.rvtbl th.rvsalesh .sarr{margin-left:3px}
+.rvacts .chip small{font-size:10px;opacity:.8;margin-left:2px}.rvtbl th:last-child{width:104px}
 .rvtbl .rvcl{width:18px;font-size:9.5px}
 .rvtbl th .thsub{white-space:normal}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -2326,7 +2327,7 @@ function regOff(){
   const X = S.off || (S.off = {}); const R = X.res;
   let h = '<div class="sec"><div class="sechead"><h2>오프라인 재고</h2><span class="sub">'+(offDoc&&offDoc.items?'지금 보드 오프라인 재고: '+esc(offAtLabel())+' 입력'+(offLive()?'':' (그 뒤에 올린 셀메이트 목록 값을 쓰는 중)'):'아직 따로 입력한 오프라인 재고가 없어요'+(BRAND==='tid'?' · 셀메이트 목록의 트랜쇼(오프라인) 칸 값을 쓰는 중':''))+'</span></div><div class="panel pad step">'+
     '<p class="note" style="margin:0">매장(오프라인) 재고를 <b>바코드 · 수량</b> 두 칸으로 붙여넣거나 CSV로 올리세요. 머리글이 있으면 "오프라인" · "재고" · "수량" 칸을 찾아 읽고, 머리글이 없으면 첫 칸 바코드 · 둘째 칸 수량으로 읽어요. 셀메이트 목록에 트랜쇼(오프라인) 칸이 있으면 그 값도 들어오고, <b>둘 중 나중에 올린 값</b>을 써요. 올린 목록에 없는 바코드는 오프라인 재고 0으로 봐요.</p>'+
-    '<p class="note" style="margin:0">오프라인 재고는 온라인 출고 가능 재고에 들어가지 않아요. 오프라인 판매가 많은데 오프라인 재고가 모자라면 예약배송에 <b>RT요청</b>으로 떠요.</p>'+
+    '<p class="note" style="margin:0">오프라인 재고는 온라인 출고 가능 재고에 들어가지 않아요. 온라인 재고(트랜쇼 · 곤지암 · 본사)가 모자란데 매장에선 재고 대비 잘 안 팔리면(주간 소진율 10% 미만) 예약배송에 <b>RT요청</b>으로 떠요.</p>'+
     '<textarea id="offT" rows="4" placeholder="바코드번호&#9;오프라인 재고&#10;1-0154820001&#9;3&#10;1-0154720001&#9;0">'+esc(X.text||'')+'</textarea>'+
     '<div class="filters"><button class="btn pri" data-act="offCheck">바뀐 재고 확인</button><label class="btn" for="offFile" style="cursor:pointer">CSV 파일 올리기</label><input type="file" id="offFile" accept=".csv,.tsv,.txt" hidden>'+(X.fileName?'<span class="note">'+esc(X.fileName)+'</span>':'')+'</div>';
   if(X.err) h += '<p class="note" style="margin:0;color:var(--bad)">'+esc(X.err)+'</p>';
@@ -2669,6 +2670,7 @@ function salesOffOf(b){ const x = salesOffDoc && salesOffDoc.items && salesOffDo
 function salesOffLabel(){ return salesOffDoc && salesOffDoc.items ? fmtD(salesOffDoc.from).slice(0,5)+' ~ '+fmtD(salesOffDoc.to).slice(0,5) : ''; }
 function salesLabel(){ const S1 = salesSrc(); return S1 ? fmtD(S1.from).slice(0,5)+' ~ '+fmtD(S1.to).slice(0,5) : ''; }
 const saleOff = r => /중지|종료|단종 완료/.test(r.sale||'');
+const RT_RATE = 0.1, RT_KEEP_WEEKS = 4;   // 오프라인 주간 소진율 10% 미만 · 매장엔 4주 판매분 남김
 function rvCalc(p){
   const r = rvOf(p.b), s = salesOf(p.b), so = salesOffOf(p.b);
   const opens = p.orders.filter(isOpen).sort((a,b)=>(a.eta||'9').localeCompare(b.eta||'9'));
@@ -2705,7 +2707,11 @@ function rvCalc(p){
   // 트랜쇼가 소진돼 가는데 본사에도 없고 곤지암에 있으면 → 곤지암에서 트랜쇼로 옮겨야 함
   if(st!=='단종' && known && gj>0 && !((p.hq||0)>0) && (trest<=0 || (s.wk>0 && trest < s.wk*0.6))) acts.push('moveWh');
   // 오프라인 판매 대비 오프라인 재고가 모자라고 온라인(트랜쇼 · 곤지암)에 재고가 있으면 → RT 요청
-  if(st!=='단종' && so.wk>0 && ((p.off||0)+(p.shop||0)) < so.wk*0.6 && known && rest>0) acts.push('rt');
+  // RT요청 = 매장(오프라인) 재고를 온라인으로 가져오기: 온라인(트랜쇼 · 곤지암 · 본사)이 모자라고, 매장에선 재고 대비 안 팔릴 때만
+  const offStk = (p.off||0) + (p.shop||0);
+  const offRate = offStk>0 ? so.wk/offStk : null;   // 오프라인 주간 소진율
+  const rtQty = offStk>0 ? Math.max(0, offStk - Math.ceil(so.wk*RT_KEEP_WEEKS)) : 0;   // 매장에 몇 주 판매분은 남기고 가져올 수 있는 수량
+  if(st!=='단종' && known && s.wk>0 && (rest + (p.hq||0)) < s.wk*0.6 && offStk>0 && offRate < RT_RATE && rtQty>0) acts.push('rt');
   // 예약 차수별 남은 수량: 미발송(출고 가능 재고의 마이너스)을 앞 차수부터 채워 나감
   let deficit = known ? Math.max(0, -(rest||0)) : 0;
   const rleft = live.map(x=>{ const q = +x.q||0; const use = Math.min(q, deficit); deficit -= use; return q - use; });
@@ -2719,7 +2725,7 @@ function rvCalc(p){
   }
   const delay = pushDays>0 || !!lateO;
   if(delay && st!=='단종') acts.unshift('delay');
-  return {p, r, s, so, st, auto, opens, inc, next, known, rest, rq, ravail, rleft, total, lvl, acts, shipFrom, live, wh, cat:rvCatOf(p), delay, pushDays, lateO};
+  return {p, r, s, so, offStk, offRate, rtQty, st, auto, opens, inc, next, known, rest, rq, ravail, rleft, total, lvl, acts, shipFrom, live, wh, cat:rvCatOf(p), delay, pushDays, lateO};
 }
 function rvRows(){
   const out = [];
@@ -2776,7 +2782,7 @@ function viewResv(){
       '<label class="chk mselall"><input type="checkbox" id="rvSelAll2"> 보이는 상품 모두 선택</label><span class="note">'+nf(a.length)+'개</span></div>';
   const SEL = X.sel || (X.sel = {}); const shownB = a.slice(0, X.n).map(x=>x.p.b); const selN = Object.keys(SEL).filter(b=>SEL[b]).length;
   const allOn = shownB.length && shownB.every(b=>SEL[b]);
-  h += '<div class="panel tw"><table class="rvtbl"><thead><tr><th class="ck"><input type="checkbox" id="rvSelAll"'+(allOn?' checked':'')+' title="보이는 상품 모두 선택" aria-label="모두 선택"></th>'+sth('prod','상품 · 컬러,사이즈 · 바코드')+sth('st','노출 상태')+sth('act','할 일')+sth('un','미발송','num')+sth('wk','판매 추이<br><small>(일주일)</small>','rvsalesh','<small class="thsub">'+esc(salesLabel())+'</small>')+sth('stock','재고')+sth('eta','입고 예정')+sth('round','예약 차수')+sth('ch','플랫폼별 현황')+sth('memo','메모')+'</tr></thead><tbody>';
+  h += '<div class="panel tw"><table class="rvtbl"><thead><tr><th class="ck"><input type="checkbox" id="rvSelAll"'+(allOn?' checked':'')+' title="보이는 상품 모두 선택" aria-label="모두 선택"></th>'+sth('prod','상품 · 컬러,사이즈 · 바코드')+sth('st','노출 상태')+sth('act','할 일')+sth('un','미발송','num')+sth('wk','판매 추이','rvsalesh','<small class="thsub">(일주일)</small><small class="thsub">'+esc(salesLabel().replace(/\s/g,''))+'</small>')+sth('stock','재고')+sth('eta','입고 예정')+sth('round','예약 차수')+sth('ch','플랫폼별 현황')+sth('memo','메모')+'</tr></thead><tbody>';
   if(!a.length) h += '<tr><td colspan="11" class="empty">조건에 맞는 상품이 없습니다.</td></tr>';
   S.__rvRows = a;
   const lock = !canDo('resv'); const CATS = catList().map(c=>c.n);
@@ -2784,7 +2790,7 @@ function viewResv(){
     const p = x.p, r = x.r;
     h += '<tr class="'+(x.acts.length?'rvneed':'')+(x.delay?' rvdelay':'')+(SEL[p.b]?' rvsel-on':'')+'"><td class="ck"><input type="checkbox" data-rvselb="'+esc(p.b)+'"'+(SEL[p.b]?' checked':'')+' aria-label="선택"></td><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(p.key)+'">'+esc(p.n||p.en)+'</a>'+(p.n&&p.en?'<small class="pen" title="'+esc(p.en)+'">'+esc(p.en)+'</small>':'')+'<small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+flink(p.curFac)+'</small><select class="catsel" data-rvcat="'+esc(normK(p.n||p.b))+'" title="분류 (담당 분담)"'+(lock?' disabled':'')+'>'+CATS.map(c=>'<option'+(c===x.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="__new">+ 분류 관리…</option></select></div></div></td>'+
       '<td><select class="rvsel st-'+(x.st==='예약배송'?'open':x.st==='임시예약배송'?'soon':x.st==='단종(예정)'?'over':x.st==='품절'?'late':x.st==='단종'?'none':'done')+'" data-rvst="'+esc(p.b)+'"'+(lock?' disabled':'')+'>'+RV_ST.map(s=>'<option'+(s===x.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+'</td>'+
-      '<td class="rvacts">'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d)+'">'+RV_ACT[k].t+'</span>').join('')+(x.lvl?'<span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
+      '<td class="rvacts">'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d+(k==='rt'?' · 오프라인 재고 '+x.offStk+'개 중 주간 판매 '+x.so.wk+'개 (소진율 '+Math.round(x.offRate*100)+'%) · 가져올 수 있는 수량 약 '+x.rtQty+'개':''))+'">'+RV_ACT[k].t+(k==='rt'?' <small>'+nf(x.rtQty)+'</small>':'')+'</span>').join('')+(x.lvl?'<span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
       '<td class="num">'+(x.s.unsent?'<b>'+nf(x.s.unsent)+'</b>':'<span class="muted">0</span>')+'</td>'+
       '<td class="rvsales">'+(salesOffDoc&&salesOffDoc.items ? '<div class="whl"><span>온라인</span><b>'+nf(x.s.wk)+'</b></div><div class="whl"><span>오프라인</span><b>'+nf(x.so.wk)+'</b></div>' : (x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>'))+'</td>'+
       '<td class="num">'+(x.known?(x.rq>0?'<span class="ravail'+(x.ravail<=0?' bad':'')+'" title="출고 가능 재고 + 예약 차수 수량 (미발송 제외)">예약 포함 가용 <b>'+nf(x.ravail)+'</b></span>':'')+'<div class="whtop" title="가용 = 트랜쇼 + 곤지암 − 미발송 (본사 · 오프라인 · 매장 재고 제외)">가용 <b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
@@ -2897,7 +2903,7 @@ function rvSalesModal(){
   const X = S.rvs || (S.rvs = {}); const off = X.kind==='off';
   const kindSel = '<label class="f" style="max-width:260px">추이 종류<select id="rvsKind"><option value="on"'+(off?'':' selected')+'>온라인 추이현황</option><option value="off"'+(off?' selected':'')+'>오프라인 추이현황</option></select></label>';
   let h = '<div class="mh"><div><h2>판매 추이 업데이트</h2><div class="muted" style="font-size:12.5px">지금: 온라인 '+esc(salesLabel()||'없음')+' · 오프라인 '+esc(salesOffLabel()||'없음')+'</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+kindSel+
-    (off ? '<div class="panel pad step"><p class="note" style="margin:0"><b>오프라인(매장) 판매 추이</b>를 올리는 곳이에요. 정식 양식은 받는 대로 맞출 예정이고, 지금은 <b>바코드번호</b> 칸과 <b>날짜별(YYYYMMDD) 수량</b> 또는 <b>판매수량 · 주문수</b> 칸이 있으면 읽어요.</p><p class="note" style="margin:0"><b>오프라인 주간 판매</b> = 날짜 칸 중 최근 7일 합계 (날짜 칸이 없으면 판매수량). 오프라인 재고(트랜쇼 오프라인 + 매장)가 이 판매의 60% 아래로 떨어지고 온라인에 재고가 있으면 예약배송에 <b>RT요청</b>으로 떠요. POS 판매(바코드 하이픈 없음)도 그대로 올리면 돼요 · 실판매 수량을 주간 판매로, <b>매장 재고</b> 칸이 있으면 매장 재고로 같이 반영해요.</p>'+
+    (off ? '<div class="panel pad step"><p class="note" style="margin:0"><b>오프라인(매장) 판매 추이</b>를 올리는 곳이에요. 정식 양식은 받는 대로 맞출 예정이고, 지금은 <b>바코드번호</b> 칸과 <b>날짜별(YYYYMMDD) 수량</b> 또는 <b>판매수량 · 주문수</b> 칸이 있으면 읽어요.</p><p class="note" style="margin:0"><b>오프라인 주간 판매</b> = 날짜 칸 중 최근 7일 합계 (날짜 칸이 없으면 판매수량). 온라인 재고(트랜쇼 · 곤지암 · 본사)가 온라인 판매의 60% 아래인데, 매장에선 재고 대비 잘 안 팔리면(오프라인 주간 판매 ÷ 오프라인 재고 10% 미만) 예약배송에 <b>RT요청</b>으로 떠요. 매장엔 4주 판매분을 남기고 나머지를 가져올 수 있는 수량으로 보여드려요. POS 판매(바코드 하이픈 없음)도 그대로 올리면 돼요 · 실판매 수량을 주간 판매로, <b>매장 재고</b> 칸이 있으면 매장 재고로 같이 반영해요.</p>'+
       '<textarea id="rvSalesT" rows="4" placeholder="바코드번호&#9;상품명&#9;옵션&#9;…&#9;20261110&#9;20261111 … (또는 판매수량)">'+esc(X.text||'')+'</textarea>' :
     '<div class="panel pad step"><p class="note" style="margin:0">셀메이트 <b>판매 DB</b>(대표이미지 · 바코드번호 · 상품명 · 옵션내용 · 사입상품명 · 공급처명 · 상품분류 · 미발송수 · 현재고 · 주문수 · 취소주문수 · 반품주문수 · 판매가 · 원가 · 날짜별 주문수) CSV를 올리거나 머리글까지 붙여넣으세요. 세 브랜드 모두 같은 양식이에요.</p><p class="note" style="margin:0"><b>주간 판매</b> = 날짜 칸 중 <b>최근 7일 합계</b> (마지막 날짜가 오늘이면 진행 중인 오늘은 빼고 그 전 7일) · <b>미발송</b> = 미발송수 칸.</p>'+
     '<textarea id="rvSalesT" rows="4" placeholder="대표이미지&#9;바코드번호&#9;상품명&#9;옵션내용&#9;…&#9;미발송수&#9;현재고&#9;주문수&#9;…&#9;20261104&#9;20261105 …">'+esc(X.text||'')+'</textarea>')+
