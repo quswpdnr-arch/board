@@ -2685,7 +2685,7 @@ function viewResv(){
       '<label class="chk mselall"><input type="checkbox" id="rvSelAll2"> 보이는 상품 모두 선택</label><span class="note">'+nf(a.length)+'개</span></div>';
   const SEL = X.sel || (X.sel = {}); const shownB = a.slice(0, X.n).map(x=>x.p.b); const selN = Object.keys(SEL).filter(b=>SEL[b]).length;
   const allOn = shownB.length && shownB.every(b=>SEL[b]);
-  h += '<div class="panel tw"><table class="rvtbl"><thead><tr><th class="ck"><input type="checkbox" id="rvSelAll"'+(allOn?' checked':'')+' title="보이는 상품 모두 선택" aria-label="모두 선택"></th>'+sth('prod','상품 · 컬러,사이즈 · 바코드')+sth('st','노출 상태')+sth('act','할 일')+sth('wk','주간 판매','num','<small class="thsub">'+esc(salesLabel())+'</small>')+sth('stock','재고','num','<small class="thsub">출고 가능 / 실 보유</small>')+sth('eta','입고 예정')+sth('round','예약 차수')+sth('ch','플랫폼','','<small class="thsub">위 예약 설정 · 아래 판매 중 · 마우스를 대면 이름</small>')+sth('memo','메모')+'</tr></thead><tbody>';
+  h += '<div class="panel tw"><table class="rvtbl"><thead><tr><th class="ck"><input type="checkbox" id="rvSelAll"'+(allOn?' checked':'')+' title="보이는 상품 모두 선택" aria-label="모두 선택"></th>'+sth('prod','상품 · 컬러,사이즈 · 바코드')+sth('st','노출 상태')+sth('act','할 일')+sth('wk','주간 판매','num','<small class="thsub">'+esc(salesLabel())+'</small>')+sth('stock','재고','num','<small class="thsub">출고 가능 / 실 보유</small>')+sth('eta','입고 예정')+sth('round','예약 차수')+sth('ch','플랫폼별 현황')+sth('memo','메모')+'</tr></thead><tbody>';
   if(!a.length) h += '<tr><td colspan="10" class="empty">조건에 맞는 상품이 없습니다.</td></tr>';
   S.__rvRows = a;
   const lock = !canDo('resv'); const CATS = catList().map(c=>c.n);
