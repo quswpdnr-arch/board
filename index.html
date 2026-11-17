@@ -682,7 +682,8 @@ const diffDays = (a,b) => Math.round((new Date(a+'T00:00:00') - new Date(b+'T00:
 const DOW = ['일','월','화','수','목','금','토'];
 const fmtD = s => { if(!s) return ''; const d=new Date(s+'T00:00:00'); return pad(d.getMonth()+1)+'.'+pad(d.getDate())+' ('+DOW[d.getDay()]+')'; };
 const fmtDY = s => s ? s.slice(2).replace(/-/g,'.') : '';
-const nf = n => Number(n||0).toLocaleString('ko-KR');
+const NF_KO = new Intl.NumberFormat('ko-KR');
+const nf = n => NF_KO.format(Number(n||0));
 const p2 = n => String(n).padStart(2,'0');
 function fmtAt(iso, dateOnly){ const d = new Date(iso); if(!iso || isNaN(d)) return String(iso||'').slice(5,16).replace('T',' '); return p2(d.getMonth()+1)+'-'+p2(d.getDate())+(dateOnly?'':' '+p2(d.getHours())+':'+p2(d.getMinutes())); }
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -920,7 +921,8 @@ async function initCaps(){
   const fail = e => { clearTimeout(timer); dbState='err'; toast('저장소 연결 오류: '+(e&&e.message||'')); render(); };
   let first = {p:true,o:true,v:true,l:true,f:true,c:true,x:true,s:true};
   DB.collection('prod').onSnapshot(s => { newProds={}; s.docs.forEach(d=>newProds[d.id]=d.data()); if(first.p){first.p=false;ready();} else refresh(); }, fail);
-  DB.collection('ord').onSnapshot(s => { newOrds={}; s.docs.forEach(d=>newOrds[d.id]=d.data()); if(first.o){first.o=false;ready();} else refresh(); }, fail);
+  const ordCol = (SNAP.ordReset && RAWDB && RAWDB.fb && typeof DB.collection('ord').where === 'function') ? DB.collection('ord').where('at', '>', new Date(SNAP.ordReset).toISOString()) : DB.collection('ord');
+  ordCol.onSnapshot(s => { newOrds={}; s.docs.forEach(d=>newOrds[d.id]=d.data()); if(first.o){first.o=false;ready();} else refresh(); }, fail);
   DB.collection('ovr').onSnapshot(s => { ovr={}; s.docs.forEach(d=>ovr[d.id]=d.data()); if(first.v){first.v=false;ready();} else refresh(); }, fail);
   DB.collection('fac').onSnapshot(s => { facDocs={}; s.docs.forEach(d=>{ const x=d.data(); if(x&&x.name) facDocs[x.name]=x; }); if(first.f){first.f=false;ready();} else refresh(); }, fail);
   DB.doc('stock/current').onSnapshot(d => { stockDoc = d.exists ? d.data() : null; if(first.s){first.s=false;ready();} else refresh(); }, fail);
@@ -1157,11 +1159,13 @@ async function exportAll(){
   if(!DB){ toast('저장소에 연결된 뒤에 백업할 수 있습니다'); return; }
   toast('백업 파일을 만드는 중…');
   const logs = await new Promise(res => { let un = null; un = DB.collection('log').onSnapshot(s => { const o = {}; s.docs.forEach(d=>o[d.id]=d.data()); res(o); setTimeout(()=>{ try{ un && un(); }catch(e){} }, 0); }, () => res({})); });
+  // 오더는 화면용으로 일부만 받으므로 백업할 땐 전체를 따로 받음
+  const ordAll = await new Promise(res => { let un = null; un = DB.collection('ord').onSnapshot(s => { const o = {}; s.docs.forEach(d=>o[d.id]=d.data()); res(o); setTimeout(()=>{ try{ un && un(); }catch(e){} }, 0); }, () => res(newOrds)); });
   const fac = {}; for(const [n,d] of Object.entries(facDocs)) fac[facDocId(n)] = d;
   const pfix = {}; for(const [o,d] of Object.entries(pfixDocs)) pfix[pfixId(o)] = d;
   const fchg = {}; for(const c of fchgs){ const d = Object.assign({}, c); delete d.id; fchg[c.id] = d; }
   const backup = {kind:'knownbetter-board-backup', v:1, at:new Date().toISOString(), brand:BRAND, snap: JSON.parse(SNAP_TXT),
-    db:{prod:newProds, ord:newOrds, ovr, fac, pfix, fchg, stock: stockDoc ? {current:stockDoc} : {}, log:logs}};
+    db:{prod:newProds, ord:ordAll, ovr, fac, pfix, fchg, stock: stockDoc ? {current:stockDoc} : {}, log:logs}};
   // 기록에 남은 사람 이름도 함께 저장 (새 홈페이지에서 '누가' 표시용)
   const ids = new Set(); const grab = o => { if(!o || typeof o!=='object') return; for(const [k,v] of Object.entries(o)){ if(/^(by|delBy|restBy)$/.test(k) && typeof v==='string' && v) ids.add(v); else if(v && typeof v==='object') grab(v); } };
   grab(backup.db);
@@ -3454,9 +3458,12 @@ async function saveBulk(){ if(!need('reorder')) return;
 
 // ---------- render ----------
 let refreshQ = 0;
-function refresh(){ if(refreshQ) return; refreshQ = setTimeout(()=>{ refreshQ = 0; rebuild(); STYLES = styles(); buildMix(); render(); }, 40); }
+let bgRender = false, lastAppHtml = null;
+const bgRun = fn => { bgRender = true; try{ fn(); } finally { bgRender = false; } };
+function refresh(){ if(refreshQ) return; refreshQ = setTimeout(()=>{ refreshQ = 0; rebuild(); STYLES = styles(); buildMix(); bgRun(render); }, 40); }
 let lightQ = 0;
-function lightRefresh(){ if(refreshQ || lightQ) return; lightQ = setTimeout(()=>{ lightQ = 0; render(); }, 40); }
+function lightRefresh(){ if(refreshQ || lightQ) return; lightQ = setTimeout(()=>{ lightQ = 0; bgRun(render); }, 40); }
+['click','input','change','keydown','submit','focusin'].forEach(ev => document.addEventListener(ev, () => { lastAppHtml = null; }, true));
 function refreshNow(){ clearTimeout(refreshQ); refreshQ = 0; rebuild(); STYLES = styles(); buildMix(); render(); }
 async function setCountry(f, kind){ if(!need('fac','fix')) return;
   if(!kind) return;
@@ -3499,10 +3506,14 @@ function render(){
   if(isExt() && BRAND==='all'){ setBrand('kb'); return; }
   EXP = null;
   if(!window.__namesPre && DB && ORDERS.length){ window.__namesPre = 1; setTimeout(preloadNames, 300); }
-  if(BRAND==='all'){ app.innerHTML = viewAll(); expInject(app); navSync(); return; }
-  if(!BRAND_DATA[BRAND]){ app.innerHTML = brandEmpty(); navSync(); return; }
+  if(BRAND==='all'){ lastAppHtml = null; app.innerHTML = viewAll(); expInject(app); navSync(); return; }
+  if(!BRAND_DATA[BRAND]){ lastAppHtml = null; app.innerHTML = brandEmpty(); navSync(); return; }
   pushSum();
-  app.innerHTML = ({home:viewHome, resv:viewResv, sched:viewSched, mng:()=>{ S.tab='fac'; S.fac.view='mng'; return viewFac(); }, fac:viewFac, due:viewDue, cal:viewCal, find:viewFind, reg:viewReg, mng:viewMng, fix:viewFix}[S.tab]||viewHome)();
+  const html = ({home:viewHome, resv:viewResv, sched:viewSched, mng:()=>{ S.tab='fac'; S.fac.view='mng'; return viewFac(); }, fac:viewFac, due:viewDue, cal:viewCal, find:viewFind, reg:viewReg, mng:viewMng, fix:viewFix}[S.tab]||viewHome)();
+  const viewKey = BRAND+'|'+S.tab;
+  // 팀원 저장 등으로 배경에서 다시 그릴 때, 결과가 지금 화면과 똑같으면 그대로 둠 (펼친 목록 · 입력 중인 칸 유지)
+  if(bgRender && lastAppHtml !== null && html === lastAppHtml && app.dataset.vk === viewKey){ navSync(); loadThumbs(); return; }
+  app.innerHTML = html; lastAppHtml = html; app.dataset.vk = viewKey;
   if(fid){ const e = document.getElementById(fid); if(e){ e.focus(); try{ if(pos!=null) e.setSelectionRange(pos,pos); }catch(x){} } }
   expInject(app);
   addBackButtons();

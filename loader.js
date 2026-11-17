@@ -3,7 +3,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithCredential, onAuthStateChanged, signOut, connectAuthEmulator } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator,
-  collection, doc, query, orderBy, limit, onSnapshot, setDoc, addDoc, getDoc, deleteDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  collection, doc, query, where, orderBy, limit, onSnapshot, setDoc, addDoc, getDoc, deleteDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const CFG = window.FIREBASE_CONFIG || {};
 const ADMINS = (window.BOARD_ADMINS || []).map(e => String(e).trim().toLowerCase());
@@ -145,6 +145,7 @@ const wrapDocs = s => ({ docs: s.docs.map(d => ({ id: d.id, data: () => d.data()
 function colRef(path, cons){
   return {
     orderBy: (f, dir) => colRef(path, cons.concat(orderBy(f, dir || 'asc'))),
+    where: (f, op, v) => colRef(path, cons.concat(where(f, op, v))),
     limit: n => colRef(path, cons.concat(limit(n))),
     onSnapshot: (cb, err) => onSnapshot(cons.length ? query(collection(fs, path), ...cons) : collection(fs, path), s => cb(wrapDocs(s)), err),
     add: async data => { const r = await addDoc(collection(fs, path), data); return { id: r.id }; },
@@ -159,7 +160,7 @@ function docRef(path){
     onSnapshot: (cb, err) => onSnapshot(doc(fs, path), d => cb({ exists: d.exists(), data: () => d.data() }), err)
   };
 }
-const dbShim = { collection: path => colRef(path, []), doc: path => docRef(path) };
+const dbShim = { fb: true, collection: path => colRef(path, []), doc: path => docRef(path) };
 let userNames = null;
 function watchUsers(){
   if(userNames) return; userNames = {};
