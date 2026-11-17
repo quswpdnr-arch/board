@@ -2678,8 +2678,9 @@ function rvCalc(p){
   const known = hasStock(p);
   const wh = p.trans!=null;
   const gj = wh ? (p.gj||0) : 0;
-  const rest = known ? (wh ? p.trans + gj - (p.unsent||0) : (Number(p.avail)||0)) : null;   // 출고 가능 = 트랜쇼 + 곤지암 − 미발송
-  const trest = known && wh ? p.trans - (p.unsent||0) : null;   // 트랜쇼만
+  const rest = known ? (wh ? p.trans + (p.hq||0) + gj - (p.unsent||0) : (Number(p.avail)||0)) : null;   // 가용 = 트랜쇼 + 본사 + 곤지암 − 미발송
+  const threst = known && wh ? p.trans + (p.hq||0) - (p.unsent||0) : null;   // 트랜쇼 + 본사 (곤지암 빼고)
+  const shipNow = known && wh ? p.trans + gj - (p.unsent||0) : null;   // 바로 출고 (본사는 검수 후)
   const live = r.rounds.filter(x=>!x.done);
   const rq = live.reduce((t,x)=>t+(+x.q||0),0);
   const total = (rest||0) + rq;
@@ -2702,16 +2703,16 @@ function rvCalc(p){
     }
     if((ast==='일반배송' || isResvSt(ast) || (auto && st==='품절' && s.wk>0)) && known && rest<=0 && inc===0 && rq===0 && !(wh && (p.hq||0)>0)) acts.push('toSold');
     if(st==='품절' && ((known && rest>0) || inc>0)) acts.push('reopen');
-    if(wh && (p.hq||0)>0 && rest<=0 && (isResvSt(st) || s.wk>0)) acts.push('qc');
+    if(wh && (p.hq||0)>0 && shipNow<=0 && (isResvSt(st) || s.wk>0)) acts.push('qc');
   }
-  // 트랜쇼가 소진돼 가는데 본사에도 없고 곤지암에 있으면 → 곤지암에서 트랜쇼로 옮겨야 함
-  if(st!=='단종' && known && gj>0 && !((p.hq||0)>0) && (trest<=0 || (s.wk>0 && trest < s.wk*0.6))) acts.push('moveWh');
+  // 트랜쇼 + 본사 재고가 떨어질 것 같은데 곤지암에 있으면 → 곤지암에서 트랜쇼로 옮겨야 함
+  if(st!=='단종' && known && gj>0 && (threst<=0 || (s.wk>0 && threst < s.wk*0.6))) acts.push('moveWh');
   // 오프라인 판매 대비 오프라인 재고가 모자라고 온라인(트랜쇼 · 곤지암)에 재고가 있으면 → RT 요청
   // RT요청 = 매장(오프라인) 재고를 온라인으로 가져오기: 온라인(트랜쇼 · 곤지암 · 본사)이 모자라고, 매장에선 재고 대비 안 팔릴 때만
   const offStk = (p.off||0) + (p.shop||0);
   const offRate = offStk>0 ? so.wk/offStk : null;   // 오프라인 주간 소진율
   const rtQty = offStk>0 ? Math.max(0, offStk - Math.ceil(so.wk*RT_KEEP_WEEKS)) : 0;   // 매장에 몇 주 판매분은 남기고 가져올 수 있는 수량
-  if(st!=='단종' && known && s.wk>0 && (rest + (p.hq||0)) < s.wk*0.6 && offStk>0 && offRate < RT_RATE && rtQty>0) acts.push('rt');
+  if(st!=='단종' && salesOffDoc && salesOffDoc.items && known && s.wk>0 && rest < s.wk*0.6 && offStk>0 && offRate < RT_RATE && rtQty>0) acts.push('rt');
   // 예약 차수별 남은 수량: 미발송(출고 가능 재고의 마이너스)을 앞 차수부터 채워 나감
   let deficit = known ? Math.max(0, -(rest||0)) : 0;
   const rleft = live.map(x=>{ const q = +x.q||0; const use = Math.min(q, deficit); deficit -= use; return q - use; });
@@ -2793,7 +2794,7 @@ function viewResv(){
       '<td class="rvacts">'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d+(k==='rt'?' · 오프라인 재고 '+x.offStk+'개 중 주간 판매 '+x.so.wk+'개 (소진율 '+Math.round(x.offRate*100)+'%) · 가져올 수 있는 수량 약 '+x.rtQty+'개':''))+'">'+RV_ACT[k].t+(k==='rt'?' <small>'+nf(x.rtQty)+'</small>':'')+'</span>').join('')+(x.lvl?'<span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
       '<td class="num">'+(x.s.unsent?'<b>'+nf(x.s.unsent)+'</b>':'<span class="muted">0</span>')+'</td>'+
       '<td class="rvsales">'+(salesOffDoc&&salesOffDoc.items ? '<div class="whl"><span>온라인</span><b>'+nf(x.s.wk)+'</b></div><div class="whl"><span>오프라인</span><b>'+nf(x.so.wk)+'</b></div>' : (x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>'))+'</td>'+
-      '<td class="num">'+(x.known?(x.rq>0?'<span class="ravail'+(x.ravail<=0?' bad':'')+'" title="출고 가능 재고 + 예약 차수 수량 (미발송 제외)">예약 포함 가용 <b>'+nf(x.ravail)+'</b></span>':'')+'<div class="whtop" title="가용 = 트랜쇼 + 곤지암 − 미발송 (본사 · 오프라인 · 매장 재고 제외)">가용 <b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
+      '<td class="num">'+(x.known?(x.rq>0?'<span class="ravail'+(x.ravail<=0?' bad':'')+'" title="출고 가능 재고 + 예약 차수 수량 (미발송 제외)">예약 포함 가용 <b>'+nf(x.ravail)+'</b></span>':'')+'<div class="whtop" title="가용 = 트랜쇼 + 본사 창고 + 곤지암 − 미발송 (오프라인 · 매장 재고 제외)">가용 <b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
       '<td>'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+(x.next?'<a class="rvinc" data-act="openOrder" data-id="'+x.next.id+'">'+(x.next.eta?fmtD(x.next.eta).slice(0,5)+' <small>'+(x.next.etaKind==='fixed'?'확정':'예상')+'</small>':'미정')+' · '+nf(x.next.remain)+'장</a>'+(x.opens.length>1?'<small class="odsub">전체 '+x.opens.length+'건 · '+nf(x.inc)+'장</small>':'')+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':''):'<span class="muted">없음</span>')+'</td>'+
       '<td>'+(x.live.length?x.live.map((o,i)=>'<span class="rvround'+(x.shipFrom&&o.d&&o.d<x.shipFrom?' bad':'')+'">'+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+(o.q?' · '+nf(o.q)+'장':'')+'</span>'+(o.q&&x.known?'<small class="rleft'+(x.rleft[i]<=0?' bad':'')+'">'+(x.rleft[i]<=0?'예약 수량 소진':'남은 '+nf(x.rleft[i])+'장')+'</small>':'')).join(''):'')+'<button class="btn sm ghost" data-act="rvEdit" data-b="'+esc(p.b)+'">'+(x.live.length?'수정':'+ 차수')+'</button></td>'+
       '<td><div class="rvchs"><span class="rvch"><em class="rvcl">예약</em><button class="rvc all'+(chList().every(c=>r.ch[c])?' on':'')+'" data-act="rvChAll" data-b="'+esc(p.b)+'" data-tip="예약 설정 · 전체 반영 / 해제"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(r.ch[c]?' on':'')+'" data-act="rvCh" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · 예약 '+(r.ch[c]?'설정 완료':'미설정')+'" aria-label="'+esc(c)+' 예약 설정"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span>'+
@@ -2801,7 +2802,7 @@ function viewResv(){
       '<td class="rvmemo">'+(r.cmt?'<small>'+esc(r.cmt).replace(/\n/g,' ')+'</small>':'')+(r.memo?'<small class="muted">'+esc(r.memo)+'</small>':'')+'</td></tr>';
   }
   h += '</tbody></table></div>'+bulkBar(selN)+(a.length>X.n?'<div class="more"><button class="btn" data-act="rvMore">'+nf(a.length-X.n)+'개 더 보기</button></div>':'')+
-    '<p class="note">재고 = 셀메이트 가용재고(미발송 제외) / 실 보유재고 · 재고 부족 = 가용 + 예약 수량이 주간 판매의 30% 미만이면 긴급, 60% 미만이면 주의 · 출고 가능일 = 입고 예정일 + 검수 '+QC_DAYS+'영업일 · 재고 = 트랜쇼 + 곤지암(바로 출고) − 미발송 / 실 보유 (본사 재고는 검수 후 출고 · 오프라인 재고는 따로)</p></div>';
+    '<p class="note">재고 = 셀메이트 가용재고(미발송 제외) / 실 보유재고 · 재고 부족 = 가용 + 예약 수량이 주간 판매의 30% 미만이면 긴급, 60% 미만이면 주의 · 출고 가능일 = 입고 예정일 + 검수 '+QC_DAYS+'영업일 · 재고 = 가용(트랜쇼 + 본사 창고 + 곤지암 − 미발송) · 오프라인 · 매장 재고는 따로</p></div>';
   return h;
 }
 function rvModal(b, preset){
