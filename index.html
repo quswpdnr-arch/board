@@ -2441,15 +2441,18 @@ function errMsg(e){ const c = e && e.code || ''; if(c==='perm' || /permission/.t
 function parseEmails(t){ return [...new Set((String(t||'').toLowerCase().match(/[^\s<>,;"'()]+@[^\s<>,;"'()]+\.[a-z]{2,}/g)||[]))]; }
 // "홍길동 kim@gmail.com" · "kim@gmail.com 홍길동" · "홍길동<kim@gmail.com>" · 줄바꿈/쉼표/탭 섞여도 인식 (이름은 없어도 됨)
 function parseMembers(t){
-  const em = /[^\s<>,;"'()\t]+@[^\s<>,;"'()\t]+\.[a-z]{2,}/i;
-  const parts = String(t||'').split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean);
+  const em = /[^\s<>,;"'()\[\]\t@:]+@[^\s<>,;"'()\[\]\t@:]+\.[a-z]{2,}/i;
+  // 메일 링크 · 두 번 붙여넣은 주소(…@gmail.comkim@…)도 하나씩 나눠 읽기
+  t = String(t||'').replace(/mailto:/gi,' ').replace(/[\[\]()]/g,' ').replace(/(@[^\s@,;]*?\.(?:com|net|org|co\.kr|kr|io|me))(?=[a-z0-9._%+-]+@)/gi,'$1\n');
+  const parts = t.split(/[\n,;]+/).map(x=>x.trim()).filter(Boolean);
   const out = []; let pend = '';
   for(const x of parts){
     const m = x.match(em);
     if(!m){ const nm = x.replace(/[<>"'()\t]/g,' ').replace(/\s+/g,' ').trim(); if(!nm) continue; const last = out[out.length-1]; if(last && !last.name && !pend) last.name = nm; else pend = nm; continue; }
-    const e = m[0].toLowerCase(); let nm = x.replace(m[0],' ').replace(/[<>"'()\t:]/g,' ').replace(/\s+/g,' ').trim();
+    const ems = [...new Set((x.match(new RegExp(em.source,'gi'))||[]).map(v=>v.toLowerCase()))];
+    let nm = x.replace(new RegExp(em.source,'gi'),' ').replace(/[<>"'()\t:]/g,' ').replace(/\s+/g,' ').trim();
     if(!nm && pend) nm = pend; pend = '';
-    if(!out.some(o=>o.email===e)) out.push({email:e, name:nm});
+    ems.forEach((e,k) => { if(!out.some(o=>o.email===e)) out.push({email:e, name:k===0?nm:''}); });
   }
   return out;
 }
