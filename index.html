@@ -2724,8 +2724,8 @@ function rvCalc(p){
     if(isResvSt(ast)){
       if(!live.length && inc>0) acts.push('noRound');
       if(shipFrom && live.some(x=>x.d && x.d < shipFrom)) acts.push('risk');
-      // 가용재고(트랜쇼 · 본사 · 곤지암)가 일주일 판매의 60% 이상일 때만 (재고 부족 '주의' 기준과 같음) · 판매가 없으면 1개 이상
-      if(known && rest>0 && (s.wk>0 ? rest >= s.wk*0.6 : true)) acts.push('toNormal');
+      // 가용재고(트랜쇼 · 본사 · 곤지암)가 일주일 판매의 40% 이상일 때만 · 판매가 없으면 1개 이상
+      if(known && rest>0 && (s.wk>0 ? rest >= s.wk*0.4 : true)) acts.push('toNormal');
     }
     if((ast==='일반배송' || isResvSt(ast) || (auto && st==='품절' && s.wk>0)) && known && rest<=0 && inc===0 && rq===0 && !(wh && (p.hq||0)>0)) acts.push('toSold');
     if(st==='품절' && ((known && rest>0) || inc>0)) acts.push('reopen');
