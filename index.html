@@ -158,6 +158,7 @@ label.f input,label.f select,label.f textarea{color:var(--fg)}
 
 .facwrap{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:start}
 .facnav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 100px);display:grid;padding:6px;max-height:calc(100vh - 130px);overflow-y:auto}
+.faccombo{display:flex;flex-direction:column;gap:3px}.faccombo .facq{width:100%}.facqhint{font-size:11px;color:var(--muted);line-height:1.3}.facqhint.new{color:#c2410c}
 .facnav input.facnq{margin:2px 2px 8px;padding:7px 10px;font-size:13px;min-width:0;width:auto}.facnone{font-size:12px;padding:6px 10px}.facbtn[hidden]{display:none}
 .facbtn{appearance:none;border:0;background:none;font:inherit;color:var(--fg);display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer;text-align:left}
 .facbtn:hover{background:var(--sunk)}
@@ -2367,6 +2368,7 @@ function stockRun(text, fileName){
 function facVal(id){ const s = document.getElementById(id); if(!s) return ''; return s.value==='__new' ? val(id+'_new') : s.value; }
 function setFacSelect(id, name){
   const s = document.getElementById(id); if(!s) return;
+  const q = document.getElementById(id+'_q'); if(q){ q.value = name||''; facComboSync(id); return; }
   if([...s.options].some(o=>o.value===name)) s.value = name;
   else { s.value = '__new'; const i = document.getElementById(id+'_new'); if(i){ i.hidden = false; i.value = name; } }
 }
@@ -2408,7 +2410,28 @@ function optSelect(id, value, opts, ph, newLabel, newPh){
   return '<span class="facsel"><select id="'+id+'" data-facsel="1"><option value="">'+ph+'</option>'+opts.map(f=>'<option'+(f===value?' selected':'')+'>'+esc(f)+'</option>').join('')+'<option value="__new"'+(isNew?' selected':'')+'>'+newLabel+'</option></select>'+
     '<input id="'+id+'_new" placeholder="'+newPh+'" value="'+esc(isNew?value:'')+'"'+(isNew?'':' hidden')+'></span>';
 }
-function facSelect(id, value, exclude){ return optSelect(id, value, activeFacs().filter(f=>f!==exclude), '공장 선택', '+ 새 공장 직접 입력', '새 공장 이름'); }
+function facSelect(id, value, exclude){ return facCombo(id, value, activeFacs().filter(f=>f!==exclude)); }
+// 공장: 검색해서 고르기 (값은 기존처럼 숨은 선택칸에 들어감 · 목록에 없으면 새 공장)
+function facCombo(id, value, opts){
+  const isNew = value && !opts.includes(value);
+  return '<span class="facsel faccombo"><input type="search" id="'+id+'_q" class="facq" list="'+id+'_dl" data-facq="'+id+'" placeholder="공장 검색 · 선택" value="'+esc(value||'')+'" autocomplete="off">'+
+    '<datalist id="'+id+'_dl">'+opts.map(f=>'<option value="'+esc(f)+'"></option>').join('')+'</datalist>'+
+    '<select id="'+id+'" hidden aria-hidden="true" tabindex="-1"><option value=""></option>'+opts.map(f=>'<option'+(f===value?' selected':'')+'>'+esc(f)+'</option>').join('')+'<option value="__new"'+(isNew?' selected':'')+'></option></select>'+
+    '<input id="'+id+'_new" hidden value="'+esc(isNew?value:'')+'">'+
+    '<small class="facqhint'+(isNew?' new':'')+'"'+(isNew?'':' hidden')+'>'+(isNew?'목록에 없는 공장 · 새 공장으로 등록돼요':'')+'</small></span>';
+}
+function facComboSync(id, done){
+  const q = document.getElementById(id+'_q'), s = document.getElementById(id), n = document.getElementById(id+'_new'); if(!q || !s) return;
+  const opts = [...s.options].map(o=>o.value).filter(v=>v && v!=='__new');
+  let t = q.value.trim(); const lc = t.toLowerCase();
+  let hit = opts.find(o=>o.toLowerCase()===lc);
+  const part = lc ? opts.filter(o=>o.toLowerCase().includes(lc)) : [];
+  if(!hit && done && part.length===1){ hit = part[0]; q.value = hit; }   // 하나만 맞으면 그걸로
+  const h = q.parentNode.querySelector('.facqhint');
+  if(hit){ s.value = hit; if(n) n.value = ''; if(h){ h.hidden = true; h.className = 'facqhint'; } }
+  else if(!t){ s.value = ''; if(n) n.value = ''; if(h){ h.hidden = true; h.className = 'facqhint'; } }
+  else { s.value = '__new'; if(n) n.value = t; if(h){ h.hidden = false; h.className = 'facqhint'+(part.length?'':' new'); h.textContent = part.length ? '맞는 공장 '+part.length+'개 · 목록에서 골라주세요' : '목록에 없는 공장 · 새 공장으로 등록돼요'; } }
+}
 // 분류 = 시즌(26 FW4) + 품목(재킷)
 function catParts(){
   const se = new Set(), ty = new Map();
@@ -3566,7 +3589,7 @@ function expInject(app){
 // 검색 중이면 검색창 앞에 '‹ 전체' 버튼
 function addBackButtons(){
   document.querySelectorAll('#app input[type=search]').forEach(i=>{
-    if(!i.value || !i.id || i.id==='facNavQ' || (i.previousElementSibling && i.previousElementSibling.classList.contains('qback'))) return;
+    if(!i.value || !i.id || i.id==='facNavQ' || i.classList.contains('facq') || (i.previousElementSibling && i.previousElementSibling.classList.contains('qback'))) return;
     const b = document.createElement('button'); b.type='button'; b.className='btn sm qback'; b.dataset.act='qBack'; b.dataset.t=i.id;
     const back = i.id==='findQ' && S.find.from ? ({home:'대시보드',due:'입고 예정',resv:'예약배송',fac:'공장별 조회',reg:'등록 · 입고',sched:'일정 입력'}[S.find.from]||'') : '';
     b.title = back ? back+' 화면으로 돌아가기' : '검색 지우고 전체 목록으로'; b.innerHTML = back ? '‹ '+back : '‹ 전체';
@@ -3629,6 +3652,7 @@ document.addEventListener('compositionend', e => { composing = false; if(renderW
 let tmr;
 document.addEventListener('input', e => {
   const t = e.target;
+  if(t.dataset && t.dataset.facq){ facComboSync(t.dataset.facq, false); return; }
   if(t.dataset && t.dataset.rem!=null){ const w = t.parentNode.querySelector('.overq'); if(w){ const ov = (+t.value||0) - (+t.dataset.rem||0); w.hidden = !(ov>0); w.textContent = '초과 입고 +'+ov; } }
   if(t.dataset && t.dataset.sch){ const id = t.dataset.sch; S.sched.edits[id] = S.sched.edits[id] || {}; S.sched.edits[id][t.dataset.k] = t.value; const tr = t.closest('tr'); const has = !!S.sched.edits[id].eta; if(tr){ tr.classList.toggle('schdirty', has); const b = tr.querySelector('[data-act=schSave]'); if(b){ b.disabled = !has; b.classList.toggle('pri', has); } } const all = document.querySelector('[data-act=schSaveAll]'); if(all){ const n = Object.values(S.sched.edits).filter(e=>e&&e.eta).length; all.textContent = '입력한 '+n+'건 저장'; all.disabled = !n; } }
   if(t.id==='schQ'){ S.sched.q = t.value; S.sched.n = 150; clearTimeout(tmr); tmr=setTimeout(render,200); }
@@ -3749,6 +3773,7 @@ document.addEventListener('change', e => {
   if(t.dataset && t.dataset.pcountry){ setStyleCountry([t.dataset.pcountry], t.value); }
   if(t.dataset && t.dataset.sdeco){ const st = STYLES.get(t.dataset.sdeco); if(st) setStyleDeco(st.prods.map(p=>p.key), t.value); }
   if(t.dataset && t.dataset.scountry){ const st = STYLES.get(t.dataset.scountry); if(st) setStyleCountry(st.prods.map(p=>p.key), t.value); }
+  if(t.dataset && t.dataset.facq){ facComboSync(t.dataset.facq, e.type==='change'); }
   if(t.dataset && t.dataset.facsel){ const i = document.getElementById(t.id+'_new'); if(i){ i.hidden = t.value!=='__new'; if(!i.hidden) i.focus(); } }
   if(t.dataset && t.dataset.country!=null){ setCountry(t.dataset.country, t.value); }
   if(t.id==='mngOff'){ S.mng.showOff=t.checked; render(); }
