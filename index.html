@@ -158,7 +158,7 @@ label.f input,label.f select,label.f textarea{color:var(--fg)}
 
 .facwrap{display:grid;grid-template-columns:200px minmax(0,1fr);gap:18px;align-items:start}
 .facnav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 100px);display:grid;padding:6px;max-height:calc(100vh - 130px);overflow-y:auto}
-.faccombo{display:flex;flex-direction:column;gap:3px}.faccombo .facq{width:100%}.facqhint{font-size:11px;color:var(--muted);line-height:1.3}.facqhint.new{color:#c2410c}
+.faccombo{display:flex;flex-direction:column;gap:3px;position:relative}.facdd{position:absolute;left:0;right:0;margin-top:40px;top:0;z-index:30;max-height:260px;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);padding:4px}.facddi{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:6px;font:inherit;font-size:13.5px;color:var(--fg);cursor:pointer}.facddi:hover,.facddi.on{background:var(--accent-soft,rgba(16,120,90,.10));color:var(--accent)}.facddi.sug{font-weight:600}.facddn{font-size:12px;color:var(--muted);padding:7px 10px}.faccombo:has(.facdd:not([hidden])) .facqhint{visibility:hidden}.faccombo .facq{width:100%}.facqhint{font-size:11px;color:var(--muted);line-height:1.3}.facqhint.new{color:#c2410c}
 .facnav input.facnq{margin:2px 2px 8px;padding:7px 10px;font-size:13px;min-width:0;width:auto}.facnone{font-size:12px;padding:6px 10px}.facbtn[hidden]{display:none}
 .facbtn{appearance:none;border:0;background:none;font:inherit;color:var(--fg);display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;cursor:pointer;text-align:left}
 .facbtn:hover{background:var(--sunk)}
@@ -2414,18 +2414,58 @@ function facSelect(id, value, exclude){ return facCombo(id, value, activeFacs().
 // 공장: 검색해서 고르기 (값은 기존처럼 숨은 선택칸에 들어감 · 목록에 없으면 새 공장)
 function facCombo(id, value, opts){
   const isNew = value && !opts.includes(value);
-  return '<span class="facsel faccombo"><input type="search" id="'+id+'_q" class="facq" list="'+id+'_dl" data-facq="'+id+'" placeholder="공장 검색 · 선택" value="'+esc(value||'')+'" autocomplete="off">'+
-    '<datalist id="'+id+'_dl">'+opts.map(f=>'<option value="'+esc(f)+'"></option>').join('')+'</datalist>'+
+  return '<span class="facsel faccombo"><input type="search" id="'+id+'_q" class="facq" data-facq="'+id+'" placeholder="공장 검색 · 선택 (초성도 돼요)" value="'+esc(value||'')+'" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="'+id+'_dd">'+
+    '<div class="facdd" id="'+id+'_dd" role="listbox" hidden></div>'+
     '<select id="'+id+'" hidden aria-hidden="true" tabindex="-1"><option value=""></option>'+opts.map(f=>'<option'+(f===value?' selected':'')+'>'+esc(f)+'</option>').join('')+'<option value="__new"'+(isNew?' selected':'')+'></option></select>'+
     '<input id="'+id+'_new" hidden value="'+esc(isNew?value:'')+'">'+
     '<small class="facqhint'+(isNew?' new':'')+'"'+(isNew?'':' hidden')+'>'+(isNew?'목록에 없는 공장 · 새 공장으로 등록돼요':'')+'</small></span>';
 }
+// 한글 검색: 그대로 포함 · 초성(ㅇㅇㄴ) · 입력 중인 마지막 글자(아이ㄴ → 아이니) · 오타면 비슷한 이름
+const HG_CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+const hgCho = s => [...String(s)].map(c=>{ const k = c.charCodeAt(0)-0xAC00; return k>=0 && k<11172 ? HG_CHO[Math.floor(k/588)] : c; }).join('');
+const HG_JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const hgJamo = s => [...String(s)].map(c=>{ const k = c.charCodeAt(0)-0xAC00; if(k<0||k>=11172) return c.toLowerCase(); return HG_CHO[Math.floor(k/588)] + String.fromCharCode(0x314F + Math.floor((k%588)/28)) + HG_JONG[k%28]; }).join('');
+function facMatch(name, q){
+  const n = name.toLowerCase(), t = q.toLowerCase().replace(/\s+/g,''); if(!t) return true;
+  if(n.replace(/\s+/g,'').includes(t)) return true;
+  if(/^[ㄱ-ㅎ]+$/.test(t) && hgCho(n).includes(t)) return true;
+  const nj = hgJamo(n.replace(/\s+/g,''));
+  if(nj.includes(hgJamo(t))) return true;   // 입력 중인 글자까지 자모로 비교 (아이ㄴ → 아이니)
+  // 입력 중에 받침으로 붙은 자음(아인 → 아이니): 마지막 받침을 떼서 다음 글자 첫소리로도 비교
+  const lc = t.charCodeAt(t.length-1)-0xAC00;
+  if(lc>=0 && lc<11172 && lc%28){ const t2 = t.slice(0,-1)+String.fromCharCode(0xAC00+lc-lc%28); if(nj.includes(hgJamo(t2)+HG_JONG[lc%28])) return true; }
+  return false;
+}
+function lev(a, b){ const m = a.length, n = b.length; if(!m) return n; if(!n) return m; let p = Array.from({length:n+1}, (_,j)=>j);
+  for(let i=1;i<=m;i++){ const c = [i]; for(let j=1;j<=n;j++) c[j] = Math.min(p[j]+1, c[j-1]+1, p[j-1]+(a[i-1]===b[j-1]?0:1)); p = c; } return p[n]; }
+function facSuggest(opts, q){ const t = hgJamo(q.replace(/\s+/g,'')); if(t.length < 2) return [];
+  return opts.map(o=>{ const j = hgJamo(o.replace(/\s+/g,'')); return [o, Math.min(lev(t, j), lev(t, j.slice(0, t.length)))]; }).filter(x=>x[1] <= Math.max(1, Math.floor(t.length/3))).sort((a,b)=>a[1]-b[1]).slice(0,3).map(x=>x[0]); }
+function facDD(id, show){
+  const q = document.getElementById(id+'_q'), s = document.getElementById(id), dd = document.getElementById(id+'_dd'); if(!q || !s || !dd) return;
+  if(!show){ dd.hidden = true; q.setAttribute('aria-expanded','false'); return; }
+  const opts = [...s.options].map(o=>o.value).filter(v=>v && v!=='__new');
+  const t = q.value.trim(); const hits = opts.filter(o=>facMatch(o, t));
+  let html = '';
+  if(hits.length) html = hits.slice(0, 40).map((o,i)=>'<button type="button" class="facddi'+(i===0&&t?' on':'')+'" role="option" data-facpick="'+esc(id)+'" data-f="'+esc(o)+'">'+esc(o)+'</button>').join('') + (hits.length>40?'<div class="facddn">'+(hits.length-40)+'개 더 · 더 입력해 주세요</div>':'');
+  else { const sg = facSuggest(opts, t); html = '<div class="facddn">맞는 공장이 없어요'+(sg.length?' · 혹시 이 공장인가요?':' · 이대로 두면 새 공장으로 등록돼요')+'</div>' + sg.map((o,i)=>'<button type="button" class="facddi sug'+(i===0?' on':'')+'" role="option" data-facpick="'+esc(id)+'" data-f="'+esc(o)+'">'+esc(o)+'</button>').join(''); }
+  dd.innerHTML = html; dd.hidden = false; q.setAttribute('aria-expanded','true');
+}
+function facPick(id, name){ const q = document.getElementById(id+'_q'); if(!q) return; q.value = name; facComboSync(id, true); facDD(id, false); }
+document.addEventListener('mousedown', e => { const b = e.target.closest && e.target.closest('[data-facpick]'); if(b){ e.preventDefault(); facPick(b.dataset.facpick, b.dataset.f); } }, true);
+document.addEventListener('focusin', e => { const t = e.target; if(t.dataset && t.dataset.facq) facDD(t.dataset.facq, true); });
+document.addEventListener('focusout', e => { const t = e.target; if(t.dataset && t.dataset.facq){ const id = t.dataset.facq; setTimeout(()=>{ facComboSync(id, true); facDD(id, false); }, 120); } });
+document.addEventListener('keydown', e => { const t = e.target; if(!(t.dataset && t.dataset.facq)) return; const id = t.dataset.facq; const dd = document.getElementById(id+'_dd'); if(!dd) return;
+  const items = [...dd.querySelectorAll('.facddi')]; let i = items.findIndex(x=>x.classList.contains('on'));
+  if(e.key==='ArrowDown' || e.key==='ArrowUp'){ e.preventDefault(); if(dd.hidden) facDD(id, true); const L = [...dd.querySelectorAll('.facddi')]; if(!L.length) return; i = e.key==='ArrowDown' ? (i+1)%L.length : (i<=0 ? L.length-1 : i-1); L.forEach((x,k)=>x.classList.toggle('on', k===i)); L[i].scrollIntoView({block:'nearest'}); }
+  else if(e.key==='Enter' && !e.isComposing){ if(!dd.hidden && i>=0){ e.preventDefault(); facPick(id, items[i].dataset.f); } }
+  else if(e.key==='Escape'){ facDD(id, false); }
+});
 function facComboSync(id, done){
   const q = document.getElementById(id+'_q'), s = document.getElementById(id), n = document.getElementById(id+'_new'); if(!q || !s) return;
   const opts = [...s.options].map(o=>o.value).filter(v=>v && v!=='__new');
   let t = q.value.trim(); const lc = t.toLowerCase();
   let hit = opts.find(o=>o.toLowerCase()===lc);
-  const part = lc ? opts.filter(o=>o.toLowerCase().includes(lc)) : [];
+  const part = lc ? opts.filter(o=>facMatch(o, t)) : [];
   if(!hit && done && part.length===1){ hit = part[0]; q.value = hit; }   // 하나만 맞으면 그걸로
   const h = q.parentNode.querySelector('.facqhint');
   if(hit){ s.value = hit; if(n) n.value = ''; if(h){ h.hidden = true; h.className = 'facqhint'; } }
@@ -3652,7 +3692,7 @@ document.addEventListener('compositionend', e => { composing = false; if(renderW
 let tmr;
 document.addEventListener('input', e => {
   const t = e.target;
-  if(t.dataset && t.dataset.facq){ facComboSync(t.dataset.facq, false); return; }
+  if(t.dataset && t.dataset.facq){ facComboSync(t.dataset.facq, false); facDD(t.dataset.facq, true); return; }
   if(t.dataset && t.dataset.rem!=null){ const w = t.parentNode.querySelector('.overq'); if(w){ const ov = (+t.value||0) - (+t.dataset.rem||0); w.hidden = !(ov>0); w.textContent = '초과 입고 +'+ov; } }
   if(t.dataset && t.dataset.sch){ const id = t.dataset.sch; S.sched.edits[id] = S.sched.edits[id] || {}; S.sched.edits[id][t.dataset.k] = t.value; const tr = t.closest('tr'); const has = !!S.sched.edits[id].eta; if(tr){ tr.classList.toggle('schdirty', has); const b = tr.querySelector('[data-act=schSave]'); if(b){ b.disabled = !has; b.classList.toggle('pri', has); } } const all = document.querySelector('[data-act=schSaveAll]'); if(all){ const n = Object.values(S.sched.edits).filter(e=>e&&e.eta).length; all.textContent = '입력한 '+n+'건 저장'; all.disabled = !n; } }
   if(t.id==='schQ'){ S.sched.q = t.value; S.sched.n = 150; clearTimeout(tmr); tmr=setTimeout(render,200); }
