@@ -2844,10 +2844,10 @@ function rvOf(b){
   return d ? Object.assign(base, d, {rounds: Array.isArray(d.rounds) ? d.rounds : base.rounds, ch: d.ch || {}, sell: d.sell || {}}) : Object.assign(base, {sell:{}});
 }
 function salesSrc(){ if(salesDoc && salesDoc.items && SL0 && SL0.to && String(SL0.to) > String(salesDoc.to||'')) return SL0; return salesDoc && salesDoc.items ? salesDoc : SL0; }
-function salesOf(b){ const S1 = salesSrc(); const x = S1 && S1.items && S1.items[b]; return x ? {wk:+x[0]||0, unsent:+x[1]||0, ws:Array.isArray(x[2])?x[2].map(v=>+v||0):null} : {wk:0, unsent:0, ws:(S1&&S1.weeks)?S1.weeks.map(()=>0):null}; }
+function salesOf(b){ const S1 = salesSrc(); const x = S1 && S1.items && S1.items[b]; return x ? {wk:+x[0]||0, unsent:+x[1]||0, ws:Array.isArray(x[2])?x[2].map(v=>+v||0):(x.length>2?x.slice(2).map(v=>+v||0):null)} : {wk:0, unsent:0, ws:(S1&&S1.weeks)?S1.weeks.map(()=>0):null}; }
 // 온라인 3주 추이: 작은 막대 3개 + 지난주 대비 변화 (마우스를 올리면 주차별 숫자)
 function wk3Html(s){ const S1 = salesSrc(); if(!s.ws || !S1 || !S1.weeks) return '';
-  const ws = s.ws, mx = Math.max(1, ...ws), lb = S1.weeks.map(w=>fmtD(w[0]).slice(0,5)+'~'+fmtD(w[1]).slice(0,5));
+  const ws = s.ws, mx = Math.max(1, ...ws), lb = S1.weeks.map(w=>{ const a = Array.isArray(w) ? w : String(w).split('~'); return fmtD(a[0]).slice(0,5)+'~'+fmtD(a[1]).slice(0,5); });
   const prev = ws[ws.length-2], cur = ws[ws.length-1]; const ch = prev>0 ? Math.round((cur-prev)/prev*100) : (cur>0 ? null : 0);
   const tip = ws.map((v,i)=>(ws.length-i===1?'지난주':(ws.length-i)+'주 전')+' ('+lb[i]+') '+v+'장').reverse().join('\n');
   return '<div class="wk3" title="'+esc(tip)+'">'+ws.map((v,i)=>'<i style="height:'+Math.max(2, Math.round(v/mx*16))+'px"'+(i===ws.length-1?' class="now"':'')+'></i>').join('')+
@@ -3097,9 +3097,9 @@ function salesParse(text){
     if(shop) shop[b] = (shop[b]||0) + num(r[ish]);
     const o = use.length ? use.reduce((t,c)=>t+num(r[c.i]),0) : num(r[io]); const u = iu>=0 ? num(r[iu]) : 0;
     const ws = wks.length>1 ? wks.map(w=>w.reduce((t,c)=>t+num(r[c.i]),0)) : null;
-    if(o||u||(ws&&ws.some(Boolean))) items[b] = ws ? [o,u,ws] : [o,u]; }
+    if(o||u||(ws&&ws.some(Boolean))) items[b] = ws ? [o,u].concat(ws) : [o,u]; }
   const fd = d => d ? d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8) : '';
-  return {items, shop, n, from: use.length ? fd(use[0].d) : addDays(TODAY,-7), to: use.length ? fd(use[use.length-1].d) : addDays(TODAY,-1), days: use.length, weeks: wks.length>1 ? wks.map(w=>[fd(w[0].d), fd(w[w.length-1].d)]) : null};
+  return {items, shop, n, from: use.length ? fd(use[0].d) : addDays(TODAY,-7), to: use.length ? fd(use[use.length-1].d) : addDays(TODAY,-1), days: use.length, weeks: wks.length>1 ? wks.map(w=>fd(w[0].d)+'~'+fd(w[w.length-1].d)) : null};
 }
 function rvSalesModal(){
   const X = S.rvs || (S.rvs = {}); const off = X.kind==='off';
