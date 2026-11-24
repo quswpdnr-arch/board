@@ -2371,7 +2371,7 @@ function regOff(){
   const X = S.off || (S.off = {}); const R = X.res;
   let h = '<div class="sec"><div class="sechead"><h2>오프라인 재고</h2><span class="sub">'+(offDoc&&offDoc.items?'지금 보드 오프라인 재고: '+esc(offAtLabel())+' 입력'+(offLive()?'':' (그 뒤에 올린 셀메이트 목록 값을 쓰는 중)'):'아직 따로 입력한 오프라인 재고가 없어요'+(BRAND==='tid'?' · 셀메이트 목록의 트랜쇼(오프라인) 칸 값을 쓰는 중':''))+'</span></div><div class="panel pad step">'+
     '<p class="note" style="margin:0">매장(오프라인) 재고를 <b>바코드 · 수량</b> 두 칸으로 붙여넣거나 CSV로 올리세요. 머리글이 있으면 "오프라인" · "재고" · "수량" 칸을 찾아 읽고, 머리글이 없으면 첫 칸 바코드 · 둘째 칸 수량으로 읽어요. 셀메이트 목록에 트랜쇼(오프라인) 칸이 있으면 그 값도 들어오고, <b>둘 중 나중에 올린 값</b>을 써요. 올린 목록에 없는 바코드는 오프라인 재고 0으로 봐요.</p>'+
-    '<p class="note" style="margin:0">오프라인 재고는 온라인 출고 가능 재고에 들어가지 않아요. 온라인 재고(트랜쇼 · 곤지암 · 본사)가 모자란데 매장에선 재고 대비 잘 안 팔리면(주간 소진율 10% 미만) 예약배송에 <b>RT 오프→온</b>으로 떠요. 반대로 매장에선 잘 팔리는데 매장 재고가 2주 판매분도 안 되고 온라인에 여유가 있으면 <b>RT 온→오프</b>로 떠요.</p>'+
+    '<p class="note" style="margin:0">오프라인 재고는 온라인 출고 가능 재고에 들어가지 않아요. 온라인 재고(트랜쇼 · 곤지암 · 본사)가 모자란데 매장에선 재고 대비 잘 안 팔리면(주간 소진율 10% 미만) 예약배송에 <b>RT 오프→온</b>으로 떠요. 반대로 매장에선 잘 팔리는데 매장 재고가 1주 판매분도 안 되고 온라인에 여유가 있으면 <b>RT 온→오프</b>로 떠요.</p>'+
     '<textarea id="offT" rows="4" placeholder="바코드번호&#9;오프라인 재고&#10;1-0154820001&#9;3&#10;1-0154720001&#9;0">'+esc(X.text||'')+'</textarea>'+
     '<div class="filters"><button class="btn pri" data-act="offCheck">바뀐 재고 확인</button><label class="btn" for="offFile" style="cursor:pointer">CSV 파일 올리기</label><input type="file" id="offFile" accept=".csv,.tsv,.txt" hidden>'+(X.fileName?'<span class="note">'+esc(X.fileName)+'</span>':'')+'</div>';
   if(X.err) h += '<p class="note" style="margin:0;color:var(--bad)">'+esc(X.err)+'</p>';
@@ -2844,7 +2844,7 @@ function salesOffLabel(){ return salesOffDoc && salesOffDoc.items ? fmtD(salesOf
 function salesLabel(){ const S1 = salesSrc(); return S1 ? fmtD(S1.from).slice(0,5)+' ~ '+fmtD(S1.to).slice(0,5) : ''; }
 const saleOff = r => /중지|종료|단종 완료/.test(r.sale||'');
 const RT_RATE = 0.1, RT_KEEP_WEEKS = 4;   // 오프라인 주간 소진율 10% 미만 · 매장엔 4주 판매분 남김
-const RT_OUT_COVER = 2, RT_ON_KEEP = 2, QC_RATE = 0.1;   // 매장 재고가 2주 판매분 미만 · 온라인엔 2주 판매분 남김 · 검수는 본사 재고가 판매의 10% 이상
+const RT_OUT_COVER = 1, RT_ON_KEEP = 2, QC_RATE = 0.1;   // 매장 재고가 1주 판매분 미만 · 온라인엔 2주 판매분 남김 · 검수는 본사 재고가 판매의 10% 이상
 function rvCalc(p){
   const r = rvOf(p.b), s = salesOf(p.b), so = salesOffOf(p.b);
   const opens = p.orders.filter(isOpen).sort((a,b)=>(a.eta||'9').localeCompare(b.eta||'9'));
@@ -2889,7 +2889,7 @@ function rvCalc(p){
   const offRate = offStk>0 ? so.wk/offStk : null;   // 오프라인 주간 소진율
   const rtQty = offStk>0 ? Math.max(0, offStk - Math.ceil(so.wk*RT_KEEP_WEEKS)) : 0;   // 매장에 몇 주 판매분은 남기고 가져올 수 있는 수량
   if(st!=='단종' && salesOffDoc && salesOffDoc.items && known && s.wk>0 && rest < s.wk*0.6 && offStk>0 && offRate < RT_RATE && rtQty>0) acts.push('rt');
-  // 온→오프: 매장에선 잘 팔리는데 매장 재고가 2주 판매분도 안 되고, 온라인은 2주 판매분을 남기고도 여유가 있을 때
+  // 온→오프: 매장에선 잘 팔리는데 매장 재고가 1주 판매분도 안 되고, 온라인은 2주 판매분을 남기고도 여유가 있을 때
   const onSpare = known ? rest - Math.ceil(s.wk*RT_ON_KEEP) : 0;
   const rtOutQty = (so.wk>0 && offStk < so.wk*RT_OUT_COVER) ? Math.max(0, Math.min(onSpare, Math.ceil(so.wk*RT_OUT_COVER) - offStk)) : 0;
   if(st!=='단종' && salesOffDoc && salesOffDoc.items && known && so.wk>0 && rtOutQty>0 && !acts.includes('rt')) acts.push('rtOut');
@@ -3092,7 +3092,7 @@ function rvSalesModal(){
   const X = S.rvs || (S.rvs = {}); const off = X.kind==='off';
   const kindSel = '<label class="f" style="max-width:260px">추이 종류<select id="rvsKind"><option value="on"'+(off?'':' selected')+'>온라인 추이현황</option><option value="off"'+(off?' selected':'')+'>오프라인 추이현황</option></select></label>';
   let h = '<div class="mh"><div><h2>판매 추이 업데이트</h2><div class="muted" style="font-size:12.5px">지금: 온라인 '+esc(salesLabel()||'없음')+' · 오프라인 '+esc(salesOffLabel()||'없음')+'</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+kindSel+
-    (off ? '<div class="panel pad step"><p class="note" style="margin:0"><b>오프라인(매장) 판매 추이</b>를 올리는 곳이에요. 정식 양식은 받는 대로 맞출 예정이고, 지금은 <b>바코드번호</b> 칸과 <b>날짜별(YYYYMMDD) 수량</b> 또는 <b>판매수량 · 주문수</b> 칸이 있으면 읽어요.</p><p class="note" style="margin:0"><b>오프라인 주간 판매</b> = 날짜 칸 중 최근 7일 합계 (날짜 칸이 없으면 판매수량). 온라인 재고(트랜쇼 · 곤지암 · 본사)가 온라인 판매의 60% 아래인데, 매장에선 재고 대비 잘 안 팔리면(오프라인 주간 판매 ÷ 오프라인 재고 10% 미만) 예약배송에 <b>RT 오프→온</b>으로 떠요. 반대로 매장에선 잘 팔리는데 매장 재고가 2주 판매분도 안 되고 온라인에 여유가 있으면 <b>RT 온→오프</b>로 떠요. 매장엔 4주 판매분을 남기고 나머지를 가져올 수 있는 수량으로 보여드려요. POS 판매(바코드 하이픈 없음)도 그대로 올리면 돼요 · 실판매 수량을 주간 판매로, <b>매장 재고</b> 칸이 있으면 매장 재고로 같이 반영해요.</p>'+
+    (off ? '<div class="panel pad step"><p class="note" style="margin:0"><b>오프라인(매장) 판매 추이</b>를 올리는 곳이에요. 정식 양식은 받는 대로 맞출 예정이고, 지금은 <b>바코드번호</b> 칸과 <b>날짜별(YYYYMMDD) 수량</b> 또는 <b>판매수량 · 주문수</b> 칸이 있으면 읽어요.</p><p class="note" style="margin:0"><b>오프라인 주간 판매</b> = 날짜 칸 중 최근 7일 합계 (날짜 칸이 없으면 판매수량). 온라인 재고(트랜쇼 · 곤지암 · 본사)가 온라인 판매의 60% 아래인데, 매장에선 재고 대비 잘 안 팔리면(오프라인 주간 판매 ÷ 오프라인 재고 10% 미만) 예약배송에 <b>RT 오프→온</b>으로 떠요. 반대로 매장에선 잘 팔리는데 매장 재고가 1주 판매분도 안 되고 온라인에 여유가 있으면 <b>RT 온→오프</b>로 떠요. 매장엔 4주 판매분을 남기고 나머지를 가져올 수 있는 수량으로 보여드려요. POS 판매(바코드 하이픈 없음)도 그대로 올리면 돼요 · 실판매 수량을 주간 판매로, <b>매장 재고</b> 칸이 있으면 매장 재고로 같이 반영해요.</p>'+
       '<textarea id="rvSalesT" rows="4" placeholder="바코드번호&#9;상품명&#9;옵션&#9;…&#9;20261110&#9;20261111 … (또는 판매수량)">'+esc(X.text||'')+'</textarea>' :
     '<div class="panel pad step"><p class="note" style="margin:0">셀메이트 <b>판매 DB</b>(대표이미지 · 바코드번호 · 상품명 · 옵션내용 · 사입상품명 · 공급처명 · 상품분류 · 미발송수 · 현재고 · 주문수 · 취소주문수 · 반품주문수 · 판매가 · 원가 · 날짜별 주문수) CSV를 올리거나 머리글까지 붙여넣으세요. 세 브랜드 모두 같은 양식이에요.</p><p class="note" style="margin:0"><b>주간 판매</b> = 날짜 칸 중 <b>최근 7일 합계</b> (마지막 날짜가 오늘이면 진행 중인 오늘은 빼고 그 전 7일) · <b>미발송</b> = 미발송수 칸.</p>'+
     '<textarea id="rvSalesT" rows="4" placeholder="대표이미지&#9;바코드번호&#9;상품명&#9;옵션내용&#9;…&#9;미발송수&#9;현재고&#9;주문수&#9;…&#9;20261104&#9;20261105 …">'+esc(X.text||'')+'</textarea>')+
