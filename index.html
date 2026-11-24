@@ -393,7 +393,7 @@ body.mode-all #tabs{display:none}
 .plmatch{display:block;margin-top:4px;font-size:12px;padding:3px 8px;border-radius:6px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;cursor:pointer;font-weight:400}.plmatch.on{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}.plmatch input{vertical-align:-2px;margin-right:4px}
 .ptag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;background:#fef3c7;color:#92400e;margin-left:4px;vertical-align:1px;cursor:help;white-space:nowrap}
 .pbox>summary{cursor:pointer;list-style:none}.pbox>summary::-webkit-details-marker{display:none}.prow{margin:4px 0}.prow .pno{display:inline-block;width:20px;font-weight:700;color:#92400e}
-.offpend{display:block;font-size:11px;color:#9a3412;margin-bottom:3px}.offpend.on{font-weight:700}
+.offpend{display:block;font-size:11px;color:var(--muted);margin-top:3px;cursor:help;white-space:nowrap}
 .mcat{position:relative;display:inline-block}.mcat>summary{list-style:none;cursor:pointer;padding:6px 26px 6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg,#fff);font-size:13px;position:relative}.mcat>summary::-webkit-details-marker{display:none}.mcat>summary::after{content:'▾';position:absolute;right:9px;top:6px;color:#888}.mcat.on>summary{border-color:#6366f1;color:#4338ca;font-weight:600}
 .mcatp{position:absolute;z-index:30;top:calc(100% + 4px);left:0;min-width:240px;max-height:340px;overflow:auto;background:var(--bg,#fff);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px 10px}.mcatp .chk{display:flex;gap:6px;padding:4px 0;font-size:13px;white-space:nowrap}.mcath{display:flex;justify-content:flex-end;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:2px}
 .rvch{display:inline-flex;gap:2px;flex-wrap:nowrap}.rvc{font:inherit;font-size:10.5px;width:21px;height:21px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;padding:0}.rvc.on{background:var(--ok);border-color:var(--ok);color:#fff}
@@ -617,8 +617,8 @@ table.mcard tr.shrow{display:none}
 .rvtbl td:nth-child(8){min-width:108px;max-width:132px}.rvtbl td:nth-child(8) .rvinc{white-space:normal}
 .rvtbl td.rvacts{width:96px}.rvtbl td.rvacts .chip{display:flex;width:fit-content;margin:0 0 4px;white-space:nowrap}.rvtbl td.rvacts .chip:last-child{margin-bottom:0}
 .whls{display:flex;flex-direction:column;gap:1px;margin-top:3px}.whl{display:flex;justify-content:space-between;gap:8px;font-size:11px;line-height:1.35;color:var(--muted);white-space:nowrap}.whl b{color:var(--fg);font-weight:600}.whl.hq b{color:var(--info)}.whl.safe b{color:#b45309}.whl.shopt{cursor:help}.whl.shopt span{text-decoration:underline dotted}.whl.offl{opacity:.8}
-.whtop{white-space:nowrap}.wk3{display:flex;align-items:flex-end;gap:2px;height:18px;margin:1px 0 3px;cursor:help}.wk3 i{display:block;width:7px;background:#c9d6d2;border-radius:2px 2px 0 0}.wk3 i.now{background:var(--accent)}.wk3 small{font-size:10.5px;margin-left:4px;color:var(--muted);line-height:1}.wk3 small.up{color:#15803d}.wk3 small.dn{color:var(--bad)}
-.rvsales .whl{font-size:12px}.rvsales .whl b{font-size:13px}.rvtbl td.rvsales{min-width:0;width:96px;padding-left:22px!important}.rvtbl th.rvsalesh{width:96px;line-height:1.3;padding-left:22px!important;text-align:left}.rvtbl th.rvsalesh .thsub{display:block;white-space:nowrap;font-weight:400;margin:1px 0 0}.rvtbl th.rvsalesh .sarr{margin-left:3px}
+.whtop{white-space:nowrap}.wk3{margin:2px 0 4px;font-size:11px;line-height:1.25}.wkr{display:flex;align-items:center;gap:4px;color:var(--muted)}.wkr .wkl{width:43px;flex:none;white-space:nowrap;font-variant-numeric:tabular-nums}.wkr .wkl em{font-style:normal;font-size:9.5px;margin-left:2px;color:#b45309}.wkr .wkb{flex:1;height:7px;background:var(--sunk);border-radius:3px;overflow:hidden;min-width:24px}.wkr .wkb i{display:block;height:100%;background:#a7c4bb;border-radius:3px}.wkr b{min-width:22px;text-align:right;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}.wkr.now{color:var(--ink)}.wkr.now .wkb i{background:var(--accent)}.wkr.now b{font-size:13px}.wk3 .wkc{display:block;text-align:right;font-size:10.5px;margin-top:1px}.wk3 .up{color:#15803d}.wk3 .dn{color:var(--bad)}
+.rvsales .whl{font-size:12px}.rvsales .whl b{font-size:13px}.rvtbl td.rvsales{min-width:0;width:132px;padding-left:10px!important}.rvtbl th.rvsalesh{width:132px;line-height:1.3;padding-left:22px!important;text-align:left}.rvtbl th.rvsalesh .thsub{display:block;white-space:nowrap;font-weight:400;margin:1px 0 0}.rvtbl th.rvsalesh .sarr{margin-left:3px}
 .rvacts .chip small{font-size:10px;opacity:.8;margin-left:2px}.rvtbl th:last-child{width:104px}
 .rvtbl .rvcl{width:18px;font-size:9.5px}
 .rvtbl th .thsub{white-space:normal}
@@ -724,7 +724,7 @@ const S = {
   pr: {q:'', style:null, qty:{}, short:{}, over:{}, d:''},
   pl: {text:'', res:null},
   sm: {},
-  rv: {q:'', st:'', fac:'', cat:'', cats:[], own:'', offInc:false, act:'', all:false, n:150, sk:'', sd:1, sel:{}},
+  rv: {q:'', st:'', fac:'', cat:'', cats:[], own:'', offEx:false, act:'', all:false, n:150, sk:'', sd:1, sel:{}},
   sched: {view:'none', q:'', fac:'', edits:{}, n:150},
   team: {add:'', perms:{reorder:true,recv:true,eta:true,reg:true,stock:true,resv:true,fix:true,fac:true}},
   reg: {mode:'sync', newRows:[{opt:'',b:'',qty:'',eta:''}], ro:{q:'', style:null, sel:{}}, bulk:''},
@@ -2845,13 +2845,15 @@ function rvOf(b){
 }
 function salesSrc(){ if(salesDoc && salesDoc.items && SL0 && SL0.to && String(SL0.to) > String(salesDoc.to||'')) return SL0; return salesDoc && salesDoc.items ? salesDoc : SL0; }
 function salesOf(b){ const S1 = salesSrc(); const x = S1 && S1.items && S1.items[b]; return x ? {wk:+x[0]||0, unsent:+x[1]||0, ws:Array.isArray(x[2])?x[2].map(v=>+v||0):(x.length>2?x.slice(2).map(v=>+v||0):null)} : {wk:0, unsent:0, ws:(S1&&S1.weeks)?S1.weeks.map(()=>0):null}; }
-// 온라인 3주 추이: 작은 막대 3개 + 지난주 대비 변화 (마우스를 올리면 주차별 숫자)
-function wk3Html(s){ const S1 = salesSrc(); if(!s.ws || !S1 || !S1.weeks) return '';
-  const ws = s.ws, mx = Math.max(1, ...ws), lb = S1.weeks.map(w=>{ const a = Array.isArray(w) ? w : String(w).split('~'); return fmtD(a[0]).slice(0,5)+'~'+fmtD(a[1]).slice(0,5); });
-  const prev = ws[ws.length-2], cur = ws[ws.length-1]; const ch = prev>0 ? Math.round((cur-prev)/prev*100) : (cur>0 ? null : 0);
-  const tip = ws.map((v,i)=>(ws.length-i===1?'지난주':(ws.length-i)+'주 전')+' ('+lb[i]+') '+v+'장').reverse().join('\n');
-  return '<div class="wk3" title="'+esc(tip)+'">'+ws.map((v,i)=>'<i style="height:'+Math.max(2, Math.round(v/mx*16))+'px"'+(i===ws.length-1?' class="now"':'')+'></i>').join('')+
-    '<small class="'+(ch==null||ch>0?'up':ch<0?'dn':'')+'">'+(ch==null?'신규':ch>0?'▲'+ch+'%':ch<0?'▼'+(-ch)+'%':'–')+'</small></div>'; }
+// 온라인 주차별 추이: 주마다 막대 + 숫자를 한 줄씩 (위가 오래된 주, 맨 아래가 지난주) · 지난주 옆에 전주 대비 변화
+const wkLabels = S1 => (S1.weeks||[]).map(w=>{ const a = Array.isArray(w) ? w : String(w).split('~'); return {f:a[0], t:a[1], days: diffDays(a[1], a[0]) + 1}; });
+function wk3Html(s){ const S1 = salesSrc(); if(!s.ws || !S1 || !S1.weeks || s.ws.length<2) return '';
+  const ws = s.ws, L = wkLabels(S1), mx = Math.max(1, ...ws);
+  const prev = ws[ws.length-2], cur = ws[ws.length-1]; const pd = (L[ws.length-2]||{}).days||7;
+  const prevN = pd<7 ? prev*7/pd : prev; const ch = prevN>0 ? Math.round((cur-prevN)/prevN*100) : (cur>0 ? null : 0);
+  return '<div class="wk3">'+ws.map((v,i)=>{ const l = L[i]||{}, last = i===ws.length-1;
+    return '<div class="wkr'+(last?' now':'')+'" title="'+esc((l.f?fmtD(l.f).slice(0,5)+'~'+fmtD(l.t).slice(0,5):'')+(l.days<7?' ('+l.days+'일)':''))+'"><span class="wkl">'+(l.f?fmtD(l.f).slice(0,5):'')+(l.days<7?'<em>'+l.days+'일</em>':'')+'</span><span class="wkb"><i style="width:'+Math.max(v?6:0, Math.round(v/mx*100))+'%"></i></span><b>'+nf(v)+'</b>'+
+      '</div>'; }).join('')+'<small class="wkc '+(ch==null||ch>0?'up':ch<0?'dn':'')+'">'+(ch==null?'신규 판매':ch>0?'전주 대비 ▲'+ch+'%':ch<0?'전주 대비 ▼'+(-ch)+'%':'전주와 같음')+'</small></div>'; }
 function salesOffOf(b){ const x = salesOffDoc && salesOffDoc.items && salesOffDoc.items[b]; return x ? {wk:+x[0]||0} : {wk:0}; }
 function salesOffLabel(){ return salesOffDoc && salesOffDoc.items ? fmtD(salesOffDoc.from).slice(0,5)+' ~ '+fmtD(salesOffDoc.to).slice(0,5) : ''; }
 function salesLabel(){ const S1 = salesSrc(); return S1 ? fmtD(S1.from).slice(0,5)+' ~ '+fmtD(S1.to).slice(0,5) : ''; }
@@ -2862,7 +2864,7 @@ function rvCalc(p){
   const r = rvOf(p.b), s = salesOf(p.b), so = salesOffOf(p.b);
   const opens = p.orders.filter(isOpen).sort((a,b)=>(a.eta||'9').localeCompare(b.eta||'9'));
   const offP = offPendOf(p), offQ = offP.reduce((t,e)=>t+e.q,0);
-  const inc = opens.reduce((t,o)=>t+o.remain,0) + (S.rv.offInc ? offQ : 0), next = opens[0] || null;
+  const inc = opens.reduce((t,o)=>t+o.remain,0), next = opens[0] || null;
   const known = hasStock(p);
   const wh = p.trans!=null;
   const gj = wh ? (p.gj||0) : 0;
@@ -2977,11 +2979,11 @@ function viewResv(){
           cl.map(c=>'<label class="chk"><input type="checkbox" class="rvCatC" value="'+esc(c.n)+'"'+(sel.includes(c.n)?' checked':'')+'> '+esc(c.n||'미분류')+(c.owner?' <span class="muted">· '+esc(c.owner)+'</span>':'')+' <span class="muted">('+c.c+')</span></label>').join('')+'</div></details>'+
           (own.length?'<select id="rvOwn"><option value="">전체 담당자</option>'+own.map(o=>'<option'+(o===X.own?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>':''); })()+
       '<select id="rvFac"><option value="">전체 공장</option>'+activeFacs().map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
-      (anyF?'<button class="btn sm" data-act="rvClear">‹ 검색 필터 해제</button>':'')+(X.act?'':'<label class="chk"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'> 전체 상품 보기</label>')+(OFFP&&BRAND==='tid'?'<label class="chk" title="켜면 오프라인 리오더 수량도 입고 예정에 더해 계산해요"><input type="checkbox" id="rvOffInc"'+(X.offInc?' checked':'')+'> 오프라인 리오더 포함</label>':'')+
+      (anyF?'<button class="btn sm" data-act="rvClear">‹ 검색 필터 해제</button>':'')+(X.act?'':'<label class="chk"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'> 전체 상품 보기</label>')+(OFFP&&BRAND==='tid'?'<label class="chk" title="입고 예정 칸에서 오프라인(매장) 리오더 줄을 숨겨요 · 예약배송 계산은 원래 온라인 리오더만 써요"><input type="checkbox" id="rvOffEx"'+(X.offEx?' checked':'')+'> 리오더 오프라인 제외</label>':'')+
       '<label class="chk mselall"><input type="checkbox" id="rvSelAll2"> 보이는 상품 모두 선택</label><span class="note">'+nf(a.length)+'개</span></div>';
   const SEL = X.sel || (X.sel = {}); const shownB = a.slice(0, X.n).map(x=>x.p.b); const selN = Object.keys(SEL).filter(b=>SEL[b]).length;
   const allOn = shownB.length && shownB.every(b=>SEL[b]);
-  h += '<div class="panel tw"><table class="rvtbl"><thead><tr><th class="ck"><input type="checkbox" id="rvSelAll"'+(allOn?' checked':'')+' title="보이는 상품 모두 선택" aria-label="모두 선택"></th>'+sth('prod','상품 · 컬러,사이즈 · 바코드')+sth('st','노출 상태')+sth('act','할 일')+sth('un','미발송','num')+sth('wk','판매 추이','rvsalesh','<small class="thsub">(일주일)</small><small class="thsub">'+esc(salesLabel().replace(/\s/g,''))+'</small>')+sth('stock','재고')+sth('eta','입고 예정')+sth('round','예약 차수')+sth('ch','플랫폼별 현황')+sth('memo','메모')+'</tr></thead><tbody>';
+  h += '<div class="panel tw"><table class="rvtbl"><thead><tr><th class="ck"><input type="checkbox" id="rvSelAll"'+(allOn?' checked':'')+' title="보이는 상품 모두 선택" aria-label="모두 선택"></th>'+sth('prod','상품 · 컬러,사이즈 · 바코드')+sth('st','노출 상태')+sth('act','할 일')+sth('un','미발송','num')+sth('wk','판매 추이','rvsalesh',(()=>{ const S1 = salesSrc(); const L = S1 && S1.weeks ? wkLabels(S1) : []; return L.length>1 ? '<small class="thsub">(주차별 · '+L.length+'주)</small><small class="thsub">'+fmtD(L[0].f).slice(0,5)+'~'+fmtD(L[L.length-1].t).slice(0,5)+'</small>' : '<small class="thsub">(일주일)</small><small class="thsub">'+esc(salesLabel().replace(/\s/g,''))+'</small>'; })())+sth('stock','재고')+sth('eta','입고 예정')+sth('round','예약 차수')+sth('ch','플랫폼별 현황')+sth('memo','메모')+'</tr></thead><tbody>';
   if(!a.length) h += '<tr><td colspan="11" class="empty">조건에 맞는 상품이 없습니다.</td></tr>';
   S.__rvRows = a;
   const lock = !canDo('resv'); const CATS = catList().map(c=>c.n);
@@ -2991,9 +2993,9 @@ function viewResv(){
       '<td><select class="rvsel st-'+(x.st==='예약배송'?'open':x.st==='임시예약배송'?'soon':x.st==='단종(예정)'?'over':x.st==='품절'?'late':x.st==='단종'?'none':'done')+'" data-rvst="'+esc(p.b)+'"'+(lock?' disabled':'')+'>'+RV_ST.map(s=>'<option'+(s===x.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+'</td>'+
       '<td class="rvacts">'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d+(k==='rt'?' · 오프라인 재고 '+x.offStk+'개 중 주간 판매 '+x.so.wk+'개 (소진율 '+Math.round(x.offRate*100)+'%) · 가져올 수 있는 수량 약 '+x.rtQty+'개':k==='rtOut'?' · 매장 주간 판매 '+x.so.wk+'개 · 매장 재고 '+x.offStk+'개 · 보낼 수량 약 '+x.rtOutQty+'개 (온라인엔 2주 판매분 남김)':''))+'">'+RV_ACT[k].t+(k==='rt'?' <small>'+nf(x.rtQty)+'</small>':k==='rtOut'?' <small>'+nf(x.rtOutQty)+'</small>':'')+'</span>').join('')+(x.lvl?'<span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
       '<td class="num">'+(x.s.unsent?'<b>'+nf(x.s.unsent)+'</b>':'<span class="muted">0</span>')+'</td>'+
-      '<td class="rvsales">'+(salesOffDoc&&salesOffDoc.items ? '<div class="whl"><span>온라인</span><b>'+nf(x.s.wk)+'</b></div>'+wk3Html(x.s)+'<div class="whl"><span>오프라인</span><b>'+nf(x.so.wk)+'</b></div>' : (x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')+wk3Html(x.s))+'</td>'+
+      '<td class="rvsales">'+(()=>{ const w = wk3Html(x.s); return salesOffDoc&&salesOffDoc.items ? '<div class="whl"><span>온라인</span>'+(w?'':'<b>'+nf(x.s.wk)+'</b>')+'</div>'+w+'<div class="whl"><span>오프라인</span><b>'+nf(x.so.wk)+'</b></div>' : (w || (x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')); })()+'</td>'+
       '<td class="num">'+(x.known?(x.rq>0?'<span class="ravail'+(x.ravail<=0?' bad':'')+'" title="출고 가능 재고 + 예약 차수 수량 (미발송 제외)">예약 포함 가용 <b>'+nf(x.ravail)+'</b></span>':'')+'<div class="whtop" title="가용 = 트랜쇼 + 본사 창고 + 곤지암 − 미발송 (오프라인 · 매장 재고 제외)">가용 <b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
-      '<td>'+(x.offQ?'<small class="offpend'+(X.offInc?' on':'')+'" title="'+esc(x.offP.map(e=>(e.round?e.round+' · ':'')+(e.eta?'입고 '+fmtD(e.eta).slice(0,5):'발주 '+fmtD(e.od).slice(0,5))+' · '+e.q+'장').join('\n'))+'">오프라인 리오더 '+nf(x.offQ)+'장 · '+(X.offInc?'포함':'참고')+'</small>':'')+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+(x.next?'<a class="rvinc" data-act="openOrder" data-id="'+x.next.id+'">'+(x.next.eta?fmtD(x.next.eta).slice(0,5)+' <small>'+(x.next.etaKind==='fixed'?'확정':'예상')+'</small>':'미정')+' · '+nf(x.next.parts?x.next.partRem:x.next.remain)+'장</a>'+partTag(x.next)+(x.opens.length>1?'<small class="odsub">전체 '+x.opens.length+'건 · '+nf(x.inc)+'장</small>':'')+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':''):'<span class="muted">없음</span>')+'</td>'+
+      '<td>'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+(x.next?'<a class="rvinc" data-act="openOrder" data-id="'+x.next.id+'">'+(x.next.eta?fmtD(x.next.eta).slice(0,5)+' <small>'+(x.next.etaKind==='fixed'?'확정':'예상')+'</small>':'미정')+' · '+nf(x.next.parts?x.next.partRem:x.next.remain)+'장</a>'+partTag(x.next)+(x.opens.length>1?'<small class="odsub">전체 '+x.opens.length+'건 · '+nf(x.inc)+'장</small>':'')+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':''):'<span class="muted">없음</span>')+''+(x.offQ&&!X.offEx?'<small class="offpend" title="'+esc('매장(오프라인)으로 갈 리오더예요 · 예약배송 · 가용 계산에는 넣지 않아요\n'+x.offP.map(e=>(e.round?e.round+' · ':'')+(e.eta?'입고 '+fmtD(e.eta).slice(0,5):'발주 '+fmtD(e.od).slice(0,5))+' · '+e.q+'장').join('\n'))+'">+ 오프라인 리오더 '+nf(x.offQ)+'장</small>':'')+'</td>'+
       '<td>'+(()=>{ let li = -1; return r.rounds.map((o,k)=>{ const no = '<em class="rno">'+(k+1)+'차</em>'; if(o.done) return '<span class="rvround done" title="마감된 차수">'+no+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+(o.q?' · '+nf(o.q)+'장':'')+' <small>마감</small></span>'; const i = ++li; return '<span class="rvround'+(i===0?' cur':'')+(x.shipFrom&&o.d&&o.d<x.shipFrom?' bad':'')+'">'+no+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+(o.q?' · '+nf(o.q)+'장':'')+'</span>'+(o.q&&x.known?'<small class="rleft'+(x.rleft[i]<=0?' bad':'')+'">'+(x.rleft[i]<=0?'예약 수량 소진'+(x.live[i+1]?' → '+(li+2)+'차로':''):'남은 '+nf(x.rleft[i])+'장')+'</small>':''); }).join(''); })()+'<button class="btn sm ghost" data-act="rvEdit" data-b="'+esc(p.b)+'">'+(x.live.length?'수정':'+ 차수')+'</button></td>'+
       '<td><div class="rvchs"><span class="rvch"><em class="rvcl">예약</em><button class="rvc all'+(chList().every(c=>r.ch[c])?' on':'')+'" data-act="rvChAll" data-b="'+esc(p.b)+'" data-tip="예약 설정 · 전체 반영 / 해제"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(r.ch[c]?' on':'')+'" data-act="rvCh" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · 예약 '+(r.ch[c]?'설정 완료':'미설정')+'" aria-label="'+esc(c)+' 예약 설정"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span>'+
         '<span class="rvch sell"><em class="rvcl">판매</em><button class="rvc all'+(chList().every(c=>sellOn(r,c))?' on':'')+'" data-act="rvSellAll" data-b="'+esc(p.b)+'" data-tip="판매 중 · 전체 켜기 / 끄기"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(sellOn(r,c)?' on':'')+'" data-act="rvSell" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · '+(sellOn(r,c)?'판매 중':'판매 안 함')+'" aria-label="'+esc(c)+' 판매"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span></div></td>'+
@@ -3088,8 +3090,8 @@ function salesParse(text){
   let base = dcols;
   if(base.length && base[base.length-1].d === tdy && base.length > 7) base = base.slice(0, -1);
   let use = base.slice(-7);
-  // 3주 추이: 최근 7일 · 그 전 7일 · 그 전 7일 (날짜가 14일 이상 있을 때)
-  const wks = base.length >= 14 ? [base.slice(-21,-14), base.slice(-14,-7), use].filter(w=>w.length===7) : [];
+  // 주차별 추이: 최근 날짜부터 7일씩 끊어 최대 3주 (마지막 묶음이 7일이 안 돼도 3일 이상이면 그 주로 표시)
+  const wks = []; for(let e = base.length; e > 0 && wks.length < 3; e -= 7){ const w = base.slice(Math.max(0, e-7), e); if(w.length >= 3) wks.unshift(w); }
   if(!dcols.length && io<0) return {err:'주문수 · 판매수량 칸이나 날짜 칸이 없습니다.'};
   const num = v => parseInt(String(v||'0').replace(/,/g,''),10)||0;
   const items = {}, shop = ish>=0 ? {} : null; let n = 0;
@@ -3923,7 +3925,7 @@ document.addEventListener('change', e => {
   if(t.id==='rvCat'){ S.rv.cat = t.value; render(); }
   if(t.classList && t.classList.contains('rvCatC')){ const v = t.value, c = S.rv.cats = (S.rv.cats||[]).filter(x=>x!==v); if(t.checked) c.push(v); S.rv.catOpen = true; render(); }
   if(t.id==='rvOwn'){ S.rv.own = t.value; render(); }
-  if(t.id==='rvOffInc'){ S.rv.offInc = t.checked; render(); }
+  if(t.id==='rvOffEx'){ S.rv.offEx = t.checked; render(); }
   if(t.id==='rvChAllM'){ document.querySelectorAll('[data-rvch]').forEach(i=>{ i.checked = t.checked; }); }
   if(t.dataset && t.dataset.rvch && !t.checked){ const a = document.getElementById('rvChAllM'); if(a) a.checked = false; }
   if(t.dataset && t.dataset.rvcat){ if(t.value==='__new'){ S.catEdit = null; catModal(); render(); } else setStyleCat(t.dataset.rvcat, t.value); }
