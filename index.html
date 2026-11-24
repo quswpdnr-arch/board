@@ -391,6 +391,8 @@ body.mode-all #tabs{display:none}
 .rvround{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--sunk);border:1px solid var(--line);margin:0 4px 4px 0;white-space:nowrap}.rvround.bad{border-color:var(--bad);color:var(--bad)}
 .rvround .rno{font-style:normal;font-weight:700;margin-right:4px;color:var(--ink2,#555)}.rvround.cur{border-color:#6366f1;background:#eef2ff}.rvround.done{opacity:.55;text-decoration:none}.rvround.done small{font-size:10px;margin-left:2px}
 .plmatch{display:block;margin-top:4px;font-size:12px;padding:3px 8px;border-radius:6px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;cursor:pointer;font-weight:400}.plmatch.on{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}.plmatch input{vertical-align:-2px;margin-right:4px}
+.ptag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;background:#fef3c7;color:#92400e;margin-left:4px;vertical-align:1px;cursor:help;white-space:nowrap}
+.pbox>summary{cursor:pointer;list-style:none}.pbox>summary::-webkit-details-marker{display:none}.prow{margin:4px 0}.prow .pno{display:inline-block;width:20px;font-weight:700;color:#92400e}
 .offpend{display:block;font-size:11px;color:#9a3412;margin-bottom:3px}.offpend.on{font-weight:700}
 .mcat{position:relative;display:inline-block}.mcat>summary{list-style:none;cursor:pointer;padding:6px 26px 6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg,#fff);font-size:13px;position:relative}.mcat>summary::-webkit-details-marker{display:none}.mcat>summary::after{content:'▾';position:absolute;right:9px;top:6px;color:#888}.mcat.on>summary{border-color:#6366f1;color:#4338ca;font-weight:600}
 .mcatp{position:absolute;z-index:30;top:calc(100% + 4px);left:0;min-width:240px;max-height:340px;overflow:auto;background:var(--bg,#fff);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px 10px}.mcatp .chk{display:flex;gap:6px;padding:4px 0;font-size:13px;white-space:nowrap}.mcath{display:flex;justify-content:flex-end;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:2px}
@@ -888,6 +890,15 @@ function addOrder(o){
   else if(o.eta0){ o.eta = o.eta0; o.etaKind = 'fixed'; }
   else if(o.od && o.remain>0){ o.eta = addDays(o.od, leadFor(o.f)); o.etaKind = 'est'; }
   else { o.eta = ''; o.etaKind = ''; }
+  // 파샬(나눠서 입고): 남은 수량을 여러 예정 줄로 나눠 둔 경우 → 다음 줄의 날짜 · 수량을 입고 예정으로
+  o.parts = null;
+  if(Array.isArray(v.parts) && v.parts.length>1 && o.remain>0 && !o.closed){
+    const got = Math.max(0, (o.qty - o.remain) - (+v.pbase||0)); let cum = 0, cur = -1;
+    o.parts = v.parts.map((x,i)=>{ const q = +x.q||0; const from = cum; cum += q; const done = cum <= got; if(!done && cur<0) cur = i; return {d:x.d||'', q, done, rem: done ? 0 : Math.min(q, cum - Math.max(got, from))}; });
+    if(cur<0) cur = o.parts.length-1;
+    o.partI = cur+1; o.partN = o.parts.length; o.partRem = Math.min(o.remain, o.parts[cur].rem || o.remain);
+    if(o.parts[cur].d){ o.eta = o.parts[cur].d; o.etaKind = 'fixed'; }
+  }
   o.firstEta = (o.changes.find(c=>c.type==='eta')||{}).from || '';
   o.short = o.closed && o.qty>0 && o.recv>0 && o.recv < o.qty ? o.qty - o.recv : 0;
   o.overQ = o.recv > o.qty && o.qty>0 ? o.recv - o.qty : 0;
@@ -992,6 +1003,8 @@ function toast(msg){
   setTimeout(()=>t.remove(), 2600);
 }
 const chip = s => '<span class="chip st-'+s+'">'+ST[s]+'</span>';
+function partTag(o){ if(!o.parts) return ''; const N = ['①','②','③','④','⑤','⑥','⑦','⑧'];
+  return ' <span class="ptag" title="'+esc(o.parts.map((x,i)=>(N[i]||(i+1)+'.')+' '+(x.d?fmtD(x.d).slice(0,5):'날짜 미정')+' · '+x.q+'장 '+(x.done?'입고 완료':(i===o.partI-1&&x.rem<x.q?'예정 (남은 '+x.rem+'장)':'예정'))).join('\n'))+'">파샬 '+o.partI+'/'+o.partN+'</span>'; }
 function etaCell(o){
   if(!o.eta) return '<span class="muted">'+(o.etaText?esc(o.etaText):'미정')+'</span>';
   const k = o.etaKind==='fixed' ? '<span class="kind fixed">확정</span>' : '<span class="kind">예상</span>';
@@ -999,7 +1012,7 @@ function etaCell(o){
   if(o.status==='late') extra = ' <span class="kind" style="color:var(--bad)">'+diffDays(TODAY,o.eta)+'일 지연</span>';
   if(o.status==='over') extra = ' <span class="kind" style="color:var(--warn)">+'+diffDays(TODAY,o.eta)+'일</span>';
   const ch = o.changes.filter(c=>c.type==='eta').length;
-  return '<span class="num">'+fmtD(o.eta)+'</span> '+k+extra+(ch?' <span class="kind">· 변경 '+ch+'회</span>':'');
+  return '<span class="num">'+fmtD(o.eta)+'</span> '+k+extra+(ch?' <span class="kind">· 변경 '+ch+'회</span>':'')+partTag(o);
 }
 // ---------- 상품 사진 (셀메이트 대표이미지 썸네일) ----------
 const IMG = SNAP.img || {}; const NCH = window.__IMGURL ? 0 : (SNAP.imgChunks || 0);
@@ -2980,7 +2993,7 @@ function viewResv(){
       '<td class="num">'+(x.s.unsent?'<b>'+nf(x.s.unsent)+'</b>':'<span class="muted">0</span>')+'</td>'+
       '<td class="rvsales">'+(salesOffDoc&&salesOffDoc.items ? '<div class="whl"><span>온라인</span><b>'+nf(x.s.wk)+'</b></div>'+wk3Html(x.s)+'<div class="whl"><span>오프라인</span><b>'+nf(x.so.wk)+'</b></div>' : (x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')+wk3Html(x.s))+'</td>'+
       '<td class="num">'+(x.known?(x.rq>0?'<span class="ravail'+(x.ravail<=0?' bad':'')+'" title="출고 가능 재고 + 예약 차수 수량 (미발송 제외)">예약 포함 가용 <b>'+nf(x.ravail)+'</b></span>':'')+'<div class="whtop" title="가용 = 트랜쇼 + 본사 창고 + 곤지암 − 미발송 (오프라인 · 매장 재고 제외)">가용 <b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
-      '<td>'+(x.offQ?'<small class="offpend'+(X.offInc?' on':'')+'" title="'+esc(x.offP.map(e=>(e.round?e.round+' · ':'')+(e.eta?'입고 '+fmtD(e.eta).slice(0,5):'발주 '+fmtD(e.od).slice(0,5))+' · '+e.q+'장').join('\n'))+'">오프라인 리오더 '+nf(x.offQ)+'장 · '+(X.offInc?'포함':'참고')+'</small>':'')+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+(x.next?'<a class="rvinc" data-act="openOrder" data-id="'+x.next.id+'">'+(x.next.eta?fmtD(x.next.eta).slice(0,5)+' <small>'+(x.next.etaKind==='fixed'?'확정':'예상')+'</small>':'미정')+' · '+nf(x.next.remain)+'장</a>'+(x.opens.length>1?'<small class="odsub">전체 '+x.opens.length+'건 · '+nf(x.inc)+'장</small>':'')+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':''):'<span class="muted">없음</span>')+'</td>'+
+      '<td>'+(x.offQ?'<small class="offpend'+(X.offInc?' on':'')+'" title="'+esc(x.offP.map(e=>(e.round?e.round+' · ':'')+(e.eta?'입고 '+fmtD(e.eta).slice(0,5):'발주 '+fmtD(e.od).slice(0,5))+' · '+e.q+'장').join('\n'))+'">오프라인 리오더 '+nf(x.offQ)+'장 · '+(X.offInc?'포함':'참고')+'</small>':'')+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+(x.next?'<a class="rvinc" data-act="openOrder" data-id="'+x.next.id+'">'+(x.next.eta?fmtD(x.next.eta).slice(0,5)+' <small>'+(x.next.etaKind==='fixed'?'확정':'예상')+'</small>':'미정')+' · '+nf(x.next.parts?x.next.partRem:x.next.remain)+'장</a>'+partTag(x.next)+(x.opens.length>1?'<small class="odsub">전체 '+x.opens.length+'건 · '+nf(x.inc)+'장</small>':'')+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':''):'<span class="muted">없음</span>')+'</td>'+
       '<td>'+(()=>{ let li = -1; return r.rounds.map((o,k)=>{ const no = '<em class="rno">'+(k+1)+'차</em>'; if(o.done) return '<span class="rvround done" title="마감된 차수">'+no+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+(o.q?' · '+nf(o.q)+'장':'')+' <small>마감</small></span>'; const i = ++li; return '<span class="rvround'+(i===0?' cur':'')+(x.shipFrom&&o.d&&o.d<x.shipFrom?' bad':'')+'">'+no+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+(o.q?' · '+nf(o.q)+'장':'')+'</span>'+(o.q&&x.known?'<small class="rleft'+(x.rleft[i]<=0?' bad':'')+'">'+(x.rleft[i]<=0?'예약 수량 소진'+(x.live[i+1]?' → '+(li+2)+'차로':''):'남은 '+nf(x.rleft[i])+'장')+'</small>':''); }).join(''); })()+'<button class="btn sm ghost" data-act="rvEdit" data-b="'+esc(p.b)+'">'+(x.live.length?'수정':'+ 차수')+'</button></td>'+
       '<td><div class="rvchs"><span class="rvch"><em class="rvcl">예약</em><button class="rvc all'+(chList().every(c=>r.ch[c])?' on':'')+'" data-act="rvChAll" data-b="'+esc(p.b)+'" data-tip="예약 설정 · 전체 반영 / 해제"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(r.ch[c]?' on':'')+'" data-act="rvCh" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · 예약 '+(r.ch[c]?'설정 완료':'미설정')+'" aria-label="'+esc(c)+' 예약 설정"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span>'+
         '<span class="rvch sell"><em class="rvcl">판매</em><button class="rvc all'+(chList().every(c=>sellOn(r,c))?' on':'')+'" data-act="rvSellAll" data-b="'+esc(p.b)+'" data-tip="판매 중 · 전체 켜기 / 끄기"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(sellOn(r,c)?' on':'')+'" data-act="rvSell" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · '+(sellOn(r,c)?'판매 중':'판매 안 함')+'" aria-label="'+esc(c)+' 판매"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span></div></td>'+
@@ -3348,14 +3361,19 @@ function orderModal(id, mode){
     if(r) h += '<div class="panel pad step"><h3>입고 내역 수정</h3><p class="note" style="margin:0">지금: <b>'+(r.d?fmtDY(r.d):(r.l?esc(r.l):'날짜 없음'))+' · '+nf(r.q)+'장</b> ('+(isA?'보드에서 입고 처리':'시트 기록')+'). 날짜나 수량이 틀렸을 때만 고쳐주세요. 입고 · 잔여 수량도 같이 맞춰져요.</p>'+
       '<div class="formgrid"><label class="f">입고일 (출고일)<input type="date" id="m_rd" value="'+esc(r.d||'')+'"></label><label class="f">수량<input type="number" id="m_rq" min="0" value="'+r.q+'"></label></div><label class="f">사유<input id="m_rr" placeholder="예: 시트 날짜 오기 · 실제 입고 6/18"></label>'+
       '<div class="filters"><button class="btn pri" data-act="rcSave" data-id="'+o.id+'" data-k="'+esc(k)+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>'; }
-  if(mode==='recv') h += '<div class="panel pad step"><h3>'+(o.remain>0?'입고 처리':'추가 입고')+'</h3>'+(o.remain>0?'':'<p class="note" style="margin:0">이미 입고 완료된 차수예요 (오더 '+nf(o.qty)+' · 입고 '+nf(o.recv)+(o.qty>o.recv?' · 미달 '+nf(o.qty-o.recv):'')+'). 늦게 들어온 수량만 넣으면 이 차수 입고에 더해져요.</p>')+'<div class="formgrid"><label class="f">입고 수량<input type="number" id="m_q" min="1" value="'+(o.remain>0?o.remain:Math.max(1,o.qty-o.recv))+'"></label><label class="f">입고일 (출고일)<input type="date" id="m_d" value="'+TODAY+'"></label></div><div class="filters"><button class="btn pri" data-act="doRecv" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
+  if(mode==='recv') h += '<div class="panel pad step"><h3>'+(o.remain>0?'입고 처리':'추가 입고')+'</h3>'+(o.remain>0?'':'<p class="note" style="margin:0">이미 입고 완료된 차수예요 (오더 '+nf(o.qty)+' · 입고 '+nf(o.recv)+(o.qty>o.recv?' · 미달 '+nf(o.qty-o.recv):'')+'). 늦게 들어온 수량만 넣으면 이 차수 입고에 더해져요.</p>')+'<div class="formgrid"><label class="f">입고 수량<input type="number" id="m_q" min="1" value="'+(o.remain>0?(o.parts?o.partRem:o.remain):Math.max(1,o.qty-o.recv))+'"></label><label class="f">입고일 (출고일)<input type="date" id="m_d" value="'+TODAY+'"></label></div><div class="filters"><button class="btn pri" data-act="doRecv" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
   if(mode==='delay'){ const base = o.eta && o.eta > TODAY ? o.eta : TODAY;
     const rvw = rvOf(p.b); const rvl = (rvw.rounds||[]).filter(x=>!x.done && x.d);
     h += '<div class="panel pad step"><h3>일정 수정</h3>'+(isResvSt(rvw.st) && rvl.length ? '<p class="note" style="margin:0;color:var(--bad)">이 상품은 예약배송 중이에요 (출고 '+rvl.map(x=>fmtD(x.d).slice(0,5)+(x.q?' · '+x.q+'장':'')).join(', ')+'). 저장 후 예약배송 탭에서 출고일도 맞춰주세요.</p>' : '')+'<p class="note" style="margin:0">지금 예정일 '+(o.eta?fmtDY(o.eta)+' ('+(o.etaKind==='fixed'?'확정':'예상')+')':'미정')+' · 남은 '+nf(o.remain)+'장</p>'+
       '<div class="filters">'+[-7,-3,3,7,14].map(n=>'<button class="btn sm" data-act="dPlus" data-base="'+(o.eta||TODAY)+'" data-n="'+n+'">'+(n>0?'+':'')+n+'일</button>').join('')+'</div>'+
       '<div class="formgrid"><label class="f">새 예정일<input type="date" id="m_eta" value="'+(o.eta||TODAY)+'"></label><label class="f">사유<select id="m_r">'+REASONS.map(r=>'<option>'+r+'</option>').join('')+'</select></label></div><label class="f">메모<input id="m_memo" placeholder="예: 공장 확인 11/15 · 원단 일찍 들어옴"></label>'+
       '<p class="note" id="m_etaHint" style="margin:0">앞당기면 <b>조기 입고 예정</b>, 미루면 <b>입고 지연 예정</b>으로 기록돼요.</p>'+
-      '<div class="filters"><button class="btn pri" data-act="doEta" data-id="'+o.id+'">저장</button><button class="btn" data-act="close">취소</button></div></div>'; }
+      '<div class="filters"><button class="btn pri" data-act="doEta" data-id="'+o.id+'">저장</button><button class="btn" data-act="close">취소</button></div></div>'+
+      (o.remain>1 ? (()=>{ const ps = o.parts ? o.parts.filter(x=>!x.done).map(x=>({d:x.d, q:x.rem})) : [{d:o.eta||'', q:o.remain},{d:'', q:''}];
+        return '<details class="panel pad step pbox"'+(o.parts?' open':'')+'><summary><b>나눠서 입고 (파샬)</b> <span class="muted">공장이 남은 '+nf(o.remain)+'장을 여러 번에 나눠 보낼 때</span></summary>'+
+          '<p class="note" style="margin:6px 0">줄마다 날짜와 수량을 넣으세요. 합계가 남은 수량과 같아야 해요. 입고 처리하면 다음 줄이 입고 예정으로 넘어가요.</p><div id="m_parts">'+
+          ps.map((x,i)=>'<div class="filters prow"><span class="pno">'+(i+1)+'</span><input type="date" class="pd" value="'+esc(x.d||'')+'"><input type="number" class="pq" min="1" value="'+esc(String(x.q))+'" style="width:90px"><span class="muted">장</span></div>').join('')+'</div>'+
+          '<div class="filters"><button class="btn sm" data-act="partAdd">+ 줄 추가</button><button class="btn pri" data-act="doParts" data-id="'+o.id+'">나눠서 저장</button>'+(o.parts?'<button class="btn sm ghost" data-act="partOff" data-id="'+o.id+'">나눠 입고 해제</button>':'')+'</div></details>'; })() : ''); }
   if(mode==='eta') h += '<div class="panel pad step"><h3>일정 변경</h3><div class="formgrid"><label class="f">새 예정일<input type="date" id="m_eta" value="'+(o.eta||'')+'"></label><label class="f">사유<select id="m_r">'+REASONS.map(r=>'<option>'+r+'</option>').join('')+'</select></label></div><label class="f">메모<input id="m_memo" placeholder="예: 원단 입고 11/12 → 봉제 일주일"></label><p class="note" style="margin:0">변경 전 날짜와 사유가 기록으로 남아 CS가 고객 안내에 쓸 수 있습니다.</p><div class="filters"><button class="btn pri" data-act="doEta" data-id="'+o.id+'">저장</button><button class="btn" data-act="openOrder" data-id="'+o.id+'">취소</button></div></div>';
   if(mode==='cancel'){ const CR = ['미달 (공장 수량 부족)','불량','오더 취소','다음 차수로 이월','오더 수량 줄임'];
     h += '<div class="panel pad step"><h3>취소 · 삭제</h3><p class="note" style="margin:0">더 이상 들어오지 않을 수량을 뺍니다 (취소 · 잘못 들어간 오더 삭제). 지금 남은 수량 <b>'+nf(o.remain)+'장</b> · 전량을 빼면 이 차수는 마감돼요.</p>'+
@@ -3469,8 +3487,21 @@ async function act(a, el){
     case 'doRecv': {
       const o = BYID.get(id); const q = parseInt(val('m_q'),10), d = val('m_d');
       if(!(q>0) || !d){ toast('수량과 입고일을 넣어주세요'); return; }
-      if(q < o.remain){ recvAsk(o, q, d); break; }
+      if(q < o.remain && !(o.parts && q <= o.partRem)){ recvAsk(o, q, d); break; }
       await recvOne(o, q, d, false); closeModal(); break; }
+    case 'partAdd': { const w = document.getElementById('m_parts'); if(!w) return; const n = w.querySelectorAll('.prow').length+1; w.insertAdjacentHTML('beforeend','<div class="filters prow"><span class="pno">'+n+'</span><input type="date" class="pd"><input type="number" class="pq" min="1" style="width:90px"><span class="muted">장</span></div>'); return; }
+    case 'doParts': {
+      const o = BYID.get(id); if(!o) return;
+      const ps = [...document.querySelectorAll('#m_parts .prow')].map(r=>({d:r.querySelector('.pd').value, q:+r.querySelector('.pq').value||0})).filter(x=>x.q>0);
+      if(ps.length<2){ toast('두 줄 이상 넣어주세요'); return; }
+      if(ps.some(x=>!x.d)){ toast('줄마다 날짜를 넣어주세요'); return; }
+      const sum = ps.reduce((t,x)=>t+x.q,0); if(sum!==o.remain){ toast('합계 '+sum+'장이 남은 수량 '+o.remain+'장과 달라요'); return; }
+      const msg = '나눠서 입고 · '+ps.map(x=>fmtD(x.d).slice(0,5)+' '+x.q+'장').join(' / ');
+      const ok = await guard(()=>saveOvr(o, {parts:ps, pbase:o.qty - o.remain}, {type:'parts', msg}, label(o)+' '+msg, ['eta','reorder','recv']), '저장했습니다');
+      if(ok!==false){ closeModal(); } break; }
+    case 'partOff': {
+      const o = BYID.get(id); if(!o) return;
+      await guard(()=>saveOvr(o, {parts:null, pbase:null, eta:o.eta}, {type:'parts', msg:'나눠서 입고 해제'}, label(o)+' 나눠서 입고 해제', ['eta','reorder','recv']), '해제했습니다'); closeModal(); break; }
     case 'doEta': {
       const o = BYID.get(id); const eta = val('m_eta'), r = val('m_r'), memo = val('m_memo');
       if(!eta){ toast('새 예정일을 골라주세요'); return; }
