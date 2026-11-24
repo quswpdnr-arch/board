@@ -393,6 +393,21 @@ body.mode-all #tabs{display:none}
 .plmatch{display:block;margin-top:4px;font-size:12px;padding:3px 8px;border-radius:6px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;cursor:pointer;font-weight:400}.plmatch.on{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}.plmatch input{vertical-align:-2px;margin-right:4px}
 .ptag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;background:#fef3c7;color:#92400e;margin-left:4px;vertical-align:1px;cursor:help;white-space:nowrap}
 .pbox>summary{cursor:pointer;list-style:none}.pbox>summary::-webkit-details-marker{display:none}.prow{margin:4px 0}.prow .pno{display:inline-block;width:20px;font-weight:700;color:#92400e}
+.themebtn{position:fixed!important;left:12px;bottom:12px;z-index:30;width:28px;height:28px;padding:0!important;justify-content:center;border-radius:50%!important;opacity:.35;margin:0!important;transition:opacity .15s}.themebtn:hover,.themebtn:focus-visible{opacity:1}
+@media (max-width:640px){ .themebtn{bottom:calc(70px + env(safe-area-inset-bottom,0px))} }
+.rvtbl td.ctr,.rvtbl th.ctr{text-align:center}
+.tgl{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);font-size:13px;color:var(--ink);cursor:pointer;white-space:nowrap;user-select:none}.tgl input{margin:0;accent-color:var(--accent)}.tgl.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--panel));color:var(--accent);font-weight:600}
+.rvtbl td .btn.ghost{background:transparent}
+.etar{display:flex;align-items:baseline;gap:6px;font-size:12.5px;line-height:1.5;color:inherit;text-decoration:none;cursor:pointer;white-space:nowrap}.etar:hover{color:var(--accent)}.etar em{font-style:normal;font-size:11px;color:var(--muted);min-width:24px}.etar .d{font-variant-numeric:tabular-nums}.etar .d small{font-size:10px;color:var(--muted);margin-left:2px}.etar b{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}.etar b small{font-size:10px;font-weight:400;color:var(--muted);margin:0 2px 0 1px}.etar.off{color:var(--muted);cursor:default}.etar.off em{color:#9a3412}
+.rvtbl td.rvrd{min-width:100px;max-width:118px}.rvtbl td.rvrd.ed{cursor:pointer;border-radius:6px}.rvtbl td.rvrd.ed:hover{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.rr{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 4px;font-size:12.5px;line-height:1.55;white-space:nowrap}.rr em{font-style:normal;font-size:11px;color:var(--muted);min-width:20px}.rr span{font-variant-numeric:tabular-nums}.rr b{font-weight:600;font-variant-numeric:tabular-nums}.rr small{font-size:10px;color:var(--muted);flex-basis:100%;text-align:right;margin-top:-3px;line-height:1.3}.rr small.out{color:var(--bad);font-weight:600}.rr.cur em{color:var(--accent);font-weight:700}.rr.done{color:var(--muted)}.rr.done b{font-weight:400}.rr.bad span{color:var(--bad)}
+.addr{font-size:12px;color:var(--muted)}.rvrd.ed:hover .addr{color:var(--accent)}
+.rvtbl td.rvmemo{width:108px;min-width:104px;max-width:112px}.etaoff{display:block;text-align:right;font-size:10.5px;color:var(--muted);margin:-3px 0 2px}.mm{display:flex;gap:6px;align-items:flex-start;font-size:11.5px;line-height:1.4;padding:2px 4px;border-radius:5px;margin:0 -4px 2px;cursor:pointer}.mm:hover{background:var(--sunk)}.mm em{font-style:normal;font-size:10px;font-weight:700;color:var(--muted);flex:none;width:18px;padding-top:1px}.mm span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-all}.mm.empty span{color:#bbb}.mm.editing{background:var(--panel);cursor:default}.mm textarea{flex:1;min-width:0;font:inherit;font-size:12px;padding:4px 6px;border:1px solid var(--accent);border-radius:5px;resize:vertical}
+.bulkbar{position:sticky;bottom:14px;z-index:12;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px auto 0;padding:8px 10px 8px 16px;width:fit-content;max-width:100%;background:#1f2937;color:#fff;border:0;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.bulkbar .bkn{font-size:13px;margin-right:4px;white-space:nowrap}.bulkbar .bkn b{font-size:15px}
+.bulkbar select,.bulkbar input{height:32px;min-width:0;width:auto;background:#374151;color:#fff;border:1px solid #4b5563;border-radius:8px;font-size:12.5px;padding:0 8px}.bulkbar select{padding-right:22px}.bulkbar input::placeholder{color:#9ca3af}
+.bulkbar .bkmemo{display:inline-flex;gap:4px;align-items:center}.bulkbar .bkmemo input{width:130px}.bulkbar .btn{height:32px;background:#374151;color:#fff;border-color:#4b5563}.bulkbar .btn.ghost{background:transparent}
+.bulkbar .bkr{display:inline-flex;gap:4px;align-items:center;margin-left:4px;padding-left:8px;border-left:1px solid #4b5563}.bulkbar .bkx{appearance:none;border:0;background:transparent;color:#9ca3af;font-size:15px;width:28px;height:28px;border-radius:50%;cursor:pointer}.bulkbar .bkx:hover{background:#374151;color:#fff}
 .offpend{display:block;font-size:11px;color:var(--muted);margin-top:3px;cursor:help;white-space:nowrap}
 .mcat{position:relative;display:inline-block}.mcat>summary{list-style:none;cursor:pointer;padding:6px 26px 6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg,#fff);font-size:13px;position:relative}.mcat>summary::-webkit-details-marker{display:none}.mcat>summary::after{content:'▾';position:absolute;right:9px;top:6px;color:#888}.mcat.on>summary{border-color:#6366f1;color:#4338ca;font-weight:600}
 .mcatp{position:absolute;z-index:30;top:calc(100% + 4px);left:0;min-width:240px;max-height:340px;overflow:auto;background:var(--bg,#fff);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px 10px}.mcatp .chk{display:flex;gap:6px;padding:4px 0;font-size:13px;white-space:nowrap}.mcath{display:flex;justify-content:flex-end;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:2px}
@@ -602,23 +617,21 @@ table.mcard tr.shrow{display:none}
 :root[data-theme="dark"] .kc-gray{background:#33322f;color:#cfcac2}:root[data-theme="dark"] .kc-fuchsia{background:#45194d;color:#f2b6ff}:root[data-theme="dark"] .kc-brown{background:#3d2b1c;color:#e3c3a0}:root[data-theme="dark"] .kc-indigo{background:#272a5a;color:#bfc4ff}
 .rvtbl th.ck,.rvtbl td.ck{width:30px;text-align:center;padding-left:8px;padding-right:2px}
 .rvtbl tr.rvsel-on td{background:color-mix(in srgb, var(--accent) 7%, transparent)}
-.bulkbar{position:sticky;bottom:10px;z-index:12;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:10px 0 0;padding:10px 14px;background:var(--panel);border:1px solid var(--accent);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
-.bulkbar .bgrp{display:inline-flex;align-items:center;gap:4px}.bulkbar select{min-width:140px}
 .expbtn.infl{margin-left:auto}
 .mselall{display:none}@media (max-width:640px){.mselall{display:inline-flex}}
 @media (max-width:640px){ .bulkbar{bottom:calc(66px + env(safe-area-inset-bottom,0px))}.bulkbar .bgrp{flex:1 1 100%}.bulkbar select,.bulkbar input{flex:1} }
 .rvtbl th,.rvtbl td{padding-left:7px;padding-right:7px}
 .rvtbl th.ck,.rvtbl td.ck{padding-left:14px!important;padding-right:4px!important;width:34px}
-.rvtbl td.ck + td{min-width:0!important;width:200px;max-width:200px}
+.rvtbl td.ck + td{min-width:0!important;width:208px;max-width:208px}
 .rvtbl td.ck + td .pname small{overflow:hidden;text-overflow:ellipsis}
-.rvtbl .rvsel{width:110px;max-width:110px}
+.rvtbl .rvsel{width:92px;max-width:92px;padding-left:6px;padding-right:18px}.rvtbl td:nth-child(3){padding-left:2px!important;padding-right:2px!important;width:92px;max-width:94px}
 .rvtbl .rvc{width:19px;height:20px;font-size:10px}.rvtbl .rvch{gap:1px}.rvtbl .rvc.all{width:auto;padding:0 4px}
 .rvtbl .rvmemo{min-width:0;width:104px;max-width:110px}.rvtbl .rvmemo small{max-width:104px;word-break:break-all}
-.rvtbl td:nth-child(8){min-width:108px;max-width:132px}.rvtbl td:nth-child(8) .rvinc{white-space:normal}
+.rvtbl td:nth-child(8){min-width:108px;max-width:126px}.rvtbl td:nth-child(8) .rvinc{white-space:normal}
 .rvtbl td.rvacts{width:96px}.rvtbl td.rvacts .chip{display:flex;width:fit-content;margin:0 0 4px;white-space:nowrap}.rvtbl td.rvacts .chip:last-child{margin-bottom:0}
 .whls{display:flex;flex-direction:column;gap:1px;margin-top:3px}.whl{display:flex;justify-content:space-between;gap:8px;font-size:11px;line-height:1.35;color:var(--muted);white-space:nowrap}.whl b{color:var(--fg);font-weight:600}.whl.hq b{color:var(--info)}.whl.safe b{color:#b45309}.whl.shopt{cursor:help}.whl.shopt span{text-decoration:underline dotted}.whl.offl{opacity:.8}
-.whtop{white-space:nowrap}.wk3{margin:2px 0 4px;font-size:11px;line-height:1.25}.wkr{display:flex;align-items:center;gap:4px;color:var(--muted)}.wkr .wkl{width:43px;flex:none;white-space:nowrap;font-variant-numeric:tabular-nums}.wkr .wkl em{font-style:normal;font-size:9.5px;margin-left:2px;color:#b45309}.wkr .wkb{flex:1;height:7px;background:var(--sunk);border-radius:3px;overflow:hidden;min-width:24px}.wkr .wkb i{display:block;height:100%;background:#a7c4bb;border-radius:3px}.wkr b{min-width:22px;text-align:right;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}.wkr.now{color:var(--ink)}.wkr.now .wkb i{background:var(--accent)}.wkr.now b{font-size:13px}.wk3 .wkc{display:block;text-align:right;font-size:10.5px;margin-top:1px}.wk3 .up{color:#15803d}.wk3 .dn{color:var(--bad)}
-.rvsales .whl{font-size:12px}.rvsales .whl b{font-size:13px}.rvtbl td.rvsales{min-width:0;width:132px;padding-left:10px!important}.rvtbl th.rvsalesh{width:132px;line-height:1.3;padding-left:22px!important;text-align:left}.rvtbl th.rvsalesh .thsub{display:block;white-space:nowrap;font-weight:400;margin:1px 0 0}.rvtbl th.rvsalesh .sarr{margin-left:3px}
+.whtop{white-space:nowrap}.wk3{margin:2px 0 4px;font-size:11px;line-height:1.25}.wkr{display:flex;align-items:center;gap:4px;color:var(--muted)}.wkr .wkl{width:33px;flex:none;white-space:nowrap;font-variant-numeric:tabular-nums}.wkr .wkl em{font-style:normal;font-size:9.5px;margin-left:2px;color:#b45309}.wkr .wkb{flex:1;height:7px;background:var(--sunk);border-radius:3px;overflow:hidden;min-width:24px}.wkr .wkb i{display:block;height:100%;background:#a7c4bb;border-radius:3px}.wkr b{min-width:22px;text-align:right;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}.wkr.now{color:var(--ink)}.wkr.now .wkb i{background:var(--accent)}.wkr.now b{font-size:13px}.wk3 .wkc{display:block;text-align:right;font-size:10.5px;margin-top:1px}.wk3 .up{color:#15803d}.wk3 .dn{color:var(--bad)}
+.rvsales .whl{font-size:12px}.rvsales .whl b{font-size:13px}.rvtbl td.rvsales{min-width:0;width:120px;padding-left:10px!important}.rvtbl th.rvsalesh{width:120px;line-height:1.3;padding-left:22px!important;text-align:left}.rvtbl th.rvsalesh .thsub{display:block;white-space:nowrap;font-weight:400;margin:1px 0 0}.rvtbl th.rvsalesh .sarr{margin-left:3px}
 .rvacts .chip small{font-size:10px;opacity:.8;margin-left:2px}.rvtbl th:last-child{width:104px}
 .rvtbl .rvcl{width:18px;font-size:9.5px}
 .rvtbl th .thsub{white-space:normal}
@@ -626,6 +639,7 @@ table.mcard tr.shrow{display:none}
 </style>
 
 <script>(function(){ var t='light'; try{ t = localStorage.getItem('kb_theme') || 'light'; }catch(e){} document.documentElement.setAttribute('data-theme', t); })();</script>
+<button id="themeBtn" class="themebtn" type="button" aria-label="화면 테마 바꾸기"></button>
 <style>
 #gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:16px}
 #gate[hidden]{display:none}
@@ -651,7 +665,6 @@ table.mcard tr.shrow{display:none}
     <div class="hrow">
       <div class="brand" data-act="goHome" role="link" tabindex="0" title="대시보드로">노운베러 오더·입고 보드<span class="logo" role="img" aria-label="KNOWN BETTER"></span></div>
       <div id="brandSw" class="brandsw" role="tablist" aria-label="브랜드"></div>
-      <button id="themeBtn" class="themebtn" type="button" aria-label="화면 테마 바꾸기"></button>
       <div id="acct" class="acct"></div>
     </div>
     <nav class="tabs" role="tablist" id="tabs">
@@ -1004,6 +1017,17 @@ function toast(msg){
   setTimeout(()=>t.remove(), 2600);
 }
 const chip = s => '<span class="chip st-'+s+'">'+ST[s]+'</span>';
+// 입고 예정 칸: 들어가 있는 오더를 한 줄씩 (N차 · 날짜 · 수량) · 예상 일정만 작게 '예정' · 틸은 같은 리오더 날짜의 오프라인 수량을 '온 · 오프'로
+function etaList(x){
+  const showOff = x.offQ>0 && !S.rv.offEx; const offBy = {}; const used = new Set();
+  if(showOff) for(const e of x.offP){ (offBy[e.od] = offBy[e.od]||[]).push(e); }
+  const L = x.opens.map(o=>{ const q = o.parts ? o.partRem : o.remain; const offs = showOff ? (offBy[o.od]||[]) : []; offs.forEach(e=>used.add(e)); const oq = offs.reduce((t,e)=>t+e.q,0);
+    return {eta:o.eta||'', h:'<a class="etar" data-act="openOrder" data-id="'+o.id+'"><em>'+esc(o.round||'')+'</em><span class="d">'+(o.eta?fmtD(o.eta).slice(0,5):'미정')+(o.eta&&o.etaKind!=='fixed'?'<small>예정</small>':'')+'</span><b>'+(oq?'<small>온</small>'+nf(q):nf(q)+'<small>장</small>')+'</b></a>'+(oq?'<span class="etaoff">오프 '+nf(oq)+'</span>':'')+partTag(o)}; });
+  if(showOff) for(const e of x.offP) if(!used.has(e)) L.push({eta:e.eta||'', h:'<span class="etar off" title="오프라인(매장) 리오더 · 발주 '+fmtD(e.od).slice(0,5)+'"><em>오프</em><span class="d">'+(e.eta?fmtD(e.eta).slice(0,5):'미정')+'</span><b>'+nf(e.q)+'<small>장</small></b></span>'});
+  if(!L.length) return '<span class="muted">없음</span>';
+  L.sort((a,b)=>(a.eta||'9').localeCompare(b.eta||'9'));
+  const MAX = 4; return L.slice(0,MAX).map(z=>z.h).join('')+(L.length>MAX?'<small class="odsub">외 '+(L.length-MAX)+'건 · 합계 '+nf(x.inc)+'장</small>':'');
+}
 function partTag(o){ if(!o.parts) return ''; const N = ['①','②','③','④','⑤','⑥','⑦','⑧'];
   return ' <span class="ptag" title="'+esc(o.parts.map((x,i)=>(N[i]||(i+1)+'.')+' '+(x.d?fmtD(x.d).slice(0,5):'날짜 미정')+' · '+x.q+'장 '+(x.done?'입고 완료':(i===o.partI-1&&x.rem<x.q?'예정 (남은 '+x.rem+'장)':'예정'))).join('\n'))+'">파샬 '+o.partI+'/'+o.partN+'</span>'; }
 function etaCell(o){
@@ -1050,7 +1074,7 @@ const whList = p => { const L = []; const ln = (t, v, c) => L.push('<div class="
   if(p.trans!=null){ ln('트랜쇼', p.trans); ln('본사 창고', p.hq||0, p.hq>0?'hq':''); if(p.gj!=null) ln('곤지암', p.gj); }
   if(p.safe!=null) ln('안전재고', p.safe, 'safe');
   if(p.off!=null) ln('트랜쇼(오프라인)', p.off, 'offl');
-  if(p.shop!=null){ const st = shopStoresOf(p); L.push('<div class="whl offl'+(st?' shopt':'')+'"'+(st?' title="'+esc(st)+'"':'')+'><span>매장 재고 (참고)'+(st?' ⓘ':'')+'</span><b>'+nf(p.shop)+'개</b></div>'); }
+  if(p.shop!=null) L.push('<div class="whl offl"><span>매장 (디피 제외)</span><b>'+nf(p.shop)+'개</b></div>');
   return L.length ? '<div class="whls">'+L.join('')+'</div>' : ''; };
 const whTxt = p => p && p.trans!=null ? ['트랜쇼 '+nf(p.trans)].concat(p.gj!=null?['곤지암 '+nf(p.gj)]:[], ['본사 '+nf(p.hq)], p.off!=null?['오프라인 '+nf(p.off)]:[], p.shop!=null?['매장 '+nf(p.shop)]:[]).join(' · ') : (p && (p.off!=null||p.shop!=null) ? [p.off!=null?'오프라인 '+nf(p.off):'', p.shop!=null?'매장 '+nf(p.shop):''].filter(Boolean).join(' · ') : '');
 function stockCell(p){ if(!hasStock(p)) return '<span class="muted">—</span>'; return '<span class="stk2"><b>'+nf(availIn(p))+'</b> <span>/ '+nf(p.stock)+'</span>'+(p.trans!=null?'<small class="whs">'+whTxt(p)+'</small>':'')+'</span>'; }
@@ -2925,7 +2949,8 @@ function rvCalc(p){
   const r = rvOf(p.b), s = salesOf(p.b), so = salesOffOf(p.b);
   const opens = p.orders.filter(isOpen).sort((a,b)=>(a.eta||'9').localeCompare(b.eta||'9'));
   const offP = offPendOf(p), offQ = offP.reduce((t,e)=>t+e.q,0);
-  const inc = opens.reduce((t,o)=>t+o.remain,0), next = opens[0] || null;
+  const offOn = offQ>0 && !S.rv.offEx;   // 틸: 오프라인 리오더도 입고 예정에 포함 (제외 체크하면 뺌)
+  const inc = opens.reduce((t,o)=>t+o.remain,0) + (offOn ? offQ : 0), next = opens[0] || null;
   const known = hasStock(p);
   const wh = p.trans!=null;
   const gj = wh ? (p.gj||0) : 0;
@@ -2972,7 +2997,7 @@ function rvCalc(p){
   // 예약 차수별 남은 수량: 미발송(출고 가능 재고의 마이너스)을 앞 차수부터 채워 나감
   let deficit = known ? Math.max(0, -(rest||0)) : 0;
   const rleft = live.map(x=>{ const q = +x.q||0; const use = Math.min(q, deficit); deficit -= use; return q - use; });
-  const ravail = (rest||0) + rq;   // 예약 차수까지 합친 가용 (미발송 제외)
+  const ravail = (rest||0) + rq - (S.rv.offEx ? Math.min(rq, offQ) : 0);   // 예약 차수까지 합친 가용 (미발송 제외) · 오프라인 제외면 오프라인 리오더만큼 뺌
   if(isResvSt(st) && live.length && rq>0 && known && ravail<=0 && !saleOff(r)) acts.push('roundOut');
   // 리오더 예정일이 뒤로 밀렸거나(일정 변경) 예정일이 지났는데 안 들어온 오더
   let pushDays = 0, lateO = null;
@@ -2995,7 +3020,7 @@ function viewResv(){
   for(const x of all){ x.acts.forEach(a=>cnt[a]++); if(x.lvl==='긴급') urg++; if(x.lvl==='주의') warn++; if(isResvSt(x.st)) inResv++; }
   const q = X.q.trim().toLowerCase();
   let a = all;
-  if(X.act==='lvl') a = a.filter(x=>x.lvl); else if(X.act==='resv') a = a.filter(x=>isResvSt(x.st)); else if(X.act) a = a.filter(x=>x.acts.includes(X.act));
+  if(X.act==='lvl') a = a.filter(x=>x.lvl); else if(X.act==='wkin') a = a.filter(x=>x.next&&x.next.eta&&x.next.eta>=TODAY&&x.next.eta<=addDays(TODAY,7)); else if(X.act==='resv') a = a.filter(x=>isResvSt(x.st)); else if(X.act) a = a.filter(x=>x.acts.includes(X.act));
   else if(!X.all && !q) a = a.filter(x=>x.st!=='단종' && (x.acts.length || x.lvl || isResvSt(x.st) || x.s.wk>0 || x.inc>0));
   if(X.st) a = a.filter(x=>x.st===X.st);
   if(X.fac) a = a.filter(x=>x.p.curFac===X.fac);
@@ -3013,16 +3038,16 @@ function viewResv(){
       ch: x=>chList().filter(c=>x.r.ch[c]).length, memo: x=>(x.r.cmt||'')+(x.r.memo||'')}[X.sk];
     if(key) a = a.slice().sort((x,y)=>{ const u = key(x), v = key(y); return (typeof u==='number' ? u-v : String(u).localeCompare(String(v),'ko')) * X.sd; });
   }
-  { const L = a; EXP = {name:'예약배송', rows:()=>[['바코드','제작품명','상품명','컬러,사이즈','공장','분류','노출 상태','할 일','재고 부족','주간 판매','온라인 3주 전','온라인 2주 전','온라인 지난주','출고 가능','실 보유재고','트랜쇼','곤지암','본사','오프라인 재고','매장 재고','오프라인 주간 판매','입고 예정','다음 입고 예정일','예약 차수','판매 채널','코멘트','메모']].concat(
+  { const L = a; EXP = {name:'예약배송', rows:()=>[['바코드','제작품명','상품명','컬러,사이즈','공장','분류','노출 상태','할 일','재고 부족','주간 판매','온라인 3주 전','온라인 2주 전','온라인 지난주','출고 가능','실 보유재고','트랜쇼','곤지암','본사','오프라인 재고','매장 재고','오프라인 주간 판매','입고 예정','다음 입고 예정일','예약 차수','판매 채널','MD 메모','CS 메모']].concat(
       L.map(x=>[x.p.b, x.p.n, x.p.en, x.p.opt, x.p.curFac, x.cat||'', x.st||'', x.acts.map(k=>(RV_ACT[k]||{}).t||k).join(' · '), x.lvl||'', x.s.wk, ...(x.s.ws ? (x.s.ws.length===3 ? x.s.ws : [''].concat(x.s.ws)) : ['','','']), x.known?x.rest:'', x.known?x.p.stock:'', x.p.trans!=null?x.p.trans:'', x.p.gj!=null?x.p.gj:'', x.p.hq!=null?x.p.hq:'', x.p.off!=null?x.p.off:'', x.p.shop!=null?x.p.shop:'', x.so.wk||0, x.inc||0, x.next&&x.next.eta||'',
         x.live.map(o=>(o.d||'날짜 없음')+(o.q?' '+o.q+'장':'')).join(' / '), chList().filter(c=>x.r.ch&&x.r.ch[c]).join(', '), x.r.cmt||'', x.r.memo||'']))}; }
-  const bulkBar = n => !n ? '' : '<div class="bulkbar"><b>'+n+'개 선택</b>'+
-    '<span class="bgrp"><select id="bkSt"><option value="">노출 상태 바꾸기</option>'+RV_ST.map(v=>'<option>'+v+'</option>').join('')+'</select></span>'+
-    '<span class="bgrp"><select id="bkCat"><option value="">분류 바꾸기</option>'+catList().map(c=>'<option value="'+esc(c.n)+'">'+esc(c.n)+'</option>').join('')+'</select></span>'+
-    '<span class="bgrp"><span class="note">예약</span><button class="btn sm" data-act="bkCh" data-v="1">전체 설정</button><button class="btn sm" data-act="bkCh" data-v="0">해제</button></span>'+
-    '<span class="bgrp"><span class="note">판매</span><button class="btn sm" data-act="bkSell" data-v="1">전체 켜기</button><button class="btn sm" data-act="bkSell" data-v="0">끄기</button></span>'+
-    '<span class="bgrp"><input id="bkMemo" placeholder="메모 한 번에 추가" style="width:150px" title="기존 메모 뒤에 이어 붙여요"><button class="btn sm" data-act="bkMemo">추가</button></span>'+
-    '<span class="bgrp" style="margin-left:auto"><button class="btn sm" data-act="bkExp">선택 엑셀 내려받기</button><button class="btn sm ghost" data-act="bkClear">선택 해제</button></span></div>';
+  const bulkBar = n => !n ? '' : '<div class="bulkbar"><span class="bkn"><b>'+n+'</b>개 선택</span>'+
+    '<select id="bkSt" title="노출 상태 한 번에 바꾸기"><option value="">노출 상태</option>'+RV_ST.map(v=>'<option>'+v+'</option>').join('')+'</select>'+
+    '<select id="bkCat" title="분류 한 번에 바꾸기"><option value="">분류</option>'+catList().map(c=>'<option value="'+esc(c.n)+'">'+esc(c.n)+'</option>').join('')+'</select>'+
+    '<select id="bkChS" title="예약 채널 한 번에"><option value="">예약 채널</option><option value="1">전체 설정</option><option value="0">전체 해제</option></select>'+
+    '<select id="bkSellS" title="판매 채널 한 번에"><option value="">판매 채널</option><option value="1">전체 켜기</option><option value="0">전체 끄기</option></select>'+
+    '<span class="bkmemo"><select id="bkMemoK" title="어느 메모에 붙일지"><option value="cmt">MD 메모</option><option value="memo">CS 메모</option></select><input id="bkMemo" placeholder="메모 덧붙이기" title="기존 메모 뒤에 이어 붙여요"><button class="btn sm" data-act="bkMemo">추가</button></span>'+
+    '<span class="bkr"><button class="btn sm ghost" data-act="bkExp" title="선택한 상품만 엑셀로">엑셀</button><button class="bkx" data-act="bkClear" title="선택 해제" aria-label="선택 해제">✕</button></span></div>';
   const sth = (k, label, cls, sub) => '<th class="sortable'+(cls?' '+cls:'')+(X.sk===k?' sorted':'')+'" data-act="rvSort" data-k="'+k+'" title="눌러서 정렬 (오름차순 → 내림차순 → 기본)">'+label+'<span class="sarr">'+(X.sk===k?(X.sd===1?'▲':'▼'):'↕')+'</span>'+(sub||'')+'</th>';
   const anyF = X.q || X.st || X.fac || X.cat || (X.cats&&X.cats.length) || X.own || X.act;
   const card = (k,t,n,c,d) => '<button class="rvcard'+(X.act===k?' on':'')+'" data-act="rvAct" data-k="'+k+'" title="'+esc(t+' · '+d)+'"><span class="chip '+c+'">'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
@@ -3032,6 +3057,7 @@ function viewResv(){
       Object.entries(RV_ACT).map(([k,v])=>card(k, v.t, cnt[k], v.c, v.d)).join('')+
       card('lvl','재고 부족', urg+warn, 'kc-brown', '긴급 '+urg+' · 주의 '+warn)+
       card('resv','예약배송 중', inResv, 'kc-indigo', '예약 판매 중')+
+      card('wkin','이번 주 입고', all.filter(x=>x.next&&x.next.eta&&x.next.eta>=TODAY&&x.next.eta<=addDays(TODAY,7)).length, 'kc-teal', '7일 안에 들어올 리오더')+
     '</div>'+
     '<div class="filters"><input type="search" id="rvQ" placeholder="바코드 · 제작품명 · 컬러 · 공장 검색" value="'+esc(X.q)+'">'+
       '<select id="rvSt"><option value="">노출 상태 전체</option>'+RV_ST.map(s=>'<option'+(s===X.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+
@@ -3040,11 +3066,11 @@ function viewResv(){
           cl.map(c=>'<label class="chk"><input type="checkbox" class="rvCatC" value="'+esc(c.n)+'"'+(sel.includes(c.n)?' checked':'')+'> '+esc(c.n||'미분류')+(c.owner?' <span class="muted">· '+esc(c.owner)+'</span>':'')+' <span class="muted">('+c.c+')</span></label>').join('')+'</div></details>'+
           (own.length?'<select id="rvOwn"><option value="">전체 담당자</option>'+own.map(o=>'<option'+(o===X.own?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>':''); })()+
       '<select id="rvFac"><option value="">전체 공장</option>'+activeFacs().map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
-      (anyF?'<button class="btn sm" data-act="rvClear">‹ 검색 필터 해제</button>':'')+(X.act?'':'<label class="chk"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'> 전체 상품 보기</label>')+(OFFPsrc()&&BRAND==='tid'?'<label class="chk" title="입고 예정 칸에서 오프라인(매장) 리오더 줄을 숨겨요 · 예약배송 계산은 원래 온라인 리오더만 써요"><input type="checkbox" id="rvOffEx"'+(X.offEx?' checked':'')+'> 리오더 오프라인 제외</label>':'')+
+      (anyF?'<button class="btn sm" data-act="rvClear">‹ 검색 필터 해제</button>':'')+(X.act?'':'<label class="tgl'+(X.all?' on':'')+'"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'> 전체 상품 보기</label>')+(OFFPsrc()&&BRAND==='tid'?'<label class="tgl'+(X.offEx?' on':'')+'" title="켜면 오프라인(매장) 리오더 수량을 입고 예정 · 예약 포함 가용에서 빼고 온라인 수량만 봐요"><input type="checkbox" id="rvOffEx"'+(X.offEx?' checked':'')+'> 오프라인 리오더 제외</label>':'')+
       '<label class="chk mselall"><input type="checkbox" id="rvSelAll2"> 보이는 상품 모두 선택</label><span class="note">'+nf(a.length)+'개</span></div>';
   const SEL = X.sel || (X.sel = {}); const shownB = a.slice(0, X.n).map(x=>x.p.b); const selN = Object.keys(SEL).filter(b=>SEL[b]).length;
   const allOn = shownB.length && shownB.every(b=>SEL[b]);
-  h += '<div class="panel tw"><table class="rvtbl"><thead><tr><th class="ck"><input type="checkbox" id="rvSelAll"'+(allOn?' checked':'')+' title="보이는 상품 모두 선택" aria-label="모두 선택"></th>'+sth('prod','상품 · 컬러,사이즈 · 바코드')+sth('st','노출 상태')+sth('act','할 일')+sth('un','미발송','num')+sth('wk','판매 추이','rvsalesh',(()=>{ const S1 = salesSrc(); const L = S1 && S1.weeks ? wkLabels(S1) : []; return L.length>1 ? '<small class="thsub">(주차별 · '+L.length+'주)</small><small class="thsub">'+fmtD(L[0].f).slice(0,5)+'~'+fmtD(L[L.length-1].t).slice(0,5)+'</small>' : '<small class="thsub">(일주일)</small><small class="thsub">'+esc(salesLabel().replace(/\s/g,''))+'</small>'; })())+sth('stock','재고')+sth('eta','입고 예정')+sth('round','예약 차수')+sth('ch','플랫폼별 현황')+sth('memo','메모')+'</tr></thead><tbody>';
+  h += '<div class="panel tw"><table class="rvtbl"><thead><tr><th class="ck"><input type="checkbox" id="rvSelAll"'+(allOn?' checked':'')+' title="보이는 상품 모두 선택" aria-label="모두 선택"></th>'+sth('prod','상품 · 컬러,사이즈 · 바코드')+sth('st','노출 상태')+sth('act','할 일')+sth('un','미발송','ctr')+sth('wk','판매 추이','rvsalesh',(()=>{ const S1 = salesSrc(); const L = S1 && S1.weeks ? wkLabels(S1) : []; return L.length>1 ? '<small class="thsub">(주차별 · '+L.length+'주)</small><small class="thsub">'+fmtD(L[0].f).slice(0,5)+'~'+fmtD(L[L.length-1].t).slice(0,5)+'</small>' : '<small class="thsub">(일주일)</small><small class="thsub">'+esc(salesLabel().replace(/\s/g,''))+'</small>'; })())+sth('stock','재고')+sth('eta','입고 예정')+sth('round','예약 차수')+sth('ch','플랫폼별 현황')+sth('memo','메모','',' <small class="thsub">MD · CS</small>')+'</tr></thead><tbody>';
   if(!a.length) h += '<tr><td colspan="11" class="empty">조건에 맞는 상품이 없습니다.</td></tr>';
   S.__rvRows = a;
   const lock = !canDo('resv'); const CATS = catList().map(c=>c.n);
@@ -3053,17 +3079,20 @@ function viewResv(){
     h += '<tr class="'+(x.acts.length?'rvneed':'')+(x.delay?' rvdelay':'')+(SEL[p.b]?' rvsel-on':'')+'"><td class="ck"><input type="checkbox" data-rvselb="'+esc(p.b)+'"'+(SEL[p.b]?' checked':'')+' aria-label="선택"></td><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(p.key)+'">'+esc(p.n||p.en)+'</a>'+(p.n&&p.en?'<small class="pen" title="'+esc(p.en)+'">'+esc(p.en)+'</small>':'')+'<small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+flink(p.curFac)+'</small><select class="catsel" data-rvcat="'+esc(normK(p.n||p.b))+'" title="분류 (담당 분담)"'+(lock?' disabled':'')+'>'+CATS.map(c=>'<option'+(c===x.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="__new">+ 분류 관리…</option></select></div></div></td>'+
       '<td><select class="rvsel st-'+(x.st==='예약배송'?'open':x.st==='임시예약배송'?'soon':x.st==='단종(예정)'?'over':x.st==='품절'?'late':x.st==='단종'?'none':'done')+'" data-rvst="'+esc(p.b)+'"'+(lock?' disabled':'')+'>'+RV_ST.map(s=>'<option'+(s===x.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+'</td>'+
       '<td class="rvacts">'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d+(k==='rt'?' · 오프라인 재고 '+x.offStk+'개 중 주간 판매 '+x.so.wk+'개 (소진율 '+Math.round(x.offRate*100)+'%) · 가져올 수 있는 수량 약 '+x.rtQty+'개':k==='rtOut'?' · 매장 주간 판매 '+x.so.wk+'개 · 매장 재고 '+x.offStk+'개 · 보낼 수량 약 '+x.rtOutQty+'개 (온라인엔 2주 판매분 남김)':''))+'">'+RV_ACT[k].t+(k==='rt'?' <small>'+nf(x.rtQty)+'</small>':k==='rtOut'?' <small>'+nf(x.rtOutQty)+'</small>':'')+'</span>').join('')+(x.lvl?'<span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
-      '<td class="num">'+(x.s.unsent?'<b>'+nf(x.s.unsent)+'</b>':'<span class="muted">0</span>')+'</td>'+
+      '<td class="ctr">'+(x.s.unsent?'<b>'+nf(x.s.unsent)+'</b>':'<span class="muted">0</span>')+'</td>'+
       '<td class="rvsales">'+(()=>{ const w = wk3Html(x.s); return salesOffDoc&&salesOffDoc.items ? '<div class="whl"><span>온라인</span>'+(w?'':'<b>'+nf(x.s.wk)+'</b>')+'</div>'+w+'<div class="whl"><span>오프라인</span><b>'+nf(x.so.wk)+'</b></div>' : (w || (x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')); })()+'</td>'+
-      '<td class="num">'+(x.known?(x.rq>0?'<span class="ravail'+(x.ravail<=0?' bad':'')+'" title="출고 가능 재고 + 예약 차수 수량 (미발송 제외)">예약 포함 가용 <b>'+nf(x.ravail)+'</b></span>':'')+'<div class="whtop" title="가용 = 트랜쇼 + 본사 창고 + 곤지암 − 미발송 (오프라인 · 매장 재고 제외)">가용 <b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
-      '<td>'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+(x.next?'<a class="rvinc" data-act="openOrder" data-id="'+x.next.id+'">'+(x.next.eta?fmtD(x.next.eta).slice(0,5)+' <small>'+(x.next.etaKind==='fixed'?'확정':'예상')+'</small>':'미정')+' · '+nf(x.next.parts?x.next.partRem:x.next.remain)+'장</a>'+partTag(x.next)+(x.opens.length>1?'<small class="odsub">전체 '+x.opens.length+'건 · '+nf(x.inc)+'장</small>':'')+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':''):'<span class="muted">없음</span>')+''+(x.offQ&&!X.offEx?'<small class="offpend" title="'+esc('매장(오프라인)으로 갈 리오더예요 · 예약배송 · 가용 계산에는 넣지 않아요\n'+x.offP.map(e=>(e.round?e.round+' · ':'')+(e.eta?'입고 '+fmtD(e.eta).slice(0,5):'발주 '+fmtD(e.od).slice(0,5))+' · '+e.q+'장').join('\n'))+'">+ 오프라인 리오더 '+nf(x.offQ)+'장</small>':'')+'</td>'+
-      '<td>'+(()=>{ let li = -1; return r.rounds.map((o,k)=>{ const no = '<em class="rno">'+(k+1)+'차</em>'; if(o.done) return '<span class="rvround done" title="마감된 차수">'+no+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+(o.q?' · '+nf(o.q)+'장':'')+' <small>마감</small></span>'; const i = ++li; return '<span class="rvround'+(i===0?' cur':'')+(x.shipFrom&&o.d&&o.d<x.shipFrom?' bad':'')+'">'+no+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+(o.q?' · '+nf(o.q)+'장':'')+'</span>'+(o.q&&x.known?'<small class="rleft'+(x.rleft[i]<=0?' bad':'')+'">'+(x.rleft[i]<=0?'예약 수량 소진'+(x.live[i+1]?' → '+(li+2)+'차로':''):'남은 '+nf(x.rleft[i])+'장')+'</small>':''); }).join(''); })()+'<button class="btn sm ghost" data-act="rvEdit" data-b="'+esc(p.b)+'">'+(x.live.length?'수정':'+ 차수')+'</button></td>'+
+      '<td class="num">'+(x.known?(x.rq>0?'<span class="ravail'+(x.ravail<=0?' bad':'')+'" title="출고 가능 재고 + 예약 차수 수량 (미발송 제외)">예약 포함 가용 <b>'+nf(x.ravail)+'</b></span>':'')+'<div class="whtop" title="실제 보관 가용 = 트랜쇼 + 본사 창고 + 곤지암 − 미발송 (오프라인 · 매장 재고 제외)">실제 보관 가용 <b'+(x.rest<=0?' style="color:var(--bad)"':'')+'>'+nf(x.rest)+'</b></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
+      '<td class="rveta">'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+etaList(x)+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':'')+'</td>'+
+      '<td class="rvrd'+(lock?'':' ed')+'"'+(lock?'':' data-act="rvEdit" data-b="'+esc(p.b)+'" title="눌러서 예약 차수 수정"')+'>'+(r.rounds.length ? (()=>{ let li = -1; return r.rounds.map((o,k)=>{ const dd = (o.d?fmtD(o.d).slice(0,5):'날짜 없음'), qq = o.q?nf(o.q):'';
+          if(o.done) return '<div class="rr done"><em>'+(k+1)+'차</em><span>'+dd+'</span><b>'+qq+'</b><small>마감</small></div>';
+          const i = ++li; const left = o.q&&x.known ? x.rleft[i] : null;
+          return '<div class="rr'+(i===0?' cur':'')+(x.shipFrom&&o.d&&o.d<x.shipFrom?' bad':'')+'"'+(x.shipFrom&&o.d&&o.d<x.shipFrom?' title="출고 가능일('+fmtD(x.shipFrom).slice(0,5)+')보다 빨라요"':'')+'><em>'+(k+1)+'차</em><span>'+dd+'</span><b>'+qq+'</b>'+(left==null?'':left<=0?'<small class="out">소진</small>':'<small title="남은 예약 수량">남은 '+nf(left)+'</small>')+'</div>'; }).join(''); })() : (lock?'':'<span class="addr">+ 차수</span>'))+'</td>'+
       '<td><div class="rvchs"><span class="rvch"><em class="rvcl">예약</em><button class="rvc all'+(chList().every(c=>r.ch[c])?' on':'')+'" data-act="rvChAll" data-b="'+esc(p.b)+'" data-tip="예약 설정 · 전체 반영 / 해제"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(r.ch[c]?' on':'')+'" data-act="rvCh" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · 예약 '+(r.ch[c]?'설정 완료':'미설정')+'" aria-label="'+esc(c)+' 예약 설정"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span>'+
         '<span class="rvch sell"><em class="rvcl">판매</em><button class="rvc all'+(chList().every(c=>sellOn(r,c))?' on':'')+'" data-act="rvSellAll" data-b="'+esc(p.b)+'" data-tip="판매 중 · 전체 켜기 / 끄기"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(sellOn(r,c)?' on':'')+'" data-act="rvSell" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · '+(sellOn(r,c)?'판매 중':'판매 안 함')+'" aria-label="'+esc(c)+' 판매"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span></div></td>'+
-      '<td class="rvmemo">'+(r.cmt?'<small>'+esc(r.cmt).replace(/\n/g,' ')+'</small>':'')+(r.memo?'<small class="muted">'+esc(r.memo)+'</small>':'')+'</td></tr>';
+      '<td class="rvmemo">'+[['cmt','MD'],['memo','CS']].map(([k,l])=>'<div class="mm'+(r[k]?'':' empty')+'"'+(lock?'':' data-act="mmEdit" data-b="'+esc(p.b)+'" data-k="'+k+'"')+' title="'+esc(r[k]?l+' 메모 · '+r[k]:l+' 메모 쓰기')+'"><em>'+l+'</em><span>'+(r[k]?esc(r[k]).replace(/\n/g,' '):(lock?'':'+'))+'</span></div>').join('')+'</td></tr>';
   }
   h += '</tbody></table></div>'+bulkBar(selN)+(a.length>X.n?'<div class="more"><button class="btn" data-act="rvMore">'+nf(a.length-X.n)+'개 더 보기</button></div>':'')+
-    '<p class="note">재고 = 셀메이트 가용재고(미발송 제외) / 실 보유재고 · 재고 부족 = 가용 + 예약 수량이 주간 판매의 30% 미만이면 긴급, 60% 미만이면 주의 · 출고 가능일 = 입고 예정일 + 검수 '+QC_DAYS+'영업일 · 재고 = 가용(트랜쇼 + 본사 창고 + 곤지암 − 미발송) · 오프라인 · 매장 재고는 따로</p></div>';
+    '<p class="note">재고 = 셀메이트 가용재고(미발송 제외) / 실 보유재고 · 재고 부족 = 가용 + 예약 수량이 주간 판매의 30% 미만이면 긴급, 60% 미만이면 주의 · 출고 가능일 = 입고 예정일 + 검수 '+QC_DAYS+'영업일 · 실제 보관 가용 = 트랜쇼 + 본사 창고 + 곤지암 − 미발송 · 오프라인 · 매장 재고는 따로 · 매장 (디피 제외) = 지점별 재고에서 지점마다 디피 1장씩 뺀 합계 (RT로 뺄 수 있는 수량)</p></div>';
   return h;
 }
 function rvModal(b, preset){
@@ -3081,7 +3110,7 @@ function rvModal(b, preset){
     '<div><button class="btn sm" data-act="rvAddRound">+ 차수 추가</button></div>'+
     '<h3 style="margin:6px 0 0">판매 중인 플랫폼</h3><div class="tperm">'+chList().map(c=>'<label><input type="checkbox" data-rvsell="'+esc(c)+'"'+(sellOn(r,c)?' checked':'')+'> '+esc(c)+'</label>').join('')+'</div>'+
     '<h3 style="margin:6px 0 0">예약 설정 플랫폼</h3><div class="tperm"><label><b><input type="checkbox" id="rvChAllM"'+(chList().every(c=>r.ch[c])?' checked':'')+'> 전체</b></label>'+chList().map(c=>'<label><input type="checkbox" data-rvch="'+esc(c)+'"'+(r.ch[c]?' checked':'')+'> '+esc(c)+'</label>').join('')+'</div>'+
-    '<label class="f">상품 코멘트<input id="rv_cmt" value="'+esc(r.cmt||'')+'" placeholder="예: 라이브 · 주미니 착장"></label><label class="f">추가 사항<input id="rv_memo" value="'+esc(r.memo||'')+'" placeholder="예: 11/16 출고 · 19일 예배"></label>'+
+    '<label class="f">MD 메모<input id="rv_cmt" value="'+esc(r.cmt||'')+'" placeholder="예: 라이브 · 주미니 착장"></label><label class="f">CS 메모<input id="rv_memo" value="'+esc(r.memo||'')+'" placeholder="예: 11/16 출고 · 19일 예배"></label>'+
     '<div class="filters"><button class="btn pri" data-act="rvSave" data-b="'+esc(b)+'"'+(canDo('resv')?'':' disabled')+'>저장</button><button class="btn" data-act="close">취소</button></div></div>';
   openModal(h);
 }
@@ -3672,7 +3701,13 @@ async function act(a, el){
     case 'expView': expRun(); break;
     case 'bkCh': { const on = el.dataset.v==='1'; await rvBulk(()=>({ch:Object.fromEntries(chList().map(c=>[c,on]))}), '예약 플랫폼 전체 '+(on?'설정':'해제')); break; }
     case 'bkSell': { const on = el.dataset.v==='1'; await rvBulk(()=>({sell:Object.fromEntries(chList().map(c=>[c,on]))}), '판매 플랫폼 전체 '+(on?'켬':'끔')); break; }
-    case 'bkMemo': { const v = val('bkMemo'); if(!v){ toast('넣을 메모를 쓰세요'); break; } await rvBulk(r=>({memo: r.memo && !r.memo.includes(v) ? r.memo+' · '+v : (r.memo||v)}), '메모 추가 "'+v+'"'); break; }
+    case 'bkMemo': { const v = val('bkMemo'); if(!v){ toast('넣을 메모를 쓰세요'); break; } const mk = val('bkMemoK')==='memo' ? 'memo' : 'cmt'; await rvBulk(r=>({[mk]: r[mk] && !r[mk].includes(v) ? r[mk]+' · '+v : (r[mk]||v)}), (mk==='cmt'?'MD':'CS')+' 메모 추가 "'+v+'"'); break; }
+    case 'mmEdit': { const cell = el; if(cell.querySelector('textarea')) return; const b = el.dataset.b, k = el.dataset.k; const cur = rvOf(b)[k]||'';
+      cell.classList.add('editing'); cell.innerHTML = '<em>'+(k==='cmt'?'MD':'CS')+'</em><textarea rows="2" placeholder="'+(k==='cmt'?'MD':'CS')+' 메모 · Enter 저장 · Esc 취소">'+esc(cur)+'</textarea>';
+      const ta = cell.querySelector('textarea'); ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); let done = false;
+      const fin = async save => { if(done) return; done = true; const v = ta.value.trim(); if(save && v!==cur) await rvQuick(b, {[k]:v}, (k==='cmt'?'MD':'CS')+' 메모: '+(v||'지움')); else render(); };
+      ta.addEventListener('keydown', ev=>{ if(ev.key==='Enter' && !ev.shiftKey){ ev.preventDefault(); fin(true); } else if(ev.key==='Escape'){ ev.preventDefault(); fin(false); } });
+      ta.addEventListener('blur', ()=>fin(true)); ta.addEventListener('click', ev=>ev.stopPropagation()); return; }
     case 'bkClear': S.rv.sel = {}; render(); break;
     case 'bkExp': { const sel = new Set(rvSelB()); const keep = EXP; const rows = keep ? keep.rows() : []; const head = rows[0]||[]; const bi = head.indexOf('바코드');
       saveCsv(brandName()+'_예약배송_선택_'+TODAY+'.csv', [head].concat(rows.slice(1).filter(r=>sel.has(String(r[bi]))))); break; }
@@ -3855,7 +3890,7 @@ window.addEventListener('popstate', e => {
   navPopping = true; try{ render(); } finally { navPopping = false; }
 });
 document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if(b) setTab(b.dataset.tab); });
-function themeSync(){ const d = document.documentElement.getAttribute('data-theme')==='dark'; const b = document.getElementById('themeBtn'); if(b){ b.innerHTML = d ? '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span>밝게</span>' : '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg><span>어둡게</span>'; b.title = d ? '흰 배경으로 보기' : '어두운 배경으로 보기'; } }
+function themeSync(){ const d = document.documentElement.getAttribute('data-theme')==='dark'; const b = document.getElementById('themeBtn'); if(b){ b.innerHTML = d ? '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>' : '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>'; b.title = d ? '흰 배경으로 보기' : '어두운 배경으로 보기'; } }
 document.getElementById('themeBtn').addEventListener('click', ()=>{ const n = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', n); try{ localStorage.setItem('kb_theme', n); }catch(e){} themeSync(); });
 themeSync();
 document.addEventListener('click', e => {
@@ -3996,6 +4031,8 @@ document.addEventListener('change', e => {
   if(t.id==='rvSelAll' || t.id==='rvSelAll2'){ const sel = S.rv.sel || (S.rv.sel = {}); const rows = (S.__rvRows||[]).slice(0, S.rv.n); rows.forEach(x=>{ if(t.checked) sel[x.p.b] = true; else delete sel[x.p.b]; }); const y = window.scrollY; render(); window.scrollTo(0, y); }
   if(t.id==='bkSt' && t.value){ const v = t.value; rvBulk(()=>({st:v}), '노출 상태 → '+v); }
   if(t.id==='bkCat' && t.value){ rvBulkCat(t.value); }
+  if(t.id==='bkChS' && t.value){ const on = t.value==='1'; t.value=''; rvBulk(()=>({ch:Object.fromEntries(chList().map(c=>[c,on]))}), '예약 플랫폼 전체 '+(on?'설정':'해제')); }
+  if(t.id==='bkSellS' && t.value){ const on = t.value==='1'; t.value=''; rvBulk(()=>({sell:Object.fromEntries(chList().map(c=>[c,on]))}), '판매 플랫폼 전체 '+(on?'켬':'끔')); }
   if(t.dataset && t.dataset.rvst){ const b = t.dataset.rvst, v = t.value; const x = rvCalc([...PRODS.values()].find(p=>p.b===b));
     if(isResvSt(v) && !x.live.length){ S.rvEdit = null; rvModal(b, 'resv'); }
     else rvQuick(b, {st:v}, '노출 상태 '+(x.auto?'(자동) ':'')+x.st+' → '+v); }
