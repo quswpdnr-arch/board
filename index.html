@@ -960,6 +960,7 @@ async function initCaps(){
   DB.doc('sales/offline').onSnapshot(d => { salesOffDoc = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
   DB.doc('stock/offline').onSnapshot(d => { offDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
   DB.doc('stock/shop').onSnapshot(d => { shopDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
+  if(BRAND==='tid') DB.doc('stock/offro').onSnapshot(d => { offroDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
   DB.doc('cfg/channels').onSnapshot(d => { cfgCh = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
   DB.doc('cfg/rvcat').onSnapshot(d => { cfgCat = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
   if(ME.admin) DB.collection('members').onSnapshot(s => { members = {}; s.docs.forEach(d=>{ const x = d.data(); if(x) members[d.id] = x; }); lightRefresh(); }, ()=>{});
@@ -1857,18 +1858,28 @@ function roPlan(text){
   const byB = new Map(); for(const p of PRODS.values()) if(p.b) byB.set(p.b, p);
   const g = (r,k) => cols[k]>=0 && cols[k]!=null ? String(r[cols[k]]||'').trim() : '';
   const plan = [], miss = [], seen = new Set(); let same = 0, skipped = 0, dup = 0;
+  // 틸아이다이: 온라인 칸 = 보드 리오더 수량 · 오프라인 칸은 매장 리오더로 따로 저장 · 입고일정이 지나면 입고된 걸로 봄
+  const TID = BRAND==='tid' && cols.on>=0 && cols.on!=null, offro = TID ? {} : null; let offN = 0, offOnly = 0;
+  const lastFac = new Map();
+  const nn = v => parseInt(String(v||'').replace(/[^\d]/g,''),10)||0;
   for(const r of rows.slice(start)){
     const b = g(r,'b').replace(/^잔여량-/,''); const od = parseDay(g(r,'od'));
     const sum = parseInt(g(r,'sum').replace(/[^\d]/g,''),10);
-    const qty = sum>0 ? sum : ((parseInt(g(r,'on').replace(/[^\d]/g,''),10)||0) + (parseInt(g(r,'off').replace(/[^\d]/g,''),10)||0));
+    const onQ = nn(g(r,'on')), offQ = nn(g(r,'off'));
+    const qty = TID ? onQ : (sum>0 ? sum : (onQ + offQ));
     const memo0 = g(r,'memo'); const sumRaw = g(r,'sum').replace(/[^\d]/g,'');
-    const cancel = /취소/.test(memo0) || (sumRaw!=='' && /^0+$/.test(sumRaw));
+    const cancel = /취소/.test(memo0) || (sumRaw!=='' && /^0+$/.test(sumRaw)) || (TID && /캔슬|취소/.test(g(r,'eta')));
+    if(TID && b && od && !cancel){
+      const sf = g(r,'f'); if(sf){ const L = lastFac.get(b); if(!L || od >= L.od) lastFac.set(b, {od, f:sf}); }
+      if(offQ>0){ const e0 = parseEta(g(r,'eta'), od).eta; (offro[b] = offro[b]||[]).push({od, eta:e0||'', q:offQ}); offN++; if(!onQ) offOnly++; }
+    }
     if(b && od && cancel){
       const p0 = byB.get(b); const o0 = p0 && (p0.orders.filter(o=>o.od===od && isOpen(o)).find(o=>!(qty>0) || o.qty===qty) || p0.orders.find(o=>o.od===od && isOpen(o)));
       if(o0){ plan.push({type:'cancel', p:p0, o:o0, od, qty:o0.qty, patch:{closed:true, closeReason:'오더 취소 (리오더 시트)'}, logs:[{type:'close', msg:'오더 취소 · 남은 '+o0.remain+'장 (리오더 시트)'}], recvQ:0, label:'오더 취소', text:'남은 '+nf(o0.remain)+'장 취소 · 오더 종료'+(o0.recv?' (입고 '+nf(o0.recv)+'장은 그대로)':'')}); }
       else same++;
       continue;
     }
+    if(TID && b && od && !(qty>0) && offQ>0) continue;
     if(!b || !od || !(qty>0)){ if(b||od) skipped++; continue; }
     const key = b+'|'+od+'|'+qty; if(seen.has(key)){ dup++; continue; } seen.add(key);
     const {eta, note} = parseEta(g(r,'eta'), od);
@@ -1879,7 +1890,8 @@ function roPlan(text){
     const cands = p.orders.filter(o=>o.od===od);
     const o = cands.find(x=>x.qty===qty) || cands[0];
     if(!o){
-      plan.push({type:'new', p, od, qty, eta, reason, done, part, label:'신규 리오더', text:nf(qty)+'장 · '+nextRound(p)+(eta?' · 예정 '+fmtDY(eta):'')+(done?' · 입고완료':'')+(reason?' · '+reason:'')});
+      const expN = TID && eta && eta < TODAY;
+      plan.push({type:'new', p, od, qty, eta, reason, done: done || expN, part, auto: expN, label:'신규 리오더', text:nf(qty)+'장 · '+nextRound(p)+(eta?' · 예정 '+fmtDY(eta):'')+(done?' · 입고완료':'')+(reason?' · '+reason:'')});
       continue;
     }
     const ch = []; const patch = {}; const logs = [];
@@ -1896,17 +1908,21 @@ function roPlan(text){
     if(reason && reason!==o.etaReason && !String(o.memo||'').includes(reason) && isOpen(o)){ patch.reason = reason; ch.push('사유: '+reason); }
     // 시트의 '입고완료' · 입고 수량은 참고만: 이미 끝난 오더(잔여 0 · 미달 마감)는 건드리지 않고,
     // 남은 수량이 있을 때만 '입고도 기록' 체크 칸을 보여줌 (기본 꺼짐 · 물류 입고 처리가 기준)
-    let recvQ = 0;
+    let recvQ = 0; const etaX = eta || (o.etaKind==='fixed' ? o.eta : ''); const exp = TID && etaX && etaX < TODAY && isOpen(o) && o.remain>0;
     if(isOpen(o) && o.remain>0){
-      if(done) recvQ = o.remain;
+      if(done || exp) recvQ = o.remain;
       else if(part && part > o.recv) recvQ = Math.min(part - o.recv, o.remain);
     }
     const over = 0;
-    const sheetRecv = recvQ>0 ? (done ? '시트에 입고완료' : '시트에 입고 '+nf(part)+'장') + ' · 보드 잔여 '+nf(o.remain)+'장' : '';
+    const sheetRecv = recvQ>0 ? (exp && !done ? '입고일정 '+fmtD(etaX).slice(0,5)+' 지남 → 입고된 걸로 처리' : done ? '시트에 입고완료' : '시트에 입고 '+nf(part)+'장') + ' · 보드 잔여 '+nf(o.remain)+'장' : '';
     if(!ch.length && !recvQ){ same++; continue; }
-    plan.push({type: !ch.length ? 'recv' : (patch.eta||patch.reason ? 'eta' : 'qty'), over, p, o, od, qty, patch, logs, recvQ, sheetRecv, recvD: (eta && eta<=TODAY ? eta : TODAY), label: !ch.length ? '시트 입고 확인' : (shift==='late' ? '일정 지연 예정' : shift==='early' ? '조기 입고 예상' : shift==='set' ? '일정 확정' : patch.reason ? '사유 반영' : '오더 수량 변경'), shift, text: ch.join(' · ')});
+    plan.push({type: !ch.length ? 'recv' : (patch.eta||patch.reason ? 'eta' : 'qty'), over, p, o, od, qty, patch, logs, recvQ, sheetRecv, auto: exp, recvD: (exp ? etaX : eta && eta<=TODAY ? eta : TODAY), label: !ch.length ? (exp ? '입고 간주' : '시트 입고 확인') : (shift==='late' ? '일정 지연 예정' : shift==='early' ? '조기 입고 예상' : shift==='set' ? '일정 확정' : patch.reason ? '사유 반영' : '오더 수량 변경'), shift, text: ch.join(' · ')});
   }
-  return {plan, miss, same, skipped, dup, header, total: rows.length - start};
+  // 정보 보정: 시트의 가장 최근 리오더 공장이 보드 공장과 다르면 '공장 변경' 후보 (기본 꺼짐 · 확인하고 체크)
+  if(TID) for(const [b, L] of lastFac){ const p = byB.get(b); if(!p || !p.curFac) continue; const nf0 = x => String(x||'').replace(/\s/g,'').toLowerCase();
+    if(nf0(L.f) !== nf0(p.curFac) && !nf0(p.curFac).startsWith(nf0(L.f)) && !nf0(L.f).startsWith(nf0(p.curFac)) && !plan.some(x=>x.type==='fac' && x.p===p))
+      plan.push({type:'fac', p, od:L.od, to:L.f, known: FACTORIES.includes(L.f), label:'공장 다름', text:'보드 '+p.curFac+' → 시트 '+L.f+(FACTORIES.includes(L.f)?'':' (보드에 없는 공장명)')+' · '+fmtDY(L.od)+' 리오더부터'}); }
+  return {plan, miss, same, skipped, dup, header, total: rows.length - start, offro, offN, offOnly};
 }
 function syncRcBox(x, i){
   const q = x.type==='new' ? ((x.done||x.part) ? (x.done ? x.qty : Math.min(x.part, x.qty)) : 0) : x.recvQ;
@@ -1919,16 +1935,16 @@ function regSync(){
   let h = '<div class="sec"><div class="sechead"><h2>리오더 시트 붙여넣기</h2><span class="sub">구글 시트 "'+esc(brandName())+'" 탭을 머리글 줄까지 통째로 복사해 붙여넣으면 바뀐 내용만 골라 반영합니다</span></div><div class="panel pad step">'+
     '<ol class="note" style="margin:0;padding-left:18px;display:grid;gap:2px"><li>리오더 시트에서 <b>전체 선택(Ctrl+A) → 복사</b> (머리글 줄이 같이 들어가도, 값만 복사해도 됩니다)</li><li>아래 칸에 붙여넣고 <b>바뀐 내용 확인</b></li><li>목록을 보고 <b>반영</b>. 같은 시트를 하루에 몇 번 붙여넣어도 이미 반영된 줄은 건너뜁니다.</li></ol>'+
     '<textarea id="syncT" rows="6" placeholder="리오더 날짜&#9;바코드&#9;담당 디자이너&#9;공장&#9;…&#9;합계&#9;입고일정&#9;일정 변경 사유&#9;…&#9;비고">'+esc(Y.text||'')+'</textarea>'+
-    '<div class="filters"><button class="btn pri" data-act="syncPreview">바뀐 내용 확인</button>'+(Y.text?'<button class="btn" data-act="syncClear">비우기</button>':'')+'</div>';
+    '<div class="filters"><button class="btn pri" data-act="syncPreview">바뀐 내용 확인</button><label class="btn">파일 올리기 (.tsv · .csv)<input type="file" id="syncFile" accept=".tsv,.csv,.txt" hidden></label>'+(Y.text?'<button class="btn" data-act="syncClear">비우기</button>':'')+'</div>';
   const R = Y.res;
   if(R){
     const cnt = t => R.plan.filter(x=>x.type===t).length;
-    h += '<div class="stats"><span>읽은 줄 <b>'+nf(R.total)+'</b></span><span>신규 리오더 <b style="color:var(--accent)">'+cnt('new')+'</b></span><span>일정 반영 <b style="color:var(--info)">'+cnt('eta')+'</b>'+(R.plan.some(x=>x.shift==='late')?' · 지연 예정 '+R.plan.filter(x=>x.shift==='late').length:'')+(R.plan.some(x=>x.shift==='early')?' · 조기 입고 '+R.plan.filter(x=>x.shift==='early').length:'')+'</span><span>시트 입고 확인 <b style="color:var(--ok)">'+R.plan.filter(x=>x.recvQ>0 || (x.type==='new' && (x.done||x.part))).length+'</b> <small class="muted">(체크한 것만 입고로 기록)</small></span><span>오더 수량 변경 <b style="color:var(--warn)">'+R.plan.filter(x=>x.patch&&x.patch.qty!=null).length+'</b></span>'+(R.plan.some(x=>x.over)?'<span>초과 입고 <b style="color:var(--bad)">'+R.plan.filter(x=>x.over).length+'</b></span>':'')+(cnt('cancel')?'<span>오더 취소 <b style="color:var(--bad)">'+cnt('cancel')+'</b></span>':'')+'<span>이미 같음 <b>'+nf(R.same)+'</b></span>'+(R.miss.length?'<span>보드에 없는 바코드 <b style="color:var(--bad)">'+R.miss.length+'</b></span>':'')+(R.dup?'<span>시트 안 중복 <b>'+R.dup+'</b></span>':'')+'</div>';
+    h += '<div class="stats"><span>읽은 줄 <b>'+nf(R.total)+'</b></span><span>신규 리오더 <b style="color:var(--accent)">'+cnt('new')+'</b></span><span>일정 반영 <b style="color:var(--info)">'+cnt('eta')+'</b>'+(R.plan.some(x=>x.shift==='late')?' · 지연 예정 '+R.plan.filter(x=>x.shift==='late').length:'')+(R.plan.some(x=>x.shift==='early')?' · 조기 입고 '+R.plan.filter(x=>x.shift==='early').length:'')+'</span><span>시트 입고 확인 <b style="color:var(--ok)">'+R.plan.filter(x=>x.recvQ>0 || (x.type==='new' && (x.done||x.part))).length+'</b> <small class="muted">(체크한 것만 입고로 기록)</small></span><span>오더 수량 변경 <b style="color:var(--warn)">'+R.plan.filter(x=>x.patch&&x.patch.qty!=null).length+'</b></span>'+(R.plan.some(x=>x.over)?'<span>초과 입고 <b style="color:var(--bad)">'+R.plan.filter(x=>x.over).length+'</b></span>':'')+(cnt('cancel')?'<span>오더 취소 <b style="color:var(--bad)">'+cnt('cancel')+'</b></span>':'')+(R.plan.some(x=>x.auto)?'<span>입고일정 지나 입고 처리 <b style="color:var(--ok)">'+R.plan.filter(x=>x.auto).length+'</b></span>':'')+(cnt('fac')?'<span>공장 다름 <b style="color:var(--warn)">'+cnt('fac')+'</b> <small class="muted">(보드에 있는 공장명만 체크해 둠)</small></span>':'')+(R.offro?'<span>오프라인 리오더 <b>'+nf(R.offN)+'</b> <small class="muted">(매장용 · 예약배송 계산 제외'+(R.offOnly?' · 오프라인만 '+R.offOnly+'건':'')+')</small></span>':'')+'<span>이미 같음 <b>'+nf(R.same)+'</b></span>'+(R.miss.length?'<span>보드에 없는 바코드 <b style="color:var(--bad)">'+R.miss.length+'</b></span>':'')+(R.dup?'<span>시트 안 중복 <b>'+R.dup+'</b></span>':'')+'</div>';
     if(!R.header) h += '<p class="note" style="margin:0">머리글 줄이 없어 리오더 시트 기본 열 순서(리오더 날짜 · 바코드 · 담당 · 공장 · … · 합계 · 입고일정 · 사유 · 예약배송 · 비고)로 읽었습니다.</p>';
     if(R.plan.length){
       h += '<div class="tw" style="max-height:420px;overflow:auto"><table><thead><tr><th><input type="checkbox" id="syncAll"'+(Object.values(Y.off).some(Boolean)?'':' checked')+' aria-label="전체 선택"></th><th>구분</th><th>상품</th><th>리오더 날짜</th><th>차수</th><th>바뀌는 내용</th></tr></thead><tbody>'+
-        R.plan.map((x,i)=>{ const qc = x.patch && x.patch.qty!=null && x.type!=='qty'; return '<tr'+(x.type==='cancel'||x.over?' class="xchg"':x.patch&&x.patch.qty!=null?' class="qchg"':'')+'><td><input type="checkbox" data-sync="'+i+'"'+(Y.off[i]?'':' checked')+'></td><td style="white-space:nowrap"><span class="chip '+(x.shift==='late'?'st-late':x.shift==='early'?'st-done':({new:'st-done',eta:'st-open',recv:'st-done',qty:'st-soon',cancel:'st-late'})[x.type])+'">'+x.label+'</span>'+(qc?' <span class="chip st-soon">오더 수량 변경</span>':'')+(x.over?' <span class="chip st-late">초과 입고</span>':'')+'</td><td><b>'+esc(x.p.n||x.p.en)+'</b> '+esc(x.p.opt)+' <span class="mono muted">'+esc(x.p.b)+'</span></td><td class="num">'+fmtDY(x.od)+'</td><td>'+esc(x.o?x.o.round:nextRound(x.p))+'</td><td class="muted">'+(x.patch&&x.patch.qty!=null?'<b class="qtxt">오더 수량 '+nf(x.o.qty)+' → '+nf(x.patch.qty)+'장</b>'+(x.text.replace(/^수량 [\d,]+ → [\d,]+( · )?/,'')?' · ':'')+esc(x.text.replace(/^수량 [\d,]+ → [\d,]+( · )?/,'')):esc(x.text))+syncRcBox(x,i)+'</td></tr>'; }).join('')+'</tbody></table></div>'+
-        '<p class="note" style="margin:0">입고는 <b>물류팀이 입고 처리에서 넣은 것</b>이 기준이에요. 시트의 "입고완료"는 참고로만 보여주고, 이미 끝난 오더(미달 마감 포함)는 건드리지 않아요. 실제로 들어온 게 확인된 줄만 "입고도 기록"을 체크하세요.</p>'+
+        R.plan.map((x,i)=>{ const qc = x.patch && x.patch.qty!=null && x.type!=='qty'; return '<tr'+(x.type==='cancel'||x.over?' class="xchg"':x.patch&&x.patch.qty!=null?' class="qchg"':'')+'><td><input type="checkbox" data-sync="'+i+'"'+(Y.off[i]?'':' checked')+'></td><td style="white-space:nowrap"><span class="chip '+(x.shift==='late'?'st-late':x.shift==='early'?'st-done':({new:'st-done',eta:'st-open',recv:'st-done',qty:'st-soon',cancel:'st-late',fac:'st-soon'})[x.type])+'">'+x.label+'</span>'+(qc?' <span class="chip st-soon">오더 수량 변경</span>':'')+(x.over?' <span class="chip st-late">초과 입고</span>':'')+'</td><td><b>'+esc(x.p.n||x.p.en)+'</b> '+esc(x.p.opt)+' <span class="mono muted">'+esc(x.p.b)+'</span></td><td class="num">'+fmtDY(x.od)+'</td><td>'+esc(x.type==='fac'?'':x.o?x.o.round:nextRound(x.p))+'</td><td class="muted">'+(x.patch&&x.patch.qty!=null?'<b class="qtxt">오더 수량 '+nf(x.o.qty)+' → '+nf(x.patch.qty)+'장</b>'+(x.text.replace(/^수량 [\d,]+ → [\d,]+( · )?/,'')?' · ':'')+esc(x.text.replace(/^수량 [\d,]+ → [\d,]+( · )?/,'')):esc(x.text))+syncRcBox(x,i)+'</td></tr>'; }).join('')+'</tbody></table></div>'+
+        (R.offro?'<p class="note" style="margin:0"><b>틸아이다이</b>: 온라인 칸 수량만 보드 리오더로 잡고, 오프라인 칸은 매장 리오더로 따로 저장해요. 시트에 입고완료 · 남은 수량이 없어서 <b>입고일정이 오늘 이전인 오더는 입고된 걸로</b> 체크해 뒀어요.</p>':'')+'<p class="note" style="margin:0">입고는 <b>물류팀이 입고 처리에서 넣은 것</b>이 기준이에요. 시트의 "입고완료"는 참고로만 보여주고, 이미 끝난 오더(미달 마감 포함)는 건드리지 않아요. 실제로 들어온 게 확인된 줄만 "입고도 기록"을 체크하세요.</p>'+
         '<div><button class="btn pri" data-act="syncApply"'+(canWrite()?'':' disabled')+'>선택한 '+(R.plan.length-Object.values(Y.off).filter(Boolean).length)+'건 반영</button></div>';
     } else h += '<div class="empty">새로 반영할 내용이 없습니다. 보드가 리오더 시트와 같은 상태입니다.</div>';
     if(R.miss.length) h += '<details><summary class="note" style="cursor:pointer">보드에 없는 바코드 '+R.miss.length+'건 (신규 상품 등록 또는 정보 보정에서 바코드를 연결하면 다음 붙여넣기 때 반영됩니다)</summary><div class="tw"><table><thead><tr><th>바코드</th><th>제작품명</th><th>컬러,사이즈</th><th>공장</th><th>리오더 날짜</th><th class="num">수량</th></tr></thead><tbody>'+
@@ -1940,10 +1956,12 @@ async function syncApply(){ if(!need('reorder')) return;
   const R = S.sync.res; if(!R) return;
   const RC = S.sync.rc || {};
   const picks = R.plan.map((x,i)=>Object.assign({}, x, {_rc: !!RC[i]})).filter((x,i)=>!S.sync.off[i] && !(x.type==='recv' && !x._rc));
-  if(!picks.length){ toast('반영할 줄을 고르세요 · 시트 입고는 "입고도 기록"을 체크해야 반영돼요'); return; }
-  const at = new Date().toISOString(); const c = {new:0, eta:0, recv:0, qty:0, cancel:0};
+  if(!picks.length && !R.offro){ toast('반영할 줄을 고르세요 · 시트 입고는 "입고도 기록"을 체크해야 반영돼요'); return; }
+  const at = new Date().toISOString(); const c = {new:0, eta:0, recv:0, qty:0, cancel:0, fac:0};
   const n = await guardN(async()=>{
+    if(R.offro) await DB.doc('stock/offro').set({items:R.offro, n:R.offN, at, by:MYID||''});
     for(const x of picks){
+      if(x.type==='fac'){ await DB.collection('fchg').add({style:x.p.n||x.p.en, bs:[...x.p.origBs], from:x.p.curFac, to:x.to, date:x.od, open:true, note:'리오더 시트 공장 (정보 보정)', at, by:MYID||''}); c.fac++; continue; }
       if(x.type==='new'){
         const ref = await DB.collection('ord').add({b:x.p.b, f:x.p.curFac, round:nextRound(x.p), od:x.od, qty:x.qty, eta:x.eta||'', memo:(x.reason||''), src:'리오더 시트', at, by:MYID||''});
         if((x.done || x.part) && x._rc && ref && ref.id){ const q = x.done ? x.qty : Math.min(x.part, x.qty); await DB.doc('ovr/n_'+ref.id).set({recv:[{q, d:(x.eta && x.eta<=TODAY ? x.eta : TODAY), by:MYID||'', src:'sheet'}], log:[{at, by:MYID||'', type:'recv', msg:'입고 '+q+'장 (리오더 시트 · 확인 후 기록)'}]}); c.recv++; }
@@ -1957,10 +1975,10 @@ async function syncApply(){ if(!need('reorder')) return;
       await DB.doc('ovr/'+o.id).set(next);
       c[x.type]++;
     }
-    await writeLog('리오더 시트 반영: 신규 '+c.new+' · 일정 '+c.eta+' · 입고 '+c.recv+' · 수량 '+c.qty+(c.cancel?' · 취소 '+c.cancel:'')+'건');
-    return picks.length;
+    await writeLog('리오더 시트 반영: 신규 '+c.new+' · 일정 '+c.eta+' · 입고 '+c.recv+' · 수량 '+c.qty+(c.cancel?' · 취소 '+c.cancel:'')+(c.fac?' · 공장 보정 '+c.fac:'')+(R.offro?' · 오프라인 리오더 '+R.offN:'')+'건');
+    return picks.length || 1;
   });
-  if(n){ toast(n+'건 반영했습니다'); S.sync.res = null; S.sync.off = {}; S.sync.rc = {}; render(); }
+  if(n){ toast(picks.length ? picks.length+'건 반영했습니다' : '오프라인 리오더를 반영했습니다'); S.sync.res = null; S.sync.off = {}; S.sync.rc = {}; render(); }
 }
 
 // ---------- 상품 목록(셀메이트 양식) 붙여넣기로 신규 등록 ----------
@@ -2816,8 +2834,12 @@ function rvSuggest(p, k){
 }
 let resvDocs = {}, salesDoc = null;
 const RV0 = SNAP.resv0 || {}, SL0 = SNAP.sales0 || null;
-const OFFP = SNAP.offPend || null, OFFP_CUT = iso(new Date(Date.now()-30*864e5));
-function offPendOf(p){ if(!OFFP) return []; const out = []; for(const b of (p.origBs && p.origBs.size ? p.origBs : [p.b])) for(const e of (OFFP[b]||[])){ const d = e[1] || e[0] || ''; if(!d || d >= OFFP_CUT) out.push({od:e[0], eta:e[1], q:+e[2]||0, round:e[3]||'', etaText:e[4]||''}); } return out.sort((a,b)=>(a.eta||a.od||'9').localeCompare(b.eta||b.od||'9')); }
+// 틸아이다이 오프라인(매장) 리오더: 리오더 시트를 반영할 때 stock/offro 에 통째로 저장 · 없으면 처음 스냅샷
+// 입고일정이 지난 건 입고된 걸로 보고 빼요 (틸은 시트에 입고완료 · 남은 수량이 없음)
+let offroDoc = null;
+function OFFPsrc(){ if(offroDoc && offroDoc.items){ const o = {}; for(const [b,a] of Object.entries(offroDoc.items)) o[b] = (a||[]).map(e=>[e.od||'', e.eta||'', +e.q||0, e.round||'', e.note||'']); return o; } return SNAP.offPend || null; }
+const OFFP_CUT = TODAY;
+function offPendOf(p){ const OFFP = OFFPsrc(); if(!OFFP) return []; const out = []; for(const b of (p.origBs && p.origBs.size ? p.origBs : [p.b])) for(const e of (OFFP[b]||[])){ const d = e[1] || ''; if(!d || d >= OFFP_CUT) out.push({od:e[0], eta:e[1], q:+e[2]||0, round:e[3]||'', etaText:e[4]||''}); } return out.sort((a,b)=>(a.eta||a.od||'9').localeCompare(b.eta||b.od||'9')); }
 const RV_ACT = {
   toResv:   {t:'예약 전환 필요', d:'재고 0 · 입고 예정 있음', c:'kc-violet'},
   delay:    {t:'일정 지연',     d:'리오더 예정일 밀림 · 지연 예상', c:'kc-red'},
@@ -2979,7 +3001,7 @@ function viewResv(){
           cl.map(c=>'<label class="chk"><input type="checkbox" class="rvCatC" value="'+esc(c.n)+'"'+(sel.includes(c.n)?' checked':'')+'> '+esc(c.n||'미분류')+(c.owner?' <span class="muted">· '+esc(c.owner)+'</span>':'')+' <span class="muted">('+c.c+')</span></label>').join('')+'</div></details>'+
           (own.length?'<select id="rvOwn"><option value="">전체 담당자</option>'+own.map(o=>'<option'+(o===X.own?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>':''); })()+
       '<select id="rvFac"><option value="">전체 공장</option>'+activeFacs().map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
-      (anyF?'<button class="btn sm" data-act="rvClear">‹ 검색 필터 해제</button>':'')+(X.act?'':'<label class="chk"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'> 전체 상품 보기</label>')+(OFFP&&BRAND==='tid'?'<label class="chk" title="입고 예정 칸에서 오프라인(매장) 리오더 줄을 숨겨요 · 예약배송 계산은 원래 온라인 리오더만 써요"><input type="checkbox" id="rvOffEx"'+(X.offEx?' checked':'')+'> 리오더 오프라인 제외</label>':'')+
+      (anyF?'<button class="btn sm" data-act="rvClear">‹ 검색 필터 해제</button>':'')+(X.act?'':'<label class="chk"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'> 전체 상품 보기</label>')+(OFFPsrc()&&BRAND==='tid'?'<label class="chk" title="입고 예정 칸에서 오프라인(매장) 리오더 줄을 숨겨요 · 예약배송 계산은 원래 온라인 리오더만 써요"><input type="checkbox" id="rvOffEx"'+(X.offEx?' checked':'')+'> 리오더 오프라인 제외</label>':'')+
       '<label class="chk mselall"><input type="checkbox" id="rvSelAll2"> 보이는 상품 모두 선택</label><span class="note">'+nf(a.length)+'개</span></div>';
   const SEL = X.sel || (X.sel = {}); const shownB = a.slice(0, X.n).map(x=>x.p.b); const selN = Object.keys(SEL).filter(b=>SEL[b]).length;
   const allOn = shownB.length && shownB.every(b=>SEL[b]);
@@ -3570,7 +3592,7 @@ async function act(a, el){
     case 'calDay': S.calSel = (S.calSel===el.dataset.d ? null : el.dataset.d); render(); break;
     case 'pickStyle': S.find.style = el.dataset.k; render(); { const d=document.getElementById('detail'); if(d) d.scrollIntoView({block:'start'}); } break;
     case 'quickReorder': { const p = PRODS.get(el.dataset.b); S.reg.mode='re'; S.reg.ro={q:p.n||p.b, style:styleKey(p), sel:{}}; setTab('reg'); break; }
-    case 'syncPreview': { const t = (document.getElementById('syncT')||{}).value||''; S.sync.text = t; S.sync.off = {}; S.sync.rc = {}; S.sync.res = t.trim() ? roPlan(t) : null; if(!t.trim()) toast('리오더 시트 내용을 붙여넣어 주세요'); render(); break; }
+    case 'syncPreview': { const t = (document.getElementById('syncT')||{}).value||''; S.sync.text = t; S.sync.off = {}; S.sync.rc = {}; S.sync.res = t.trim() ? roPlan(t) : null; if(S.sync.res) S.sync.res.plan.forEach((x,i)=>{ if(x.auto) S.sync.rc[i] = true; if(x.type==='fac' && !x.known) S.sync.off[i] = true; }); if(!t.trim()) toast('리오더 시트 내용을 붙여넣어 주세요'); render(); break; }
     case 'plCheck': { const t = (document.getElementById('plT')||{}).value||''; if(!t.trim()){ toast('상품 목록을 붙여넣어 주세요'); break; } plRun(t, ''); break; }
     case 'stCheck': { const t = (document.getElementById('stT')||{}).value||''; if(!t.trim()){ toast('셀메이트 재고 목록을 붙여넣어 주세요'); break; } stockRun(t, ''); break; }
     case 'stApply': await stockApply(); break;
@@ -3925,6 +3947,7 @@ document.addEventListener('change', e => {
   if(t.id==='rvCat'){ S.rv.cat = t.value; render(); }
   if(t.classList && t.classList.contains('rvCatC')){ const v = t.value, c = S.rv.cats = (S.rv.cats||[]).filter(x=>x!==v); if(t.checked) c.push(v); S.rv.catOpen = true; render(); }
   if(t.id==='rvOwn'){ S.rv.own = t.value; render(); }
+  if(t.id==='syncFile' && t.files && t.files[0]){ const fr = new FileReader(); fr.onload = () => { let tx = String(fr.result||''); if(!/\t/.test(tx.split(/\r?\n/).slice(0,5).join(''))) tx = parseDelim(tx, ',').map(r=>r.map(c=>String(c).replace(/[\t\r\n]+/g,' ')).join('\t')).join('\n'); const ta = document.getElementById('syncT'); if(ta) ta.value = tx; S.sync.text = tx; const b = document.querySelector('[data-act=syncPreview]'); if(b) b.click(); }; fr.readAsText(t.files[0]); t.value = ''; return; }
   if(t.id==='rvOffEx'){ S.rv.offEx = t.checked; render(); }
   if(t.id==='rvChAllM'){ document.querySelectorAll('[data-rvch]').forEach(i=>{ i.checked = t.checked; }); }
   if(t.dataset && t.dataset.rvch && !t.checked){ const a = document.getElementById('rvChAllM'); if(a) a.checked = false; }
