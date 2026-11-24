@@ -2852,7 +2852,7 @@ function wk3Html(s){ const S1 = salesSrc(); if(!s.ws || !S1 || !S1.weeks || s.ws
   const prev = ws[ws.length-2], cur = ws[ws.length-1]; const pd = (L[ws.length-2]||{}).days||7;
   const prevN = pd<7 ? prev*7/pd : prev; const ch = prevN>0 ? Math.round((cur-prevN)/prevN*100) : (cur>0 ? null : 0);
   return '<div class="wk3">'+ws.map((v,i)=>{ const l = L[i]||{}, last = i===ws.length-1;
-    return '<div class="wkr'+(last?' now':'')+'" title="'+esc((l.f?fmtD(l.f).slice(0,5)+'~'+fmtD(l.t).slice(0,5):''))+'"><span class="wkl">'+(l.f?fmtD(l.f).slice(0,5):'')+'</span><span class="wkb"><i style="width:'+Math.max(v?6:0, Math.round(v/mx*100))+'%"></i></span><b>'+nf(v)+'</b>'+
+    return '<div class="wkr'+(last?' now':'')+'" title="'+esc((l.f?fmtD(l.f).slice(0,5)+'~'+fmtD(l.t).slice(0,5):''))+'"><span class="wkl">'+(i+1)+'주차</span><span class="wkb"><i style="width:'+Math.max(v?6:0, Math.round(v/mx*100))+'%"></i></span><b>'+nf(v)+'</b>'+
       '</div>'; }).join('')+'<small class="wkc '+(ch==null||ch>0?'up':ch<0?'dn':'')+'">'+(ch==null?'신규 판매':ch>0?'전주 대비 ▲'+ch+'%':ch<0?'전주 대비 ▼'+(-ch)+'%':'전주와 같음')+'</small></div>'; }
 function salesOffOf(b){ const x = salesOffDoc && salesOffDoc.items && salesOffDoc.items[b]; return x ? {wk:+x[0]||0} : {wk:0}; }
 function salesOffLabel(){ return salesOffDoc && salesOffDoc.items ? fmtD(salesOffDoc.from).slice(0,5)+' ~ '+fmtD(salesOffDoc.to).slice(0,5) : ''; }
