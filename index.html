@@ -1615,6 +1615,41 @@ async function saveChg(k){ if(!need('fix')) return;
 const sysFacName = p => p.sysFac ? String(p.sysFac).split('-')[0].replace(/\(.*?\)/g,'').trim() : '';
 const isNoB = b => !b || /^바코드없음/.test(b);
 const normK = x => String(x||'').toLowerCase().replace(/[^a-z0-9가-힣]/g,'');
+// ---------- 브랜드 교차 입력 방지 ----------
+// 세 브랜드의 셀메이트 바코드 번호가 서로 겹쳐서(같은 번호 = 다른 상품) 바코드만으로는 못 막음 →
+// 영문 상품명의 스타일 코드([KN…] 노운베러 · [TI…] 틸아이다이 · [FR…] 프리버)와 상품명 일치율로 판단
+const BRAND_CODE = {kb:'KN', tid:'TI', frv:'FR'}, CODE_BRAND = {KN:'kb', TI:'tid', FR:'frv'};
+function brandWarn(text){
+  if(BRAND==='all' || !text) return '';
+  const first = (text.split(/\r?\n/).slice(0,15).join('\n')); const d = first.includes('\t') ? '\t' : ',';
+  const rows = parseDelim(text.length > 3e6 ? text.slice(0, 3e6) : text, d).map(r=>r.map(x=>unwrapX(String(x||'').trim())));
+  const hi = rows.findIndex(r=>r.some(x=>/바코드/.test(x))); if(hi<0) return '';
+  const H = rows[hi].map(x=>x.replace(/\s/g,''));
+  const ib = H.findIndex(x=>/바코드/.test(x)), ie = H.findIndex(x=>x==='상품명'), iN = H.findIndex(x=>/사입상품명|제작품명/.test(x));
+  if(ie<0 && iN<0) return '';
+  const byB = new Map(); for(const p of PRODS.values()) if(p.b){ byB.set(p.b, p); for(const ob of p.origBs) byB.set(ob, p); }
+  const code = {}; let codes = 0, cmp = 0, agree = 0;
+  for(const r of rows.slice(hi+1, hi+1500)){
+    const b = normBc(r[ib]); if(!/^1-\d{10}$/.test(b)) continue;
+    const en = ie>=0 ? r[ie]||'' : '', n = iN>=0 ? r[iN]||'' : '';
+    const m = /\[(KN|TI|FR)/.exec(en); if(m){ codes++; code[m[1]] = (code[m[1]]||0)+1; }
+    const p = byB.get(b); if(!p || (!en && !n)) continue;
+    cmp++; if((n && (normK(n)===normK(p.n) || normK(n)===normK(p.en))) || (en && normK(en)===normK(p.en))) agree++;
+  }
+  const mine = code[BRAND_CODE[BRAND]]||0; const top = Object.entries(code).sort((a,b)=>b[1]-a[1])[0];
+  if(codes>=5 && top && CODE_BRAND[top[0]]!==BRAND && top[1] > mine*2)
+    return '이 데이터는 '+brandName(CODE_BRAND[top[0]])+' 상품으로 보여요 (상품명 스타일 코드 ['+top[0]+'…] '+top[1]+'개'+(mine?' · '+BRAND_CODE[BRAND]+' '+mine+'개':'')+').';
+  if(cmp>=15 && agree/cmp < 0.5)
+    return '바코드는 있지만 상품명이 지금 브랜드 상품과 '+Math.round(agree/cmp*100)+'%만 맞아요 ('+agree+' / '+cmp+'). 세 브랜드는 바코드 번호가 겹쳐서 다른 브랜드 데이터도 바코드로는 들어가 버려요.';
+  return '';
+}
+function brandOk(text){
+  const w = brandWarn(text); if(!w) return true;
+  const ok = confirm('⚠ 다른 브랜드 데이터 같아요\n\n지금 보고 있는 브랜드: '+brandName()+'\n'+w+'\n\n그래도 '+brandName()+'에 넣을까요? (취소하면 아무것도 바뀌지 않아요)');
+  if(!ok){ toast('취소했어요 · 상단에서 브랜드를 확인하세요'); return false; }
+  return true;
+}
+
 function issuesOf(p){
   const out = [];
   if(isNoB(p.b)) out.push('nob');
@@ -1700,6 +1735,7 @@ function parsePasteList(t){
   return parsePasteSimple(t);
 }
 function fixPasteRun(text, fileName){
+  if(!brandOk(text)) return;
   const X = S.fix; X.pasteOpen = true; X.pasteFile = fileName||''; X.paste = fileName ? '' : text;
   const r = parsePasteList(text);
   if(r.err){ X.pasteRes = null; X.pasteMsg = r.err; } else { X.pasteRes = matchPaste(r.rows); X.pasteMsg = (r.sellmate?'셀메이트 양식으로 ':'')+nf(r.rows.length)+'줄을 읽었습니다.'+(X.pasteRes.length?'':' 비어 있는 칸을 채울 상품을 찾지 못했습니다.'); }
@@ -2100,6 +2136,7 @@ async function plSave(){ if(!need('reg')) return;
   if(n){ toast(n+'개 반영했습니다'); S.pl = {text:'', res:null}; if(S.sm && S.sm.done) S.sm.done.reg = n; render(); }
 }
 function plRun(text, fileName){
+  if(!brandOk(text)) return;
   const r = plParse(text);
   if(r.err){ S.pl = {text, res:null, err:r.err, fileName}; render(); return; }
   const P = plPlan(r.rows);
@@ -2397,7 +2434,7 @@ function offParse(text){
   const n = Object.keys(items).length; if(!n) return {err:'바코드(1-0000000000 또는 하이픈 없는 10000000000)와 수량이 있는 줄을 찾지 못했습니다.'};
   return {items, n, notIn, changed, same, diffs};
 }
-function offRun(text, fileName){ const r = offParse(text); S.off = r.err ? {text:fileName?'':text, fileName, err:r.err} : {text:fileName?'':text, fileName, res:r}; render(); }
+function offRun(text, fileName){ if(!brandOk(text)) return; const r = offParse(text); S.off = r.err ? {text:fileName?'':text, fileName, err:r.err} : {text:fileName?'':text, fileName, res:r}; render(); }
 function regOff(){
   const X = S.off || (S.off = {}); const R = X.res;
   let h = '<div class="sec"><div class="sechead"><h2>오프라인 재고</h2><span class="sub">'+(offDoc&&offDoc.items?'지금 보드 오프라인 재고: '+esc(offAtLabel())+' 입력'+(offLive()?'':' (그 뒤에 올린 셀메이트 목록 값을 쓰는 중)'):'아직 따로 입력한 오프라인 재고가 없어요'+(BRAND==='tid'?' · 셀메이트 목록의 트랜쇼(오프라인) 칸 값을 쓰는 중':''))+'</span></div><div class="panel pad step">'+
@@ -2438,7 +2475,7 @@ function shopParse(text){
   if(!n) return {err:'매장 재고가 있는 바코드 줄을 찾지 못했어요.'};
   return {names, stores, items, n, notIn, tot, net, dpCut};
 }
-function shopRun(text, fileName){ const r = shopParse(text); S.shopIn = r.err ? {fileName, err:r.err} : {fileName, res:r}; render(); }
+function shopRun(text, fileName){ if(!brandOk(text)) return; const r = shopParse(text); S.shopIn = r.err ? {fileName, err:r.err} : {fileName, res:r}; render(); }
 function regShop(){
   const X = S.shopIn || (S.shopIn = {}); const R = X.res;
   const cur = shopDoc && shopDoc.stores ? '지금 보드: '+esc(shopDoc.file||'')+' · '+(()=>{ const d = new Date(shopDoc.at); return (d.getMonth()+1)+'.'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes()); })()+' 올림' : (shopDoc && shopDoc.items ? '지금 보드: POS 파일의 매장 재고 합계 (지점별 아님)' : '아직 올린 매장 재고가 없어요');
@@ -2466,6 +2503,7 @@ async function offApply(){ if(!need('stock')) return;
   if(ok){ S.off = {done:'바코드 '+nf(R.n)+'개'}; render(); }
 }
 function stockRun(text, fileName){
+  if(!brandOk(text)) return;
   const r = stockPlan(text);
   S.stk = r.err ? {text: fileName?'':text, fileName, err:r.err, res:null} : {text: fileName?'':text, fileName, err:'', res:r};
   render();
@@ -2767,6 +2805,7 @@ function smHeaderCheck(text){
   return SM_COLS.filter(k=>!has(k));
 }
 function smRun(text, fileName){
+  if(!brandOk(text)) return;
   const r = plParse(text);
   if(r.err){ S.sm = {text: fileName?'':text, fileName, err:r.err}; S.pl = {text:'', res:null}; S.stk = {text:'', res:null}; render(); return; }
   const P = plPlan(r.rows);
@@ -3140,7 +3179,7 @@ function rvSalesModal(){
     (X.res?'<div class="stats"><span>읽은 바코드 <b>'+nf(X.res.n)+'</b></span><span>판매 · 미발송 있는 바코드 <b>'+nf(Object.keys(X.res.items).length)+'</b></span><span>기간 <b>'+esc(fmtD(X.res.from).slice(0,5)+' ~ '+fmtD(X.res.to).slice(0,5))+'</b></span></div><div><button class="btn pri" data-act="rvsApply"'+(canDo('resv')?'':' disabled')+'>'+(off?'오프라인':'온라인')+' 판매 추이 반영</button></div>':'')+'</div>';
   openModal(h);
 }
-function rvsRun(text, fileName){ const kind = (S.rvs||{}).kind||'on'; const r = salesParse(text); S.rvs = r.err ? {kind, text:fileName?'':text, err:r.err} : {kind, text:fileName?'':text, res:r, file:fileName||'붙여넣기'}; rvSalesModal(); }
+function rvsRun(text, fileName){ if(!brandOk(text)) return; const kind = (S.rvs||{}).kind||'on'; const r = salesParse(text); S.rvs = r.err ? {kind, text:fileName?'':text, err:r.err} : {kind, text:fileName?'':text, res:r, file:fileName||'붙여넣기'}; rvSalesModal(); }
 async function rvsApply(){
   if(!need('resv')) return; const X = S.rvs; if(!X || !X.res) return;
   const off = X.kind==='off'; const at = new Date().toISOString();
@@ -3592,7 +3631,7 @@ async function act(a, el){
     case 'calDay': S.calSel = (S.calSel===el.dataset.d ? null : el.dataset.d); render(); break;
     case 'pickStyle': S.find.style = el.dataset.k; render(); { const d=document.getElementById('detail'); if(d) d.scrollIntoView({block:'start'}); } break;
     case 'quickReorder': { const p = PRODS.get(el.dataset.b); S.reg.mode='re'; S.reg.ro={q:p.n||p.b, style:styleKey(p), sel:{}}; setTab('reg'); break; }
-    case 'syncPreview': { const t = (document.getElementById('syncT')||{}).value||''; S.sync.text = t; S.sync.off = {}; S.sync.rc = {}; S.sync.res = t.trim() ? roPlan(t) : null; if(S.sync.res) S.sync.res.plan.forEach((x,i)=>{ if(x.auto) S.sync.rc[i] = true; if(x.type==='fac' && !x.known) S.sync.off[i] = true; }); if(!t.trim()) toast('리오더 시트 내용을 붙여넣어 주세요'); render(); break; }
+    case 'syncPreview': { const t = (document.getElementById('syncT')||{}).value||''; S.sync.text = t; S.sync.off = {}; S.sync.rc = {}; if(t.trim() && !brandOk(t)) break; S.sync.res = t.trim() ? roPlan(t) : null; if(S.sync.res) S.sync.res.plan.forEach((x,i)=>{ if(x.auto) S.sync.rc[i] = true; if(x.type==='fac' && !x.known) S.sync.off[i] = true; }); if(!t.trim()) toast('리오더 시트 내용을 붙여넣어 주세요'); render(); break; }
     case 'plCheck': { const t = (document.getElementById('plT')||{}).value||''; if(!t.trim()){ toast('상품 목록을 붙여넣어 주세요'); break; } plRun(t, ''); break; }
     case 'stCheck': { const t = (document.getElementById('stT')||{}).value||''; if(!t.trim()){ toast('셀메이트 재고 목록을 붙여넣어 주세요'); break; } stockRun(t, ''); break; }
     case 'stApply': await stockApply(); break;
