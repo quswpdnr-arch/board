@@ -2877,8 +2877,8 @@ const RV0 = SNAP.resv0 || {}, SL0 = SNAP.sales0 || null;
 // 입고일정이 지난 건 입고된 걸로 보고 빼요 (틸은 시트에 입고완료 · 남은 수량이 없음)
 let offroDoc = null;
 function OFFPsrc(){ if(offroDoc && offroDoc.items){ const o = {}; for(const [b,a] of Object.entries(offroDoc.items)) o[b] = (a||[]).map(e=>[e.od||'', e.eta||'', +e.q||0, e.round||'', e.note||'']); return o; } return SNAP.offPend || null; }
-const OFFP_CUT = TODAY;
-function offPendOf(p){ const OFFP = OFFPsrc(); if(!OFFP) return []; const out = []; for(const b of (p.origBs && p.origBs.size ? p.origBs : [p.b])) for(const e of (OFFP[b]||[])){ const d = e[1] || ''; if(!d || d >= OFFP_CUT) out.push({od:e[0], eta:e[1], q:+e[2]||0, round:e[3]||'', etaText:e[4]||''}); } return out.sort((a,b)=>(a.eta||a.od||'9').localeCompare(b.eta||b.od||'9')); }
+const OFFP_CUT = TODAY, OFFP_OLD = addDays(TODAY, -30); // 입고일정 없는 건 발주 한 달 지나면 입고된 걸로
+function offPendOf(p){ const OFFP = OFFPsrc(); if(!OFFP) return []; const out = []; for(const b of (p.origBs && p.origBs.size ? p.origBs : [p.b])) for(const e of (OFFP[b]||[])){ const d = e[1] || ''; if(d ? d >= OFFP_CUT : (e[0]||'') >= OFFP_OLD) out.push({od:e[0], eta:e[1], q:+e[2]||0, round:e[3]||'', etaText:e[4]||''}); } return out.sort((a,b)=>(a.eta||a.od||'9').localeCompare(b.eta||b.od||'9')); }
 const RV_ACT = {
   toResv:   {t:'예약 전환 필요', d:'재고 0 · 입고 예정 있음', c:'kc-violet'},
   delay:    {t:'일정 지연',     d:'리오더 예정일 밀림 · 지연 예상', c:'kc-red'},
