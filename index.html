@@ -1160,11 +1160,11 @@ const shopStoresOf = p => { if(!shopDoc || !shopDoc.stores || !shopDoc.names) re
   return lines.length ? '지점별 (디피 '+(shopDoc.dp||0)+'장씩 제외)\n'+lines.join('\n') : ''; };
 const whList = p => { const L = []; const ln = (t, v, c) => L.push('<div class="whl'+(c?' '+c:'')+'"><span>'+t+'</span><b>'+nf(v)+'개</b></div>');
   if(p.trans!=null){ ln('트랜쇼', p.trans); ln('본사 창고', p.hq||0, p.hq>0?'hq':''); if(p.gj!=null) ln('곤지암', p.gj); }
-  if(p.safe!=null) ln('안전재고', p.safe, 'safe');
   if(p.off!=null) ln('트랜쇼(오프라인)', p.off, 'offl');
   if(p.shop!=null){ const open = S.rv.shopOpen===p.b; const st = shopDoc && shopDoc.stores && shopDoc.names ? [p.b, ...p.origBs].map(b=>shopDoc.stores[b]).find(Boolean) : null;
     L.push('<div class="whl offl'+(st?' shopc':'')+(open?' open':'')+'"'+(st?' data-act="shopOpen" data-b="'+esc(p.b)+'" title="눌러서 지점별 수량 보기"':'')+'><span>매장 (디피 제외)'+(st?'<i>'+(open?'▴':'▾')+'</i>':'')+'</span><b>'+nf(p.shop)+'개</b></div>');
     if(open && st) L.push('<div class="shopl">'+shopDoc.names.map((n,i)=>[n, +st[i]||0]).filter(z=>z[1]>0).map(([n,q])=>'<div><span>'+esc(n)+'</span><b>'+(q>1?nf(q-1):'0')+'</b><small>'+nf(q)+'</small></div>').join('')+'<em>디피 제외 · 원래 수량</em></div>'); }
+  if(p.safe>0) ln('안정재고', p.safe, 'safe');
   return L.length ? '<div class="whls">'+L.join('')+'</div>' : ''; };
 const whTxt = p => p && p.trans!=null ? ['트랜쇼 '+nf(p.trans)].concat(p.gj!=null?['곤지암 '+nf(p.gj)]:[], ['본사 '+nf(p.hq)], p.off!=null?['오프라인 '+nf(p.off)]:[], p.shop!=null?['매장 '+nf(p.shop)]:[]).join(' · ') : (p && (p.off!=null||p.shop!=null) ? [p.off!=null?'오프라인 '+nf(p.off):'', p.shop!=null?'매장 '+nf(p.shop):''].filter(Boolean).join(' · ') : '');
 function stockCell(p){ if(!hasStock(p)) return '<span class="muted">—</span>'; return '<span class="stk2"><b>'+nf(availIn(p))+'</b> <span>/ '+nf(p.stock)+'</span>'+(p.trans!=null?'<small class="whs">'+whTxt(p)+'</small>':'')+'</span>'; }
@@ -2166,7 +2166,7 @@ function plParse(text){
   const col = (...ks) => { for(const k of ks){ const i = H.findIndex(h=>h===k); if(i>=0) return i; } for(const k of ks){ const i = H.findIndex(h=>h.startsWith(k)); if(i>=0) return i; } return -1; };
   const C = {b:col('바코드번호','바코드'), en:col('상품명'), n:col('사입상품명','제작품명'), opt:col('옵션명','옵션'), cat:col('상품분류','분류'), sup:col('공급처'), reg:col('상품등록일자','등록일'), stock:col('현재재고'), avail:col('가용재고'), sold:col('품절여부'), img:col('대표이미지주소','이미지주소')};
   const g = (r,k) => C[k]>=0 ? unwrapX(r[C[k]]) : '';
-  const iT = H.map((h,i)=>/트랜쇼/.test(h)&&!/오프라인|곤지암/.test(h)?i:-1).filter(i=>i>=0), iG = H.map((h,i)=>/곤지암/.test(h)&&!/오프라인/.test(h)?i:-1).filter(i=>i>=0), iO = H.map((h,i)=>/오프라인/.test(h)&&/창고|재고|트랜쇼/.test(h)&&!/폐기|불량/.test(h)?i:-1).filter(i=>i>=0), iH = H.map((h,i)=>/본사/.test(h)&&/창고|재고/.test(h)?i:-1).filter(i=>i>=0), iU = H.findIndex(h=>/미발송/.test(h)), iS = H.findIndex(h=>/안전\s*재고/.test(h));
+  const iT = H.map((h,i)=>/트랜쇼/.test(h)&&!/오프라인|곤지암/.test(h)?i:-1).filter(i=>i>=0), iG = H.map((h,i)=>/곤지암/.test(h)&&!/오프라인/.test(h)?i:-1).filter(i=>i>=0), iO = H.map((h,i)=>/오프라인/.test(h)&&/창고|재고|트랜쇼/.test(h)&&!/폐기|불량/.test(h)?i:-1).filter(i=>i>=0), iH = H.map((h,i)=>/본사/.test(h)&&/창고|재고/.test(h)?i:-1).filter(i=>i>=0), iU = H.findIndex(h=>/미발송/.test(h)), iS = H.findIndex(h=>/안[전정]\s*재고/.test(h));
   const num = v => parseInt(String(unwrapX(v)||'0').replace(/[^\d-]/g,''),10) || 0;
   const out = []; const seen = new Set(); let dupIn = 0;
   for(const r of rows.slice(hi+1)){
@@ -3151,9 +3151,10 @@ function rvCalc(p){
   const known = hasStock(p);
   const wh = p.trans!=null;
   const gj = wh ? (p.gj||0) : 0;
-  const rest = known ? (wh ? p.trans + (p.hq||0) + gj - (p.unsent||0) : (Number(p.avail)||0)) : null;   // 가용 = 트랜쇼 + 본사 + 곤지암 − 미발송
-  const threst = known && wh ? p.trans + (p.hq||0) - (p.unsent||0) : null;   // 트랜쇼 + 본사 (곤지암 빼고)
-  const shipNow = known && wh ? p.trans + gj - (p.unsent||0) : null;   // 바로 출고 (본사는 검수 후)
+  const safe = wh ? Math.max(0, +p.safe||0) : 0;   // 안정재고: 가용에서 빼고 남겨둠
+  const rest = known ? (wh ? p.trans + (p.hq||0) + gj - (p.unsent||0) - safe : (Number(p.avail)||0)) : null;   // 가용 = 트랜쇼 + 본사 + 곤지암 − 미발송 − 안정재고
+  const threst = known && wh ? p.trans + (p.hq||0) - (p.unsent||0) - safe : null;   // 트랜쇼 + 본사 (곤지암 빼고)
+  const shipNow = known && wh ? p.trans + gj - (p.unsent||0) - safe : null;   // 바로 출고 (본사는 검수 후)
   const live = r.rounds.filter(x=>!x.done);
   const rq = live.reduce((t,x)=>t+(+x.q||0),0);
   const total = (rest||0) + rq;
@@ -3281,7 +3282,7 @@ function viewResv(){
       '<td class="rvacts">'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d+(k==='rt'?' · 오프라인 재고 '+x.offStk+'개 중 주간 판매 '+x.so.wk+'개 (소진율 '+Math.round(x.offRate*100)+'%) · 가져올 수 있는 수량 약 '+x.rtQty+'개':k==='rtOut'?' · 매장 주간 판매 '+x.so.wk+'개 · 매장 재고 '+x.offStk+'개 · 보낼 수량 약 '+x.rtOutQty+'개 (온라인엔 2주 판매분 남김)':k==='reorder'?' · 주간 판매 '+x.s.wk+'장 · 가용+예약 '+((x.rest||0)+x.rq)+'장 · 4주 판매분 기준 약 '+x.reQty+'장 리오더 제안':''))+'">'+RV_ACT[k].t+(k==='rt'?' <small>'+nf(x.rtQty)+'</small>':k==='rtOut'?' <small>'+nf(x.rtOutQty)+'</small>':'')+'</span>').join('')+(x.lvl?'<span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
       '<td class="ctr">'+(x.s.unsent?'<b>'+nf(x.s.unsent)+'</b>':'<span class="muted">0</span>')+'</td>'+
       '<td class="rvsales">'+(()=>{ const w = wk3Html(x.s); return salesOffDoc&&salesOffDoc.items ? '<div class="whl"><span>온라인'+(w?' <small class="muted">('+(x.s.ws?x.s.ws.length:1)+'주)</small>':' <small class="muted">(1주)</small>')+'</span>'+(w?'':'<b>'+nf(x.s.wk)+'</b>')+'</div>'+w+'<div class="whl"><span>오프라인 <small class="muted">(1주)</small></span><b>'+nf(x.so.wk)+'</b></div>' : (w || (x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')); })()+'</td>'+
-      '<td class="rvstk">'+(x.known?'<div class="sk">'+(x.rq>0?'<div class="skl rv'+(x.ravail<=0?' bad':'')+'" title="실제 보관 가용 + 예약 차수 수량'+(S.rv.offEx&&x.offQ?' − 오프라인 리오더':'')+'"><span>예약 포함 가용</span><b>'+nf(x.ravail)+'</b></div>':'')+'<div class="skl'+(x.rest<=0?' bad':'')+'" title="트랜쇼 + 본사 창고 + 곤지암 − 미발송 (오프라인 · 매장 재고 제외)"><span>실제 보관 가용</span><b>'+nf(x.rest)+'</b></div></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
+      '<td class="rvstk">'+(x.known?'<div class="sk">'+(x.rq>0?'<div class="skl rv'+(x.ravail<=0?' bad':'')+'" title="실제 보관 가용 + 예약 차수 수량'+(S.rv.offEx&&x.offQ?' − 오프라인 리오더':'')+'"><span>예약 포함 가용</span><b>'+nf(x.ravail)+'</b></div>':'')+'<div class="skl'+(x.rest<=0?' bad':'')+'" title="트랜쇼 + 본사 창고 + 곤지암 − 미발송 − 안정재고 (오프라인 · 매장 재고 제외)"><span>실제 보관 가용</span><b>'+nf(x.rest)+'</b></div></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
       '<td class="rveta">'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+etaList(x)+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':'')+'</td>'+
       '<td class="rvrd'+(lock?'':' ed')+'"'+(lock?'':' data-act="rvEdit" data-b="'+esc(p.b)+'" title="눌러서 예약 차수 수정"')+'>'+(x.live.length ? x.live.map((o,i)=>{ const k = r.rounds.indexOf(o)+1, q = +o.q||0, left = q&&x.known ? Math.max(0, x.rleft[i]) : null, pct = q&&left!=null ? Math.round((q-left)/q*100) : 0, bad = x.shipFrom&&o.d&&o.d<x.shipFrom;
           return '<div class="rr'+(i===0?' cur':'')+(bad?' bad':'')+(left===0?' out':'')+'" title="'+esc(k+'차 · 출고 '+(o.d?fmtD(o.d):'날짜 없음')+(q?' · 예약 '+q+'장'+(left!=null?' · 팔림 '+(q-left)+'장 ('+pct+'%) · 남은 '+left+'장':''):'')+(bad?' · 출고 가능일('+fmtD(x.shipFrom).slice(0,5)+')보다 빨라요':''))+'"><div class="rrh"><em>'+k+'차</em><span>'+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+'</span>'+(q?'<span class="dot">·</span><b>'+nf(q)+'</b>':'')+'</div>'+(left!=null?'<div class="rrb2"><div class="rrb"><i style="width:'+pct+'%"></i></div><small class="rp'+(left===0?' out':'')+'">'+(left===0?'소진':pct+'% 판매')+'</small></div>':'')+'</div>'; }).join('')+(r.rounds.some(o=>o.done)?'<small class="rrdone">마감 '+r.rounds.filter(o=>o.done).length+'차</small>':'') : (lock?'':'<span class="addr">+ 차수</span>'))+'</td>'+
