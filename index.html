@@ -3161,9 +3161,11 @@ function rvCalc(p){
   const wh = p.trans!=null;
   const gj = wh ? (p.gj||0) : 0;
   const safe = wh ? Math.max(0, +p.safe||0) : 0;   // 안정재고: 가용에서 빼고 남겨둠
-  const rest = known ? (wh ? p.trans + (p.hq||0) + gj - (p.unsent||0) - safe : (Number(p.avail)||0)) : null;   // 가용 = 트랜쇼 + 본사 + 곤지암 − 미발송 − 안정재고
-  const threst = known && wh ? p.trans + (p.hq||0) - (p.unsent||0) - safe : null;   // 트랜쇼 + 본사 (곤지암 빼고)
-  const shipNow = known && wh ? p.trans + gj - (p.unsent||0) - safe : null;   // 바로 출고 (본사는 검수 후)
+  const SS1 = salesSrc(), sHas = !!(SS1 && SS1.items && SS1.items[p.b]);
+  const un = wh ? ((sHas && SS1===salesDoc && salesDoc.at && (!stockDoc || !stockDoc.at || String(salesDoc.at) > String(stockDoc.at))) ? (s.unsent||0) : (p.unsent||0)) : (s.unsent||0);   // 미발송: 재고 파일 · 판매 파일 중 나중에 올린 쪽 숫자 하나로 통일 (칸 표시도 같은 값)
+  const rest = known ? (wh ? p.trans + (p.hq||0) + gj - un - safe : (Number(p.avail)||0)) : null;   // 가용 = 트랜쇼 + 본사 + 곤지암 − 미발송 − 안정재고
+  const threst = known && wh ? p.trans + (p.hq||0) - un - safe : null;   // 트랜쇼 + 본사 (곤지암 빼고)
+  const shipNow = known && wh ? p.trans + gj - un - safe : null;   // 바로 출고 (본사는 검수 후)
   const live = r.rounds.filter(x=>!x.done);
   const rq = live.reduce((t,x)=>t+(+x.q||0),0);
   const total = (rest||0) + rq;
@@ -3217,7 +3219,7 @@ function rvCalc(p){
   // 리오더 제안: 잘 팔리는데(주 5장 이상) 입고 예정이 없고, 가용 + 예약 차수로 2주를 못 버팀
   const reQty = s.wk>=5 ? Math.max(0, Math.ceil(s.wk*4) - Math.max(0, (rest||0) + rq)) : 0;
   if(st!=='단종' && st!=='단종(예정)' && !saleOff(r) && known && s.wk>=5 && incOn===0 && (rest||0) + rq < s.wk*2 && reQty>0) acts.push('reorder');
-  return {p, r, s, so, offP, offQ, offStk, reQty, offRate, rtQty, rtOutQty, st, auto, opens, inc, next, known, rest, rq, ravail, rleft, total, lvl, acts, shipFrom, live, wh, cat:rvCatOf(p), delay, pushDays, lateO};
+  return {p, r, s, un, so, offP, offQ, offStk, reQty, offRate, rtQty, rtOutQty, st, auto, opens, inc, next, known, rest, rq, ravail, rleft, total, lvl, acts, shipFrom, live, wh, cat:rvCatOf(p), delay, pushDays, lateO};
 }
 function rvRows(){
   const out = [];
@@ -3244,7 +3246,7 @@ function viewResv(){
     const stO = {'일반배송':0,'예약배송':1,'임시예약배송':2,'단종(예정)':3,'품절':4,'단종':5,'':6};
     const key = {
       prod: x=>(x.p.n||x.p.en||'')+' '+x.p.opt, st: x=>stO[x.st||'']??5, act: x=>x.acts.length*10+(x.lvl==='긴급'?2:x.lvl==='주의'?1:0),
-      un: x=>x.s.unsent||0, wk: x=>x.s.wk, stock: x=>x.known?x.rest:-1e9, eta: x=>x.next?(x.next.eta||'9999'):'99999', round: x=>x.live.length?(x.live[0].d||'9999'):'99999',
+      un: x=>x.un||0, wk: x=>x.s.wk, stock: x=>x.known?x.rest:-1e9, eta: x=>x.next?(x.next.eta||'9999'):'99999', round: x=>x.live.length?(x.live[0].d||'9999'):'99999',
       ch: x=>chList().filter(c=>chOn(x.r,c)).length, memo: x=>(x.r.cmt||'')+(x.r.memo||'')}[X.sk];
     if(key) a = a.slice().sort((x,y)=>{ const u = key(x), v = key(y); return (typeof u==='number' ? u-v : String(u).localeCompare(String(v),'ko')) * X.sd; });
   }
@@ -3289,7 +3291,7 @@ function viewResv(){
     h += '<tr class="'+(x.acts.length?'rvneed':'')+(x.delay?' rvdelay':'')+(SEL[p.b]?' rvsel-on':'')+'"><td class="ck"><input type="checkbox" data-rvselb="'+esc(p.b)+'"'+(SEL[p.b]?' checked':'')+' aria-label="선택"></td><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(p.key)+'">'+esc(p.n||p.en)+'</a>'+(p.n&&p.en?'<small class="pen" title="'+esc(p.en)+'">'+esc(p.en)+'</small>':'')+'<small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+flink(p.curFac)+'</small><select class="catsel" data-rvcat="'+esc(normK(p.n||p.b))+'" title="분류 (담당 분담)"'+(lock?' disabled':'')+'>'+CATS.map(c=>'<option'+(c===x.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="__new">+ 분류 관리…</option></select></div></div></td>'+
       '<td><select class="rvsel st-'+(x.st==='예약배송'?'open':x.st==='임시예약배송'?'soon':x.st==='단종(예정)'?'over':x.st==='품절'?'late':x.st==='단종'?'none':'done')+'" data-rvst="'+esc(p.b)+'"'+(lock?' disabled':'')+'>'+RV_ST.map(s=>'<option'+(s===x.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+'</td>'+
       '<td class="rvacts">'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d+(k==='rt'?' · 오프라인 재고 '+x.offStk+'개 중 주간 판매 '+x.so.wk+'개 (소진율 '+Math.round(x.offRate*100)+'%) · 가져올 수 있는 수량 약 '+x.rtQty+'개':k==='rtOut'?' · 매장 주간 판매 '+x.so.wk+'개 · 매장 재고 '+x.offStk+'개 · 보낼 수량 약 '+x.rtOutQty+'개 (온라인엔 2주 판매분 남김)':k==='reorder'?' · 주간 판매 '+x.s.wk+'장 · 가용+예약 '+((x.rest||0)+x.rq)+'장 · 4주 판매분 기준 약 '+x.reQty+'장 리오더 제안':''))+'">'+RV_ACT[k].t+(k==='rt'?' <small>'+nf(x.rtQty)+'</small>':k==='rtOut'?' <small>'+nf(x.rtOutQty)+'</small>':'')+'</span>').join('')+(x.lvl?'<span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
-      '<td class="ctr">'+(x.s.unsent?'<b>'+nf(x.s.unsent)+'</b>':'<span class="muted">0</span>')+'</td>'+
+      '<td class="ctr">'+(x.un?'<b>'+nf(x.un)+'</b>':'<span class="muted">0</span>')+'</td>'+
       '<td class="rvsales">'+(()=>{ const w = wk3Html(x.s); return salesOffDoc&&salesOffDoc.items ? '<div class="whl"><span>온라인'+(w?' <small class="muted">('+(x.s.ws?x.s.ws.length:1)+'주)</small>':' <small class="muted">(1주)</small>')+'</span>'+(w?'':'<b>'+nf(x.s.wk)+'</b>')+'</div>'+w+'<div class="whl"><span>오프라인 <small class="muted">(1주)</small></span><b>'+nf(x.so.wk)+'</b></div>' : (w || (x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')); })()+'</td>'+
       '<td class="rvstk">'+(x.known?'<div class="sk">'+(x.rq>0?'<div class="skl rv'+(x.ravail<=0?' bad':'')+'" title="실제 보관 가용 + 예약 차수 수량'+'"><span>예약 포함 가용</span><b>'+nf(x.ravail)+'</b></div>':'')+'<div class="skl'+(x.rest<=0?' bad':'')+'" title="트랜쇼 + 본사 창고 + 곤지암 − 미발송 − 안정재고 (오프라인 · 매장 재고 제외)"><span>실제 보관 가용</span><b>'+nf(x.rest)+'</b></div></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
       '<td class="rveta">'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+etaList(x)+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':'')+'</td>'+
@@ -3310,7 +3312,7 @@ function rvModal(b, preset){
   if(preset==='resv' && !rounds.some(o=>!o.done)) rounds.push(rvSuggest(p, 0));
   S.rvEdit = {b, rounds, st: preset==='resv' ? '예약배송' : (S.rvEdit && S.rvEdit.b===b ? S.rvEdit.st : x.st)};
   let h = '<div class="mh">'+thumb(p,'l')+'<div><h2>'+esc(p.n||p.en)+'</h2><div class="muted" style="font-size:12.5px">'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+esc(p.curFac)+'</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
-    '<dl class="kv"><dt>주간 판매</dt><dd>'+nf(x.s.wk)+'장 <span class="muted">('+esc(salesLabel())+(x.s.unsent?' · 미발송 '+nf(x.s.unsent):'')+')</span></dd><dt>재고</dt><dd>'+(x.known?'출고 가능 <b>'+nf(x.rest)+'</b> / 실 보유 '+nf(p.stock)+(x.wh?' <span class="muted">('+whTxt(p)+(p.unsent?' · 미발송 '+nf(p.unsent):'')+')</span>':''):'—')+'</dd>'+
+    '<dl class="kv"><dt>주간 판매</dt><dd>'+nf(x.s.wk)+'장 <span class="muted">('+esc(salesLabel())+(x.un?' · 미발송 '+nf(x.un):'')+')</span></dd><dt>재고</dt><dd>'+(x.known?'출고 가능 <b>'+nf(x.rest)+'</b> / 실 보유 '+nf(p.stock)+(x.wh?' <span class="muted">('+whTxt(p)+(p.unsent?' · 미발송 '+nf(p.unsent):'')+')</span>':''):'—')+'</dd>'+
     '<dt>입고 예정</dt><dd>'+(x.opens.length?x.opens.map(o=>esc(o.round)+' '+(o.eta?fmtD(o.eta).slice(0,5)+(o.etaKind==='fixed'?' 확정':' 예상'):'미정')+' · '+nf(o.remain)+'장').join('<br>'):'없음')+'</dd></dl>'+
     '<div class="panel pad step"><div class="formgrid"><label class="f">노출 상태<select id="rv_st">'+RV_ST.map(s=>'<option'+(s===S.rvEdit.st?' selected':'')+'>'+s+'</option>').join('')+'</select></label><label class="f">판매 상태<input id="rv_sale" value="'+esc(r.sale||'')+'" placeholder="판매중"></label></div>'+
     '<h3 style="margin:6px 0 0">예약 차수</h3><p class="note" style="margin:0">한 차수 수량이 다 팔리면 <b>차수 마감</b>을 체크하고 <b>+ 차수 추가</b>를 누르세요. 다음 입고 오더 기준으로 출고일(입고 + 검수 '+QC_DAYS+'영업일) · 수량이 채워집니다.</p>'+(x.next?'<p class="note" style="margin:0">추천 출고일 = 입고 예정일 + 검수 '+QC_DAYS+'영업일 · 다음 입고 '+(x.next.eta?fmtDY(x.next.eta):'미정')+' · '+nf(x.next.remain)+'장 → 출고 가능 '+(x.shipFrom?fmtDY(x.shipFrom):'미정')+' <button class="btn sm" data-act="rvAddNext" data-b="'+esc(b)+'">다음 입고로 차수 추가</button></p>':'<p class="note" style="margin:0">입고 예정 오더가 없어요. 임시로 예약배송을 열면 예상 리드타임('+leadInfo(p,p.curFac).d+'일) + 검수로 출고일을 추천합니다. <button class="btn sm" data-act="rvAddNext" data-b="'+esc(b)+'">임시 차수 추가</button></p>')+
