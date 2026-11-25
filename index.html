@@ -439,6 +439,14 @@ a.rvinc{cursor:pointer;color:inherit;text-decoration:none;white-space:nowrap}a.r
 .btn.danger{color:var(--bad);border-color:var(--bad)}
 .rt .lock{font-style:normal;font-size:11px;margin-left:6px;opacity:.7}
 .smsec{margin-top:14px}
+.updsw{margin-left:auto;position:relative;display:flex;align-items:center}.updsw:empty{display:none}.updsw + .acct{margin-left:0}
+.updbtn{appearance:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font:inherit;font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px;cursor:pointer;white-space:nowrap}.updbtn:hover,.updbtn.on{color:var(--fg)}
+.updbtn .dot{width:7px;height:7px;border-radius:50%;background:#16a34a;flex:none}.updbtn.old .dot{background:var(--bad)}.updbtn em{font-style:normal;font-size:10.5px;color:#fff;background:var(--bad);border-radius:999px;padding:0 5px;line-height:1.5}
+.updpop{position:absolute;right:0;top:calc(100% + 6px);z-index:45;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.16);padding:8px;width:min(340px,calc(100vw - 24px));display:grid;gap:2px}
+.updpop .uh{font-size:12.5px;font-weight:700;padding:4px 8px 6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}.updpop .uh small{font-weight:400;font-size:11px;color:var(--muted)}
+.updpop .ur{appearance:none;border:0;background:none;font:inherit;color:inherit;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,64px);gap:10px;align-items:center;text-align:left;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:12.5px}.updpop .ur:hover{background:var(--bg)}
+.updpop .ur .ut{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.updpop .ur b{font-weight:600;font-variant-numeric:tabular-nums}.updpop .ur .uw{color:var(--muted);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.updpop .ur.old b{color:var(--bad)}
+.updch{display:grid;gap:8px;margin-top:12px}.upc{appearance:none;border:1px solid var(--line);background:var(--panel);color:inherit;font:inherit;text-align:left;border-radius:10px;padding:12px 14px;cursor:pointer;display:grid;gap:3px}.upc:hover{border-color:var(--accent)}.upc b{font-size:14px}.upc small{color:var(--muted);font-size:12px}.upc span{font-size:11.5px;color:var(--muted)}.upc span.old{color:var(--bad)}
 .acct{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}.acct:empty{display:none}
 .cfield{display:inline-flex;align-items:center;gap:5px;margin-left:10px;color:var(--muted)}
 .csel{font-size:12px;padding:2px 22px 2px 7px;min-height:0;height:auto;width:auto;border-radius:6px}
@@ -560,7 +568,7 @@ a.rvinc{cursor:pointer;color:inherit;text-decoration:none;white-space:nowrap}a.r
 .acctpop input{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
 .acctpop .row{display:flex;gap:6px}.acctpop .row .btn{flex:1}
 .hrow{position:relative}
-@media (max-width:640px){ .acctbtn .an,.acctbtn .ar{display:none}.acctbtn{padding:3px} .acctpop{right:8px} .pname small.pen{max-width:none} }
+@media (max-width:640px){ .updbtn{padding:4px 8px;font-size:11.5px} .acctbtn .an,.acctbtn .ar{display:none}.acctbtn{padding:3px} .acctpop{right:8px} .pname small.pen{max-width:none} }
 
 .rvtbl tr.rvdelay td{background:color-mix(in srgb, var(--bad) 6%, transparent)}
 .rvtbl tr.rvdelay td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
@@ -737,6 +745,7 @@ table.mcard tr.shrow{display:none}
     <div class="hrow">
       <div class="brand" data-act="goHome" role="link" tabindex="0" title="대시보드로">노운베러 오더·입고 보드<span class="logo" role="img" aria-label="KNOWN BETTER"></span></div>
       <div id="brandSw" class="brandsw" role="tablist" aria-label="브랜드"></div>
+      <div id="updSw" class="updsw"></div>
       <div id="acct" class="acct"></div>
     </div>
     <nav class="tabs" role="tablist" id="tabs">
@@ -1103,14 +1112,41 @@ function etaList(x){
 }
 // 데이터마다 마지막 업데이트 시각 · 담당자 (예약배송 제목 옆에 작게) · 하루 넘게 안 바뀐 건 날짜를 빨갛게
 let updDoc = null;
+function updList(){
+  const U = []; const add = (t, d, go) => { if(d && d.at) U.push({t, at:d.at, by:d.by, go}); };
+  add('재고 (셀메이트)', stockDoc, 'sm'); add('온라인 판매 추이', salesDoc, 'rvs:on');
+  if(salesOffDoc) add('오프라인 판매 추이', salesOffDoc, 'rvs:off');
+  if(offDoc) add('오프라인 재고', offDoc, 'off');
+  if(shopDoc) add('매장 재고', shopDoc, 'shop');
+  add('리오더', (updDoc&&updDoc.ro) || (BRAND==='tid'?offroDoc:null), 'sync');
+  return U;
+}
+// 헤더 오른쪽 작은 '데이터' 버튼 · 누르면 데이터별 마지막 업데이트 시각 · 담당자 (모든 화면 공통)
+const updFmt = at => { const d = new Date(at); return (d.getMonth()+1)+'.'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes()); };
+const updOld = at => (Date.now()-new Date(at)) > 36*3600e3;
+function paintUpd(){
+  const el = document.getElementById('updSw'); if(!el) return;
+  const U = (BRAND==='all' || !DB) ? [] : updList();
+  if(!U.length){ el.innerHTML = ''; return; }
+  const ids = U.map(u=>u.by).filter(Boolean); if(ids.some(id=>!nameCache[id])) resolveNames(ids);
+  const old = U.filter(u=>updOld(u.at)).length;
+  el.innerHTML = '<button class="updbtn'+(old?' old':'')+(S.updPop?' on':'')+'" data-act="updPop" aria-expanded="'+(!!S.updPop)+'" title="데이터 업데이트 현황"><i class="dot"></i><span>데이터 업데이트</span>'+(old?'<em>'+old+'</em>':'')+'</button>'+
+    (S.updPop ? '<div class="updpop" role="dialog" aria-label="데이터 업데이트 현황"><div class="uh">데이터 업데이트 <small>하루 넘게 안 바뀐 건 빨간색</small></div>'+U.map(u=>'<button class="ur'+(updOld(u.at)?' old':'')+'" data-act="updGo" data-go="'+u.go+'" title="눌러서 업데이트하러 가기"><span class="ut">'+u.t+'</span><b>'+updFmt(u.at)+'</b><span class="uw">'+(u.by?esc(who(u.by)):'')+'</span></button>').join('')+'</div>' : '');
+}
+function updGo(go){
+  S.updPop = false; closeModal();
+  if(go.startsWith('rvs:')){ S.rvs = {kind:go.slice(4)}; rvSalesModal(); paintUpd(); return; }
+  S.reg.mode = go; setTab('reg');
+}
+function stockUpdModal(){
+  const L = [['sm','온라인 재고 (셀메이트 목록)','창고별 재고 · 미발송 · 안정재고 · 신규 상품', stockDoc], ['off','오프라인 재고','매장(오프라인) 재고 바코드 · 수량', offDoc]];
+  if(BRAND==='tid') L.push(['shop','매장 재고 (지점별)','지점별 매장 재고 파일 (지점마다 디피 1장 제외)', shopDoc]);
+  const ids = L.map(x=>x[3]&&x[3].by).filter(Boolean); if(ids.some(id=>!nameCache[id])) resolveNames(ids);
+  openModal('<div class="mh"><div><h2>재고 업데이트</h2><div class="muted" style="font-size:12.5px">어떤 재고를 올릴지 고르세요</div></div><button class="btn sm x" data-act="close">닫기</button></div><div class="updch">'+
+    L.map(x=>'<button class="upc" data-act="updGo" data-go="'+x[0]+'"><b>'+x[1]+'</b><small>'+x[2]+'</small><span class="'+(x[3]&&x[3].at&&updOld(x[3].at)?'old':'')+'">'+(x[3]&&x[3].at ? '마지막 '+updFmt(x[3].at)+(x[3].by?' · '+esc(who(x[3].by)):'') : '아직 없음')+'</span></button>').join('')+'</div>');
+}
 function updLine(){
-  const U = []; const add = (t, d) => { if(d && d.at) U.push({t, at:d.at, by:d.by}); };
-  add('재고', stockDoc); add('온라인 추이', salesDoc);
-  if(salesOffDoc) add('오프라인 추이', salesOffDoc);
-  if(offDoc) add('오프라인 재고', offDoc);
-  if(shopDoc) add('매장 재고', shopDoc);
-  add('예약 입력', updDoc&&updDoc.rv);
-  add('리오더', (updDoc&&updDoc.ro) || (BRAND==='tid'?offroDoc:null));
+  const U = updList();
   if(!U.length) return '';
   const ids = U.map(u=>u.by).filter(Boolean); if(ids.some(id=>!nameCache[id])) resolveNames(ids);
   return '<span class="updl" title="데이터별 마지막 업데이트 · 담당자">'+U.map(u=>{ const d = new Date(u.at); const old = (Date.now()-d) > 36*3600e3;
@@ -2281,7 +2317,6 @@ const REG_MENU = [
     {k:'off', t:'오프라인 재고', d:'매장(오프라인) 재고를 바코드 · 수량으로 따로 입력', perm:['stock']},
     {k:'shop', t:'매장 재고 (지점별)', d:'지점별 매장 재고 파일 올리기 (지점마다 디피 1장 제외)', perm:['stock'], brand:'tid'},
     {k:'new', t:'직접 입력', d:'상품 정보와 컬러별 바코드 · 초두 수량 입력', perm:['reg']}]},
-  {k:'rvimp', t:'예약배송 일괄 입력', d:'담당자 · 카테고리 · 예약 차수 · 판매상태 엑셀', perm:['resv'], subs:[{k:'rvimp', t:'예약배송 일괄 입력', d:'담당자가 모은 예약배송 양식(엑셀을 복사해 붙여넣기 · CSV)으로 예약 차수 · 판매상태 · 분류 담당자를 한 번에'}]},
   {k:'log', t:'변경 이력', d:'누가 언제 무엇을 바꿨는지', subs:[{k:'log', t:'변경 이력', d:''}]},
   {k:'team', t:'팀원 · 권한', d:'관리자 전용', admin:true, subs:[{k:'team', t:'팀원 · 권한', d:''}]}
 ];
@@ -3263,8 +3298,8 @@ function viewResv(){
   const sth = (k, label, cls, sub) => '<th class="sortable'+(cls?' '+cls:'')+(X.sk===k?' sorted':'')+'" data-act="rvSort" data-k="'+k+'" title="눌러서 정렬 (오름차순 → 내림차순 → 기본)">'+label+'<span class="sarr">'+(X.sk===k?(X.sd===1?'▲':'▼'):'↕')+'</span>'+(sub||'')+'</th>';
   const anyF = X.q || X.st || X.fac || X.cat || (X.cats&&X.cats.length) || X.own || X.act;
   const card = (k,t,n,c,d) => '<button class="rvcard'+(X.act===k?' on':'')+'" data-act="rvAct" data-k="'+k+'" title="'+esc(t+' · '+d)+'"><span class="chip '+c+'">'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
-  let h = '<div class="sec"><div class="sechead"><h2>예약배송</h2>'+updLine()+
-    '<span class="right"><button class="btn sm" data-act="rvSales">판매 추이 업데이트</button> <button class="btn sm" data-act="catMng">분류 · 담당자</button> <button class="btn sm" data-act="chMng">판매 채널</button></span></div>'+
+  let h = '<div class="sec"><div class="sechead"><h2>예약배송</h2>'+
+    '<span class="right"><button class="btn sm" data-act="stockUpd">재고 업데이트</button> <button class="btn sm" data-act="rvSales">판매 추이 업데이트</button> <button class="btn sm" data-act="roUpd">리오더 업데이트</button> <button class="btn sm" data-act="catMng">분류 · 담당자</button> <button class="btn sm" data-act="chMng">판매 채널</button></span></div>'+
     '<div class="rvcards">'+
       Object.entries(RV_ACT).map(([k,v])=>card(k, v.t, cnt[k], v.c, v.d)).join('')+
       card('lvl','재고 부족', urg+warn, 'kc-brown', '긴급 '+urg+' · 주의 '+warn)+
@@ -3775,6 +3810,10 @@ async function act(a, el){
     case 'rvSave': await rvSave(el.dataset.b); break;
     case 'rvCh': { const r = rvOf(el.dataset.b); const ch = Object.assign({}, r.ch||{}); ch[el.dataset.c] = !chOn(r, el.dataset.c); await rvQuick(el.dataset.b, {ch}, el.dataset.c+(ch[el.dataset.c]?' 반영 완료':' 반영 해제')); break; }
     case 'rvSales': rvSalesModal(); break;
+    case 'stockUpd': stockUpdModal(); break;
+    case 'roUpd': updGo('sync'); break;
+    case 'updPop': S.updPop = !S.updPop; paintUpd(); break;
+    case 'updGo': updGo(el.dataset.go); break;
     case 'chMng': S.chEdit = null; S.chMode = null; chModal(); break;
     case 'chAdd': { document.querySelectorAll('[data-chmode]').forEach(s=>{ S.chMode[s.dataset.chmode] = s.value; }); const v = val('chNew'); if(v && !S.chEdit.includes(v)){ S.chEdit.push(v); if(!S.chMode[v]) S.chMode[v] = 'full'; } chModal(); break; }
     case 'chDel': S.chEdit.splice(+el.dataset.i, 1); chModal(); break;
@@ -4049,7 +4088,7 @@ function render(){
   document.getElementById('foot').innerHTML = '<span>시트 기준 '+esc(SNAP.asof)+'</span>'+(stockAtFull()?'<span>재고 반영 '+esc(stockAtFull())+'</span>':'')+'<span>개발자 변제욱</span>'+(dbState==='err'?'<span style="color:var(--bad)">저장소 연결 오류 · 새로고침 해주세요</span>':'');
   const app = document.getElementById('app');
   const ae = document.activeElement; const fid = ae && ae.id; const pos = fid && ae.selectionStart;
-  brandHeader();
+  brandHeader(); paintUpd();
   document.body.classList.toggle('mode-all', BRAND==='all');
   document.body.classList.toggle('mode-ext', isExt());
   if(isExt() && S.tab!=='sched'){ S.tab = 'sched'; }
@@ -4115,6 +4154,7 @@ function themeSync(){ const d = document.documentElement.getAttribute('data-them
 document.getElementById('themeBtn').addEventListener('click', ()=>{ const n = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', n); try{ localStorage.setItem('kb_theme', n); }catch(e){} themeSync(); });
 themeSync();
 document.addEventListener('click', e => {
+  if(S.updPop && !e.target.closest('#updSw')){ S.updPop = false; paintUpd(); }
   { const sm = e.target.closest('.mcat>summary'); if(sm) S.rv.catOpen = !sm.parentNode.open; else if(S.rv.catOpen && !e.target.closest('.mcat')){ S.rv.catOpen = false; const d = document.querySelector('details.mcat[open]'); if(d) d.open = false; } }
   const el = e.target.closest('[data-act]'); if(!el) return;
   if(el.dataset.act==='bg'){ if(e.target===el && downOnBg) closeModal(); return; }
