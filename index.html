@@ -3156,7 +3156,7 @@ function rvCalc(p){
   const opens = p.orders.filter(isOpen).sort((a,b)=>(a.eta||'9').localeCompare(b.eta||'9'));
   const offP = offPendOf(p), offQ = offP.reduce((t,e)=>t+e.q,0);
   const offOn = offQ>0 && !S.rv.offEx;   // 틸: 오프라인 리오더도 입고 예정에 포함 (제외 체크하면 뺌)
-  const inc = opens.reduce((t,o)=>t+o.remain,0) + (offOn ? offQ : 0), next = opens[0] || null;
+  const incOn = opens.reduce((t,o)=>t+o.remain,0), inc = incOn + (offOn ? offQ : 0), next = opens[0] || null;   // 예약배송 판단은 항상 온라인(incOn)만 · 토글은 입고 예정 표시에만
   const known = hasStock(p);
   const wh = p.trans!=null;
   const gj = wh ? (p.gj||0) : 0;
@@ -3171,22 +3171,22 @@ function rvCalc(p){
   // 노출 상태가 비어 있으면 자동 배치: 재고 있음 → 일반배송 · 재고 없고 입고 예정 → 예약배송 · 둘 다 없음 → 품절
   const auto = !r.st;
   if(!r.sale && (!known || rest>0 || (+p.stock||0)>0)) r.sale = '판매중';   // 판매 상태가 비어 있고 재고가 있으면 판매중
-  const st = r.st || ((known && (rest>0 || (+p.stock||0)>0)) || !known ? '일반배송' : inc>0 ? '예약배송' : '품절');
+  const st = r.st || ((known && (rest>0 || (+p.stock||0)>0)) || !known ? '일반배송' : incOn>0 ? '예약배송' : '품절');
   let lvl = '';
   if(s.wk>0 && st!=='단종' && st!=='단종(예정)'){ if(total < s.wk*0.3) lvl = '긴급'; else if(total < s.wk*0.6) lvl = '주의'; }
   const acts = [];
   const shipFrom = next && next.eta ? bizAdd(next.eta > TODAY ? next.eta : TODAY, QC_DAYS) : '';
   if(st==='단종(예정)' && known && rest<=0 && !(wh && (p.hq||0)>0)) acts.push('toEnd');
   if(st!=='단종' && st!=='단종(예정)' && !saleOff(r)){
-    if((ast==='일반배송' || !ast) && known && rest<=0 && inc>0) acts.push('toResv');
+    if((ast==='일반배송' || !ast) && known && rest<=0 && incOn>0) acts.push('toResv');
     if(isResvSt(ast)){
-      if(!live.length && inc>0) acts.push('noRound');
+      if(!live.length && incOn>0) acts.push('noRound');
       if(shipFrom && live.some(x=>x.d && x.d < shipFrom)) acts.push('risk');
       // 가용재고(트랜쇼 · 본사 · 곤지암)가 일주일 판매의 40% 이상일 때만 · 판매가 없으면 1개 이상
       if(known && rest>0 && (s.wk>0 ? rest >= s.wk*0.4 : true)) acts.push('toNormal');
     }
-    if((ast==='일반배송' || isResvSt(ast) || (auto && st==='품절' && s.wk>0)) && known && rest<=0 && inc===0 && rq===0 && !(wh && (p.hq||0)>0)) acts.push('toSold');
-    if(st==='품절' && ((known && rest>0) || inc>0)) acts.push('reopen');
+    if((ast==='일반배송' || isResvSt(ast) || (auto && st==='품절' && s.wk>0)) && known && rest<=0 && incOn===0 && rq===0 && !(wh && (p.hq||0)>0)) acts.push('toSold');
+    if(st==='품절' && ((known && rest>0) || incOn>0)) acts.push('reopen');
     if(wh && (p.hq||0)>0 && shipNow<=0 && (isResvSt(st) || s.wk>0) && (p.hq||0) >= s.wk*QC_RATE) acts.push('qc');   // 본사 재고가 판매 추이의 10%는 있어야
   }
   // 트랜쇼 + 본사 재고가 떨어질 것 같은데 곤지암에 있으면 → 곤지암에서 트랜쇼로 옮겨야 함
@@ -3204,7 +3204,7 @@ function rvCalc(p){
   // 예약 차수별 남은 수량: 미발송(출고 가능 재고의 마이너스)을 앞 차수부터 채워 나감
   let deficit = known ? Math.max(0, -(rest||0)) : 0;
   const rleft = live.map(x=>{ const q = +x.q||0; const use = Math.min(q, deficit); deficit -= use; return q - use; });
-  const ravail = (rest||0) + rq - (S.rv.offEx ? Math.min(rq, offQ) : 0);   // 예약 차수까지 합친 가용 (미발송 제외) · 오프라인 제외면 오프라인 리오더만큼 뺌
+  const ravail = (rest||0) + rq;   // 예약 차수까지 합친 가용 (미발송 제외) · 온라인 기준이라 오프라인 토글과 무관
   if(isResvSt(st) && live.length && rq>0 && known && ravail<=0 && !saleOff(r)) acts.push('roundOut');
   // 리오더 예정일이 뒤로 밀렸거나(일정 변경) 예정일이 지났는데 안 들어온 오더
   let pushDays = 0, lateO = null;
@@ -3216,7 +3216,7 @@ function rvCalc(p){
   if(delay && st!=='단종') acts.unshift('delay');
   // 리오더 제안: 잘 팔리는데(주 5장 이상) 입고 예정이 없고, 가용 + 예약 차수로 2주를 못 버팀
   const reQty = s.wk>=5 ? Math.max(0, Math.ceil(s.wk*4) - Math.max(0, (rest||0) + rq)) : 0;
-  if(st!=='단종' && st!=='단종(예정)' && !saleOff(r) && known && s.wk>=5 && inc===0 && (rest||0) + rq < s.wk*2 && reQty>0) acts.push('reorder');
+  if(st!=='단종' && st!=='단종(예정)' && !saleOff(r) && known && s.wk>=5 && incOn===0 && (rest||0) + rq < s.wk*2 && reQty>0) acts.push('reorder');
   return {p, r, s, so, offP, offQ, offStk, reQty, offRate, rtQty, rtOutQty, st, auto, opens, inc, next, known, rest, rq, ravail, rleft, total, lvl, acts, shipFrom, live, wh, cat:rvCatOf(p), delay, pushDays, lateO};
 }
 function rvRows(){
@@ -3276,7 +3276,7 @@ function viewResv(){
           (own.length?'<select id="rvOwn"><option value="">전체 담당자</option>'+own.map(o=>'<option'+(o===X.own?' selected':'')+'>'+esc(o)+'</option>').join('')+'</select>':''); })()+
       '<select id="rvFac"><option value="">전체 공장</option>'+activeFacs().map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
       (anyF?'<button class="fclr" data-act="rvClear">필터 해제 ✕</button>':'')+
-      '<span class="rvopt">'+(OFFPsrc()&&BRAND==='tid'?'<span class="oseg" title="오프라인(매장) 리오더를 입고 예정 · 예약 포함 가용에 넣을지"><em>오프라인 리오더</em><button data-act="rvOffSeg" data-v="0"'+(X.offEx?'':' class="on"')+'>포함</button><button data-act="rvOffSeg" data-v="1"'+(X.offEx?' class="on"':'')+'>제외</button></span>':'')+(X.act?'':'<label class="sw'+(X.all?' on':'')+'"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'><i></i>전체 상품</label>')+'</span>'+
+      '<span class="rvopt">'+(OFFPsrc()&&BRAND==='tid'?'<span class="oseg" title="오프라인(매장) 리오더를 입고 예정에 같이 보여줄지 (예약배송 계산은 항상 온라인 기준)"><em>오프라인 리오더</em><button data-act="rvOffSeg" data-v="0"'+(X.offEx?'':' class="on"')+'>포함</button><button data-act="rvOffSeg" data-v="1"'+(X.offEx?' class="on"':'')+'>제외</button></span>':'')+(X.act?'':'<label class="sw'+(X.all?' on':'')+'"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'><i></i>전체 상품</label>')+'</span>'+
       '<label class="chk mselall"><input type="checkbox" id="rvSelAll2"> 보이는 상품 모두 선택</label><span class="note">'+nf(a.length)+'개</span></div>';
   const SEL = X.sel || (X.sel = {}); const shownB = a.slice(0, X.n).map(x=>x.p.b); const selN = Object.keys(SEL).filter(b=>SEL[b]).length;
   const allOn = shownB.length && shownB.every(b=>SEL[b]);
@@ -3291,7 +3291,7 @@ function viewResv(){
       '<td class="rvacts">'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d+(k==='rt'?' · 오프라인 재고 '+x.offStk+'개 중 주간 판매 '+x.so.wk+'개 (소진율 '+Math.round(x.offRate*100)+'%) · 가져올 수 있는 수량 약 '+x.rtQty+'개':k==='rtOut'?' · 매장 주간 판매 '+x.so.wk+'개 · 매장 재고 '+x.offStk+'개 · 보낼 수량 약 '+x.rtOutQty+'개 (온라인엔 2주 판매분 남김)':k==='reorder'?' · 주간 판매 '+x.s.wk+'장 · 가용+예약 '+((x.rest||0)+x.rq)+'장 · 4주 판매분 기준 약 '+x.reQty+'장 리오더 제안':''))+'">'+RV_ACT[k].t+(k==='rt'?' <small>'+nf(x.rtQty)+'</small>':k==='rtOut'?' <small>'+nf(x.rtOutQty)+'</small>':'')+'</span>').join('')+(x.lvl?'<span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
       '<td class="ctr">'+(x.s.unsent?'<b>'+nf(x.s.unsent)+'</b>':'<span class="muted">0</span>')+'</td>'+
       '<td class="rvsales">'+(()=>{ const w = wk3Html(x.s); return salesOffDoc&&salesOffDoc.items ? '<div class="whl"><span>온라인'+(w?' <small class="muted">('+(x.s.ws?x.s.ws.length:1)+'주)</small>':' <small class="muted">(1주)</small>')+'</span>'+(w?'':'<b>'+nf(x.s.wk)+'</b>')+'</div>'+w+'<div class="whl"><span>오프라인 <small class="muted">(1주)</small></span><b>'+nf(x.so.wk)+'</b></div>' : (w || (x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')); })()+'</td>'+
-      '<td class="rvstk">'+(x.known?'<div class="sk">'+(x.rq>0?'<div class="skl rv'+(x.ravail<=0?' bad':'')+'" title="실제 보관 가용 + 예약 차수 수량'+(S.rv.offEx&&x.offQ?' − 오프라인 리오더':'')+'"><span>예약 포함 가용</span><b>'+nf(x.ravail)+'</b></div>':'')+'<div class="skl'+(x.rest<=0?' bad':'')+'" title="트랜쇼 + 본사 창고 + 곤지암 − 미발송 − 안정재고 (오프라인 · 매장 재고 제외)"><span>실제 보관 가용</span><b>'+nf(x.rest)+'</b></div></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
+      '<td class="rvstk">'+(x.known?'<div class="sk">'+(x.rq>0?'<div class="skl rv'+(x.ravail<=0?' bad':'')+'" title="실제 보관 가용 + 예약 차수 수량'+'"><span>예약 포함 가용</span><b>'+nf(x.ravail)+'</b></div>':'')+'<div class="skl'+(x.rest<=0?' bad':'')+'" title="트랜쇼 + 본사 창고 + 곤지암 − 미발송 − 안정재고 (오프라인 · 매장 재고 제외)"><span>실제 보관 가용</span><b>'+nf(x.rest)+'</b></div></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
       '<td class="rveta">'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+etaList(x)+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':'')+'</td>'+
       '<td class="rvrd'+(lock?'':' ed')+'"'+(lock?'':' data-act="rvEdit" data-b="'+esc(p.b)+'" title="눌러서 예약 차수 수정"')+'>'+(x.live.length ? x.live.map((o,i)=>{ const k = r.rounds.indexOf(o)+1, q = +o.q||0, left = q&&x.known ? Math.max(0, x.rleft[i]) : null, pct = q&&left!=null ? Math.round((q-left)/q*100) : 0, bad = x.shipFrom&&o.d&&o.d<x.shipFrom;
           return '<div class="rr'+(i===0?' cur':'')+(bad?' bad':'')+(left===0?' out':'')+'" title="'+esc(k+'차 · 출고 '+(o.d?fmtD(o.d):'날짜 없음')+(q?' · 예약 '+q+'장'+(left!=null?' · 팔림 '+(q-left)+'장 ('+pct+'%) · 남은 '+left+'장':''):'')+(bad?' · 출고 가능일('+fmtD(x.shipFrom).slice(0,5)+')보다 빨라요':''))+'"><div class="rrh"><em>'+k+'차</em><span>'+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+'</span>'+(q?'<span class="dot">·</span><b>'+nf(q)+'</b>':'')+'</div>'+(left!=null?'<div class="rrb2"><div class="rrb"><i style="width:'+pct+'%"></i></div><small class="rp'+(left===0?' out':'')+'">'+(left===0?'소진':pct+'% 판매')+'</small></div>':'')+'</div>'; }).join('')+(r.rounds.some(o=>o.done)?'<small class="rrdone">마감 '+r.rounds.filter(o=>o.done).length+'차</small>':'') : (lock?'':'<span class="addr">+ 차수</span>'))+'</td>'+
