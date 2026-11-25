@@ -3111,9 +3111,14 @@ const RV_ACT = {
   roundOut: {t:'예약 수량 소진', d:'다음 차수 · 리오더 필요', c:'kc-fuchsia'},
   reorder:  {t:'리오더 제안',   d:'2주 안에 소진 · 입고 예정 없음', c:'kc-teal'}
 };
-const sellOn = (r, c) => !(r.sell && r.sell[c]===false);   // 따로 끄지 않았으면 판매 중
+// 판매 중인지: 상품에 따로 정한 값이 있으면 그대로 · 없으면 채널 기본값 (채널 관리에서 정함)
+//   on = 켬 · off = 끔 · full = 기존 채널이 전부 켜진(판매중) 상품만 켬
+// 예약 설정: 상품에 따로 정한 값 · 없으면 끔 (단, '판매중 상품만' 채널은 기존 채널 예약이 전부 켜진 상품이면 켬)
+function chOn(r, c){ if(r.ch && c in r.ch) return !!r.ch[c]; const m = cfgCh && cfgCh.mode && cfgCh.mode[c]; if(m!=='full') return false; const base = chList().filter(x=>x!==c && !((cfgCh.mode||{})[x] && cfgCh.mode[x]!=='on')); return base.length>0 && base.every(x=>!!(r.ch && r.ch[x])); }
+function sellOn(r, c){ if(r.sell && c in r.sell) return r.sell[c]!==false; const m = (cfgCh && cfgCh.mode && cfgCh.mode[c]) || 'on';
+  if(m==='off') return false; if(m==='full'){ const base = chList().filter(x=>x!==c && !((cfgCh.mode||{})[x] && cfgCh.mode[x]!=='on')); return base.length>0 && base.every(x=>sellOn(r,x)); } return true; }
 // 판매상태 (예약배송 일괄 입력 규칙과 같음): 예약 플랫폼 켜짐 = 예약배송 · 판매 전체 켬 = 판매중 · 전체 끔 = 판매중지 · 29CM · W컨셉만 = 소량오픈
-function saleStateOf(x){ const r = x.r || x, L = chList(); if(isResvSt(x.st||r.st) && L.some(c=>r.ch && r.ch[c])) return '예약배송';
+function saleStateOf(x){ const r = x.r || x, L = chList(); if(isResvSt(x.st||r.st) && L.some(c=>chOn(r,c))) return '예약배송';
   const on = L.filter(c=>sellOn(r,c)); if(on.length===L.length) return '판매중'; if(!on.length) return '판매중지';
   if(on.length===on.filter(c=>/29|W컨셉/i.test(c)).length && on.length<=2) return '소량오픈'; return '일부 판매 ('+on.join(', ')+')'; }
 function rvOf(b){
@@ -3236,12 +3241,12 @@ function viewResv(){
     const key = {
       prod: x=>(x.p.n||x.p.en||'')+' '+x.p.opt, st: x=>stO[x.st||'']??5, act: x=>x.acts.length*10+(x.lvl==='긴급'?2:x.lvl==='주의'?1:0),
       un: x=>x.s.unsent||0, wk: x=>x.s.wk, stock: x=>x.known?x.rest:-1e9, eta: x=>x.next?(x.next.eta||'9999'):'99999', round: x=>x.live.length?(x.live[0].d||'9999'):'99999',
-      ch: x=>chList().filter(c=>x.r.ch[c]).length, memo: x=>(x.r.cmt||'')+(x.r.memo||'')}[X.sk];
+      ch: x=>chList().filter(c=>chOn(x.r,c)).length, memo: x=>(x.r.cmt||'')+(x.r.memo||'')}[X.sk];
     if(key) a = a.slice().sort((x,y)=>{ const u = key(x), v = key(y); return (typeof u==='number' ? u-v : String(u).localeCompare(String(v),'ko')) * X.sd; });
   }
   { const L = a; EXP = {name:'예약배송', rows:()=>[['바코드','제작품명','상품명','컬러,사이즈','공장','분류','노출 상태','할 일','재고 부족','주간 판매','온라인 3주 전','온라인 2주 전','온라인 지난주','출고 가능','실 보유재고','트랜쇼','곤지암','본사','오프라인 재고','매장 재고','오프라인 주간 판매','입고 예정','다음 입고 예정일','예약 차수','판매 채널','MD 메모','CS 메모','담당자','판매상태','판매 플랫폼',...[1,2,3,4,5,6].flatMap(k=>[k+'차 출고일',k+'차 수량'])]].concat(
       L.map(x=>[x.p.b, x.p.n, x.p.en, x.p.opt, x.p.curFac, x.cat||'', x.st||'', x.acts.map(k=>(RV_ACT[k]||{}).t||k).join(' · '), x.lvl||'', x.s.wk, ...(x.s.ws ? (x.s.ws.length===3 ? x.s.ws : [''].concat(x.s.ws)) : ['','','']), x.known?x.rest:'', x.known?x.p.stock:'', x.p.trans!=null?x.p.trans:'', x.p.gj!=null?x.p.gj:'', x.p.hq!=null?x.p.hq:'', x.p.off!=null?x.p.off:'', x.p.shop!=null?x.p.shop:'', x.so.wk||0, x.inc||0, x.next&&x.next.eta||'',
-        x.live.map(o=>(o.d||'날짜 없음')+(o.q?' '+o.q+'장':'')).join(' / '), chList().filter(c=>x.r.ch&&x.r.ch[c]).join(', '), x.r.cmt||'', x.r.memo||'', catOwner(x.cat||''), saleStateOf(x), chList().filter(c=>sellOn(x.r,c)).join(', '), ...[0,1,2,3,4,5].flatMap(k=>{ const o = x.live[k]; return o ? [o.d||'', o.q||''] : ['','']; })]))}; }
+        x.live.map(o=>(o.d||'날짜 없음')+(o.q?' '+o.q+'장':'')).join(' / '), chList().filter(c=>chOn(x.r,c)).join(', '), x.r.cmt||'', x.r.memo||'', catOwner(x.cat||''), saleStateOf(x), chList().filter(c=>sellOn(x.r,c)).join(', '), ...[0,1,2,3,4,5].flatMap(k=>{ const o = x.live[k]; return o ? [o.d||'', o.q||''] : ['','']; })]))}; }
   const bulkBar = n => !n ? '' : '<div class="bulkbar"><span class="bkn"><b>'+n+'</b>개 선택</span>'+
     '<select id="bkSt" title="노출 상태 한 번에 바꾸기"><option value="">노출 상태</option>'+RV_ST.map(v=>'<option>'+v+'</option>').join('')+'</select>'+
     '<select id="bkCat" title="분류 한 번에 바꾸기"><option value="">분류</option>'+catList().map(c=>'<option value="'+esc(c.n)+'">'+esc(c.n)+'</option>').join('')+'</select>'+
@@ -3286,7 +3291,7 @@ function viewResv(){
       '<td class="rveta">'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+etaList(x)+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':'')+'</td>'+
       '<td class="rvrd'+(lock?'':' ed')+'"'+(lock?'':' data-act="rvEdit" data-b="'+esc(p.b)+'" title="눌러서 예약 차수 수정"')+'>'+(x.live.length ? x.live.map((o,i)=>{ const k = r.rounds.indexOf(o)+1, q = +o.q||0, left = q&&x.known ? Math.max(0, x.rleft[i]) : null, pct = q&&left!=null ? Math.round((q-left)/q*100) : 0, bad = x.shipFrom&&o.d&&o.d<x.shipFrom;
           return '<div class="rr'+(i===0?' cur':'')+(bad?' bad':'')+(left===0?' out':'')+'" title="'+esc(k+'차 · 출고 '+(o.d?fmtD(o.d):'날짜 없음')+(q?' · 예약 '+q+'장'+(left!=null?' · 팔림 '+(q-left)+'장 ('+pct+'%) · 남은 '+left+'장':''):'')+(bad?' · 출고 가능일('+fmtD(x.shipFrom).slice(0,5)+')보다 빨라요':''))+'"><div class="rrh"><em>'+k+'차</em><span>'+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+'</span>'+(q?'<span class="dot">·</span><b>'+nf(q)+'</b>':'')+'</div>'+(left!=null?'<div class="rrb2"><div class="rrb"><i style="width:'+pct+'%"></i></div><small class="rp'+(left===0?' out':'')+'">'+(left===0?'소진':pct+'% 판매')+'</small></div>':'')+'</div>'; }).join('')+(r.rounds.some(o=>o.done)?'<small class="rrdone">마감 '+r.rounds.filter(o=>o.done).length+'차</small>':'') : (lock?'':'<span class="addr">+ 차수</span>'))+'</td>'+
-      '<td><div class="rvchs"><span class="rvch"><em class="rvcl">예약</em><button class="rvc all'+(chList().every(c=>r.ch[c])?' on':'')+'" data-act="rvChAll" data-b="'+esc(p.b)+'" data-tip="예약 설정 · 전체 반영 / 해제"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(r.ch[c]?' on':'')+'" data-act="rvCh" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · 예약 '+(r.ch[c]?'설정 완료':'미설정')+'" aria-label="'+esc(c)+' 예약 설정"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span>'+
+      '<td><div class="rvchs"><span class="rvch"><em class="rvcl">예약</em><button class="rvc all'+(chList().every(c=>chOn(r,c))?' on':'')+'" data-act="rvChAll" data-b="'+esc(p.b)+'" data-tip="예약 설정 · 전체 반영 / 해제"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(chOn(r,c)?' on':'')+'" data-act="rvCh" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · 예약 '+(chOn(r,c)?'설정 완료':'미설정')+'" aria-label="'+esc(c)+' 예약 설정"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span>'+
         '<span class="rvch sell"><em class="rvcl">판매</em><button class="rvc all'+(chList().every(c=>sellOn(r,c))?' on':'')+'" data-act="rvSellAll" data-b="'+esc(p.b)+'" data-tip="판매 중 · 전체 켜기 / 끄기"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(sellOn(r,c)?' on':'')+'" data-act="rvSell" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · '+(sellOn(r,c)?'판매 중':'판매 안 함')+'" aria-label="'+esc(c)+' 판매"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span></div></td>'+
       '<td class="rvmemo">'+[['cmt','MD'],['memo','CS']].map(([k,l])=>'<div class="mm'+(r[k]?'':' empty')+'"'+(lock?'':' data-act="mmEdit" data-b="'+esc(p.b)+'" data-k="'+k+'"')+' title="'+esc(r[k]?l+' 메모 · '+r[k]:l+' 메모 쓰기')+'"><em>'+l+'</em><span>'+(r[k]?esc(r[k]):(lock?'':'+'))+'</span></div>').join('')+'</td></tr>';
   }
@@ -3308,7 +3313,7 @@ function rvModal(b, preset){
     '<div class="rvrows">'+rounds.map((o,i)=>'<div class="rvr'+(o.done?' done':'')+'"><span class="nnum">'+(i+1)+'</span><input type="date" data-rvr="'+i+'" data-k="d" value="'+esc(o.d||'')+'"><input type="number" min="0" data-rvr="'+i+'" data-k="q" value="'+(o.q||'')+'" placeholder="수량" style="width:80px"><input data-rvr="'+i+'" data-k="memo" value="'+esc(o.memo||'')+'" placeholder="메모 (예: 3차 예약배송)"><label class="chk"><input type="checkbox" data-rvr="'+i+'" data-k="done"'+(o.done?' checked':'')+'> 차수 마감</label><button class="btn sm ghost" data-act="rvDelRound" data-i="'+i+'">✕</button>'+(x.shipFrom&&o.d&&!o.done&&o.d<x.shipFrom?'<small class="bad">입고 예정보다 빨라요</small>':'')+'</div>').join('')+'</div>'+
     '<div><button class="btn sm" data-act="rvAddRound">+ 차수 추가</button></div>'+
     '<h3 style="margin:6px 0 0">판매 중인 플랫폼</h3><div class="tperm">'+chList().map(c=>'<label><input type="checkbox" data-rvsell="'+esc(c)+'"'+(sellOn(r,c)?' checked':'')+'> '+esc(c)+'</label>').join('')+'</div>'+
-    '<h3 style="margin:6px 0 0">예약 설정 플랫폼</h3><div class="tperm"><label><b><input type="checkbox" id="rvChAllM"'+(chList().every(c=>r.ch[c])?' checked':'')+'> 전체</b></label>'+chList().map(c=>'<label><input type="checkbox" data-rvch="'+esc(c)+'"'+(r.ch[c]?' checked':'')+'> '+esc(c)+'</label>').join('')+'</div>'+
+    '<h3 style="margin:6px 0 0">예약 설정 플랫폼</h3><div class="tperm"><label><b><input type="checkbox" id="rvChAllM"'+(chList().every(c=>chOn(r,c))?' checked':'')+'> 전체</b></label>'+chList().map(c=>'<label><input type="checkbox" data-rvch="'+esc(c)+'"'+(chOn(r,c)?' checked':'')+'> '+esc(c)+'</label>').join('')+'</div>'+
     '<label class="f">MD 메모<input id="rv_cmt" value="'+esc(r.cmt||'')+'" placeholder="예: 라이브 · 주미니 착장"></label><label class="f">CS 메모<input id="rv_memo" value="'+esc(r.memo||'')+'" placeholder="예: 11/16 출고 · 19일 예배"></label>'+
     '<div class="filters"><button class="btn pri" data-act="rvSave" data-b="'+esc(b)+'"'+(canDo('resv')?'':' disabled')+'>저장</button><button class="btn" data-act="close">취소</button></div></div>';
   openModal(h);
@@ -3422,10 +3427,13 @@ async function rvsApply(){
 let cfgCh = null, cfgCat = null;
 const chList = () => (cfgCh && Array.isArray(cfgCh.list) && cfgCh.list.length) ? cfgCh.list : CHANNELS;
 const chShort = c => CH_S[c] || String(c).replace(/[^가-힣A-Za-z0-9]/g,'').slice(0,1).toUpperCase();
+const CH_MODE = [['full','판매중(전체 켜짐)인 상품만 켬'],['off','모두 끔'],['on','모두 켬']];
 function chModal(){
-  const L = (S.chEdit = S.chEdit || chList().slice());
+  const L = (S.chEdit = S.chEdit || chList().slice()); const M = (S.chMode = S.chMode || Object.assign({}, (cfgCh&&cfgCh.mode)||{})); const old = new Set(chList());
   let h = '<div class="mh"><div><h2>판매 채널 관리</h2><div class="muted" style="font-size:12.5px">예약배송을 설정해야 하는 판매처 목록 · 브랜드마다 다르게 쓸 수 있어요</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+
     '<div class="panel pad step"><div class="tchips">'+L.map((c,i)=>'<span class="tchip">'+esc(c)+' <button class="btn sm ghost" data-act="chDel" data-i="'+i+'" aria-label="'+esc(c)+' 빼기">✕</button></span>').join('')+'</div>'+
+    (L.some(c=>!old.has(c) || (M[c] && M[c]!=='on')) ? '<div class="chmode"><p class="note" style="margin:8px 0 4px"><b>기존 상품의 판매 설정</b> · 상품마다 따로 켜고 끈 적이 없으면 아래대로 보여요 (나중에 상품별로 바꿔도 돼요)</p>'+
+      L.filter(c=>!old.has(c) || (M[c] && M[c]!=='on')).map(c=>'<label class="f" style="display:flex;gap:8px;align-items:center;margin:4px 0"><b style="min-width:80px">'+esc(c)+(old.has(c)?'':' <small class="muted">새 채널</small>')+'</b><select data-chmode="'+esc(c)+'">'+CH_MODE.map(([v,t])=>'<option value="'+v+'"'+((M[c]||(old.has(c)?'on':'full'))===v?' selected':'')+'>'+t+(v==='full'?' (추천)':'')+'</option>').join('')+'</select></label>').join('')+'</div>' : '')+
     '<div class="filters"><input id="chNew" placeholder="채널 이름 (예: 에이블리, 카카오 선물하기)"><button class="btn" data-act="chAdd">추가</button></div>'+
     '<div class="filters"><button class="btn pri" data-act="chSave"'+(canDo('resv')?'':' disabled')+'>저장</button><button class="btn" data-act="close">취소</button></div></div>';
   openModal(h);
@@ -3433,8 +3441,12 @@ function chModal(){
 async function chSave(){
   if(!need('resv')) return;
   const list = (S.chEdit||[]).map(x=>String(x).trim()).filter(Boolean);
-  const ok = await guard(async()=>{ await DB.doc('cfg/channels').set({list, at:new Date().toISOString(), by:MYID||''}); await writeLog('판매 채널 변경: '+list.join(', ')); }, '판매 채널을 저장했습니다');
-  if(ok){ S.chEdit = null; closeModal(); }
+  const old = new Set(chList()); const M = Object.assign({}, (cfgCh&&cfgCh.mode)||{}, S.chMode||{});
+  document.querySelectorAll('[data-chmode]').forEach(s=>{ M[s.dataset.chmode] = s.value; });
+  list.forEach(c=>{ if(!old.has(c) && !M[c]) M[c] = 'full'; });
+  const mode = {}; list.forEach(c=>{ if(M[c] && M[c]!=='on') mode[c] = M[c]; });
+  const ok = await guard(async()=>{ await DB.doc('cfg/channels').set({list, mode, at:new Date().toISOString(), by:MYID||''}); await writeLog('판매 채널 변경: '+list.join(', ')+(Object.keys(mode).length?' · 기본값 '+Object.entries(mode).map(([c,m])=>c+' '+(CH_MODE.find(x=>x[0]===m)||[])[1]).join(', '):'')); }, '판매 채널을 저장했습니다');
+  if(ok){ S.chEdit = null; S.chMode = null; closeModal(); }
 }
 // ---------- 분류 (예약배송 담당 분담용 · 편집 가능) ----------
 const baseCat = p => String(p.cat||'').replace(/^\d{2}\s*[A-Za-z]+\d*\s+/,'').trim() || '미분류';
@@ -3755,10 +3767,10 @@ async function act(a, el){
     case 'rvAddNext': { rvKeep(); const p = [...PRODS.values()].find(x=>x.b===el.dataset.b); if(p) S.rvEdit.rounds.push(rvSuggest(p, S.rvEdit.rounds.filter(o=>!o.done).length)); rvModal(S.rvEdit.b); break; }
     case 'rvDelRound': rvKeep(); S.rvEdit.rounds.splice(+el.dataset.i, 1); rvModal(S.rvEdit.b); break;
     case 'rvSave': await rvSave(el.dataset.b); break;
-    case 'rvCh': { const r = rvOf(el.dataset.b); const ch = Object.assign({}, r.ch||{}); ch[el.dataset.c] = !ch[el.dataset.c]; await rvQuick(el.dataset.b, {ch}, el.dataset.c+(ch[el.dataset.c]?' 반영 완료':' 반영 해제')); break; }
+    case 'rvCh': { const r = rvOf(el.dataset.b); const ch = Object.assign({}, r.ch||{}); ch[el.dataset.c] = !chOn(r, el.dataset.c); await rvQuick(el.dataset.b, {ch}, el.dataset.c+(ch[el.dataset.c]?' 반영 완료':' 반영 해제')); break; }
     case 'rvSales': rvSalesModal(); break;
-    case 'chMng': S.chEdit = null; chModal(); break;
-    case 'chAdd': { const v = val('chNew'); if(v && !S.chEdit.includes(v)) S.chEdit.push(v); chModal(); break; }
+    case 'chMng': S.chEdit = null; S.chMode = null; chModal(); break;
+    case 'chAdd': { document.querySelectorAll('[data-chmode]').forEach(s=>{ S.chMode[s.dataset.chmode] = s.value; }); const v = val('chNew'); if(v && !S.chEdit.includes(v)){ S.chEdit.push(v); if(!S.chMode[v]) S.chMode[v] = 'full'; } chModal(); break; }
     case 'chDel': S.chEdit.splice(+el.dataset.i, 1); chModal(); break;
     case 'chSave': await chSave(); break;
     case 'catMng': S.catEdit = null; catModal(); break;
@@ -3767,7 +3779,7 @@ async function act(a, el){
     case 'catSave': await catSave(); break;
     case 'rvSell': { const r = rvOf(el.dataset.b); const c = el.dataset.c; const sell = Object.assign({}, r.sell||{}); const on = !sellOn(r,c); sell[c] = on; await rvQuick(el.dataset.b, {sell}, c+(on?' 판매 시작':' 판매 중지')); break; }
     case 'rvSellAll': { const r = rvOf(el.dataset.b); const on = !chList().every(c=>sellOn(r,c)); const sell = {}; chList().forEach(c=>{ sell[c] = on; }); await rvQuick(el.dataset.b, {sell}, '판매 플랫폼 전체 '+(on?'켬':'끔')); break; }
-    case 'rvChAll': { const r = rvOf(el.dataset.b); const on = !chList().every(c=>r.ch[c]); const ch = Object.assign({}, r.ch||{}); chList().forEach(c=>{ ch[c] = on; }); await rvQuick(el.dataset.b, {ch}, '채널 전체 '+(on?'반영 완료':'반영 해제')); break; }
+    case 'rvChAll': { const r = rvOf(el.dataset.b); const on = !chList().every(c=>chOn(r,c)); const ch = Object.assign({}, r.ch||{}); chList().forEach(c=>{ ch[c] = on; }); await rvQuick(el.dataset.b, {ch}, '채널 전체 '+(on?'반영 완료':'반영 해제')); break; }
     case 'brand': closeModal(); setBrand(el.dataset.k); break;
     case 'rvsCheck': { const t = val('rvSalesT'); if(!t.trim()){ toast('옵션별추이현황을 붙여넣어 주세요'); break; } rvsRun(t, ''); break; }
     case 'rvsApply': await rvsApply(); break;
