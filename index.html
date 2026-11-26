@@ -1010,6 +1010,7 @@ function addOrder(o){
   if(!o.closed && cq>0 && o.remain===0 && o.recv===0){ o.closed = true; o.closeReason = '전량 취소 · '+(o.cancels[o.cancels.length-1].r||''); }
   o.f0 = o.f; o.f = facForOrder(o, o.remain>0);
   o.changes = Array.isArray(v.log) ? v.log : [];
+  o.dlyAck = v.dlyAck || '';   // 이 시각 이전의 일정 변경은 '밀림'으로 보지 않음 (보드 도입 전 데이터 보정)
   o.etaReason = v.reason || '';
   if(v.eta){ o.eta = v.eta; o.etaKind = 'fixed'; }
   else if(o.eta0){ o.eta = o.eta0; o.etaKind = 'fixed'; }
@@ -3296,7 +3297,7 @@ function rvCalc(p){
   // 리오더 예정일이 뒤로 밀렸거나(일정 변경) 예정일이 지났는데 안 들어온 오더
   let pushDays = 0, lateO = null;
   for(const o of opens){
-    for(const c of (o.changes||[])) if(c.type==='eta' && c.from && c.to && c.to > c.from) pushDays = Math.max(pushDays, diffDays(c.to, c.from));
+    for(const c of (o.changes||[])) if(c.type==='eta' && c.from && c.to && c.to > c.from && !(o.dlyAck && (c.at||'') <= o.dlyAck)) pushDays = Math.max(pushDays, diffDays(c.to, c.from));
     if(!lateO && (o.status==='late' || o.status==='over')) lateO = o;
   }
   const delay = pushDays>0 || !!lateO;
