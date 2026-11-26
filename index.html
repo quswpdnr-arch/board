@@ -3703,7 +3703,7 @@ function viewSched(){
     const kd = schKind(o), kShow = kd==='pre' || schManual(o);
     h += '<tr data-schrow="'+o.id+'" class="schrow'+(e.eta?' schdirty':'')+(SEL[o.id]?' schsel':'')+'" aria-selected="'+(!!SEL[o.id])+'"><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><span class="pnl"><a class="plink" data-act="openOrder" data-id="'+o.id+'">'+esc(p.n||p.en)+'</a>'+(kShow?'<span class="schk k-'+kd+'" title="'+(kd==='first'?'초두 · 내년 신상 등 기획 오더 (예상일 없음)':'선오더 · 캐리오버 등 선발주 (예상일 없음)')+'">'+SCH_KIND[kd]+'</span>':'')+'</span><small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span></small></div></div></td>'+
       '<td>'+flink(o.f)+(p.contact?'<small class="odsub">'+esc(p.contact)+'</small>':'')+'</td>'+
-      '<td style="white-space:nowrap">'+esc(o.round)+(isNew(o)?'<span class="schnew">신규</span>':'')+'<small class="odsub">'+(o.od?fmtD(o.od):'초두')+'</small></td>'+
+      '<td style="white-space:nowrap">'+esc(o.round)+'<small class="odsub">'+(o.od?fmtD(o.od):'초두')+'</small></td>'+
       '<td class="num">'+nf(o.qty)+'<small class="odsub">잔여 '+nf(o.remain)+'</small></td>'+
       '<td style="white-space:nowrap">'+(o.etaKind==='fixed'?fmtD(o.eta)+' <span class="kind">확정</span>':o.eta?'<span class="muted">'+fmtD(o.eta)+' 예상</span>':'<span class="muted">미정</span>')+'</td>'+
       '<td><input type="date" data-sch="'+o.id+'" data-k="eta" value="'+esc(e.eta||'')+'"'+(lock?' disabled':'')+'></td>'+
