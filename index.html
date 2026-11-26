@@ -345,7 +345,7 @@ th.sortable{cursor:pointer;user-select:none;white-space:nowrap}th.sortable:hover
 .dkv dt{color:var(--muted);white-space:nowrap}.dkv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums;color:var(--fg)}
 .dkv dd b{font-weight:600}.dkv dd small{font-size:11px;color:var(--muted);font-weight:400}.dkv dd small:only-child,.dkv dd b+small{margin-left:2px}.dkv dd b.inq{color:var(--info)}
 .dkv dd{white-space:nowrap}.dkv dd.dwh{grid-column:1/-1;font-size:11px;color:var(--muted);margin-top:-2px}
-label.f[hidden]{display:none}.rvcards.schcards{grid-template-columns:repeat(6,minmax(0,1fr));width:100%;gap:8px}@media (max-width:1100px){.rvcards.schcards{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (max-width:700px){.rvcards.schcards{grid-template-columns:repeat(2,minmax(0,1fr))}}.schcards .rvcard{column-gap:16px;padding:9px 14px}.schcards .rvcard span{min-width:0;overflow:hidden;text-overflow:ellipsis}.schcards .rvcard b{justify-self:end;padding-left:4px}.schcards .rvcard span{white-space:nowrap}.schcards .rvcard small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.schtbl input[type=date]{width:140px}.schtbl input:not([type]){min-width:150px}.schtbl tr.schdirty td{background:var(--sunk)}
+label.f[hidden]{display:none}.rvcards.schcards{grid-template-columns:repeat(5,minmax(0,1fr));width:100%;gap:8px}@media (max-width:1100px){.rvcards.schcards{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (max-width:700px){.rvcards.schcards{grid-template-columns:repeat(2,minmax(0,1fr))}}.schcards .rvcard{column-gap:16px;padding:9px 14px}.schcards .rvcard span{min-width:0;overflow:hidden;text-overflow:ellipsis}.schcards .rvcard b{justify-self:end;padding-left:4px}.schcards .rvcard span{white-space:nowrap}.schcards .rvcard small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.schtbl input[type=date]{width:140px}.schtbl input:not([type]){min-width:150px}.schtbl tr.schdirty td{background:var(--sunk)}
 .tbadm{min-width:96px}.badm{display:inline-grid;gap:2px;justify-items:start;font-size:12px;text-align:left}.badm label{display:inline-flex;gap:3px;align-items:center;white-space:nowrap}
 tr.qchg td{background:color-mix(in srgb, var(--warn) 8%, transparent)}.qtxt{color:var(--warn)}
 tr.xchg td{background:color-mix(in srgb, var(--bad) 7%, transparent)}
@@ -733,6 +733,8 @@ table.mcard tr.shrow{display:none}
 .schbar .sbn{font-size:13px;color:var(--accent);white-space:nowrap}.schbar .sbg{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;padding-left:14px;border-left:1px solid var(--line)}.schbar .sbg em{font-style:normal;font-size:12px;color:var(--muted);margin-right:2px}
 .schbar input[type=date]{width:140px}.schbar #schBkMemo{width:150px}.schbar .sbx{margin-left:auto;appearance:none;border:0;background:none;font:inherit;font-size:12.5px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 @media (max-width:640px){.schbar .sbg{padding-left:0;border-left:0;flex:1 1 100%}.schbar input[type=date],.schbar #schBkMemo{flex:1;width:auto;min-width:0}}
+.schtbl tr.schgrp td{background:var(--sunk);padding:7px 12px!important;font-size:12.5px}.schtbl tr.schgrp td span{margin-left:8px;color:var(--muted);font-size:12px}
+.schtbl th.sortable{cursor:pointer;user-select:none;white-space:nowrap}.schtbl th .sarr{margin-left:3px;font-size:10px;color:var(--muted)}.schtbl th.sorted .sarr{color:var(--accent)}
 .schtbl tr.schrow{cursor:pointer}.schtbl tr.schrow:hover td{background:var(--bg)}.schtbl tr.schsel td,.schtbl tr.schsel:hover td{background:var(--accent-soft)}.schtbl tr.schsel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 @media (max-width:640px){.schtbl tr.schrow td,.schtbl tr.schrow:hover td,.schtbl tr.schsel td{background:transparent!important;box-shadow:none!important}.schtbl tr.schsel{background:var(--accent-soft)!important;box-shadow:0 0 0 2px var(--accent)!important}}
 .schtbl .pnl{display:flex;align-items:baseline;gap:6px;min-width:0;flex-wrap:wrap}
@@ -844,7 +846,7 @@ const S = {
   pl: {text:'', res:null},
   sm: {},
   rv: {q:'', st:'', fac:'', cat:'', cats:[], own:'', offEx:false, act:'', all:false, n:150, sk:'', sd:1, sel:{}},
-  sched: {view:'none', q:'', fac:'', edits:{}, n:150},
+  sched: {view:'all', q:'', fac:'', edits:{}, n:150},
   team: {add:'', perms:{reorder:true,recv:true,eta:true,reg:true,stock:true,resv:true,fix:true,fac:true}},
   reg: {mode:'sync', newRows:[{opt:'',b:'',qty:'',eta:''}], ro:{q:'', style:null, sel:{}}, bulk:''},
   showMore: 0
@@ -1007,7 +1009,7 @@ function addOrder(o){
   o.etaReason = v.reason || '';
   if(v.eta){ o.eta = v.eta; o.etaKind = 'fixed'; }
   else if(o.eta0){ o.eta = o.eta0; o.etaKind = 'fixed'; }
-  else if(o.od && o.remain>0){ o.eta = addDays(o.od, leadFor(o.f)); o.etaKind = 'est'; }
+  else if(o.od && o.remain>0 && !(v.kind==='first' || v.kind==='pre' || v.pre)){ o.eta = addDays(o.od, leadFor(o.f)); o.etaKind = 'est'; }   // 초두 · 선오더 태그 오더는 예상일 없음 (입고일을 바로 알 수 없어 담당자가 나중에 입력)
   else { o.eta = ''; o.etaKind = ''; }
   // 파샬(나눠서 입고): 남은 수량을 여러 예정 줄로 나눠 둔 경우 → 다음 줄의 날짜 · 수량을 입고 예정으로
   o.parts = null;
@@ -3641,30 +3643,31 @@ function schedRows(){
   const isNew = o => (o.od && o.od >= from) || (o.src==='db' && o.at && o.at.slice(0,10) >= from);
   const noEta = o => o.etaKind!=='fixed';
   const EF0 = extFacs(); const open2 = EF0.length ? open.filter(o=>EF0.includes(String(o.f).replace(/\s/g,''))) : open;
-  const F = {none:noEta, new:isNew, first:o=>schKind(o)==='first', exist:o=>schKind(o)==='exist', pre:o=>schKind(o)==='pre'};
+  const F = {none:noEta, first:o=>schKind(o)==='first', exist:o=>schKind(o)==='exist', pre:o=>schKind(o)==='pre'};
   const cnt = {all: open2.length}; for(const k in F) cnt[k] = open2.filter(F[k]).length;
   let a = F[X.view] ? open.filter(F[X.view]) : open;
   const EF = extFacs(); if(EF.length) a = a.filter(o=>EF.includes(String(o.f).replace(/\s/g,'')));
   if(X.fac) a = a.filter(o=>o.f===X.fac);
   if(q) a = a.filter(o=>(o.p.b+' '+o.p.n+' '+o.p.en+' '+o.p.opt+' '+o.f+' '+(o.p.contact||'')).toLowerCase().includes(q));
-  a = a.slice().sort(X.view==='new' ? (x,y)=>(y.od||y.at||'').localeCompare(x.od||x.at||'') : (x,y)=>(x.od||'0').localeCompare(y.od||'0'));
+  a = a.slice().sort((x,y)=>(x.od||'0').localeCompare(y.od||'0'));
+  if(X.sk){ const K = {prod:o=>(o.p.n||o.p.en||'')+' '+(o.p.opt||''), fac:o=>o.f||'', od:o=>o.od||'', qty:o=>o.remain, eta:o=>o.eta||(X.sd>0?'9999':'0000')}[X.sk];
+    if(K) a.sort((x,y)=>{ const p = K(x), q = K(y); const c = typeof p==='number' ? p-q : String(p).localeCompare(String(q), 'ko'); return c*X.sd || (x.od||'').localeCompare(y.od||''); }); }
   return {a, cnt, isNew};
 }
 // 일정 입력 분류: 초두 · 기존 상품 · 선발주 — 직접 바꾼 값(ovr.kind)이 있으면 그걸, 없으면 자동(차수 이름으로 판단)
-const SCH_KIND = {first:'초두', exist:'기존 상품', pre:'선발주'};
-function schKindAuto(o){ if(/캐리|선오더|선발주/.test(o.round||'')) return 'pre'; if(!o.od || /초두|신상/.test(o.round||'')) return 'first'; return 'exist'; }
-function schKind(o){ const v = ovr[o.id]; if(v && SCH_KIND[v.kind]) return v.kind; if(v && v.pre) return 'pre'; return schKindAuto(o); }
-const schManual = o => { const v = ovr[o.id]; return !!(v && (SCH_KIND[v.kind] || v.pre)); };   // 직접 지정한 분류가 있으면 상품명 옆에 표시
+const SCH_KIND = {first:'초두', pre:'선오더'};   // 태그: 초두(내년 신상 등 기획 오더) · 선오더(캐리오버 등 선발주) — 둘 다 예상일 없이 담당자가 입고일을 직접 입력
+function schKind(o){ const v = ovr[o.id]; if(v && SCH_KIND[v.kind]) return v.kind; if(v && v.pre) return 'pre'; if(/캐리|선오더|선발주/.test(o.round||'')) return 'pre'; return 'exist'; }
+const schManual = o => schKind(o)!=='exist';
 async function schKindBulk(k){
   if(!need('eta','recv','reorder')) return;
   const ids = Object.keys(S.sched.sel||{}).filter(id=>S.sched.sel[id] && BYID.get(id)); if(!ids.length){ toast('오더를 먼저 체크하세요'); return; }
   let n = 0;
   const ok = await guardN(async()=>{
     for(const id of ids){ const o = BYID.get(id); const from = schKind(o);
-      const v = ovr[o.id]||{}; if(v.kind===k && !v.pre) continue;   // 이미 그 분류로 지정돼 있음
-      await saveOvr(o, {kind:k, pre:false}, {type:'tag', msg:'분류 '+SCH_KIND[from]+' → '+SCH_KIND[k]}, null, ['eta','recv','reorder']); n++; }
+      const v = ovr[o.id]||{}; if((v.kind||'')===k && !v.pre) continue;   // 이미 그렇게 돼 있음
+      await saveOvr(o, {kind:k, pre:false}, {type:'tag', msg: k ? '태그 '+SCH_KIND[k]+(from!=='exist'?' (전: '+SCH_KIND[from]+')':'') : '태그 뺌 ('+(SCH_KIND[from]||'')+')'}, null, ['eta','recv','reorder']); n++; }
     return 1; });
-  if(ok){ if(n) writeLog('일정 입력 분류 '+SCH_KIND[k]+'(으)로 '+n+'건 지정'); S.sched.sel = {}; toast(n ? n+'건을 '+SCH_KIND[k]+'(으)로 지정했어요' : '이미 '+SCH_KIND[k]+'(으)로 지정돼 있어요'); render(); }
+  if(ok){ const t = k ? SCH_KIND[k]+' 태그' : '태그 빼기'; if(n) writeLog('일정 입력 '+t+' '+n+'건'); S.sched.sel = {}; toast(n ? n+'건 '+(k ? SCH_KIND[k]+' 태그를 붙였어요' : '태그를 뺐어요') : '바뀐 게 없어요'); render(); }
 }
 async function schEtaBulk(){
   const ids = Object.keys(S.sched.sel||{}).filter(id=>S.sched.sel[id] && BYID.get(id)); if(!ids.length){ toast('오더를 먼저 선택하세요'); return; }
@@ -3680,22 +3683,25 @@ function viewSched(){
   const tab = (k,t,n,d) => '<button class="rvcard'+(X.view===k?' on':'')+'" data-act="schView" data-k="'+k+'"><span>'+t+'</span><b>'+nf(n)+'</b><small>'+d+'</small></button>';
   const dirty = Object.entries(X.edits).filter(([id,e])=>e && e.eta && BYID.get(id)).length;
   let h = '<div class="sec"><div class="sechead"><h2>일정 입력</h2><span class="sub">입고 예정일이 비어 있는 오더와 최근 들어간 신규 오더예요 · 담당 디자이너가 공장과 확인한 날짜를 넣고 저장하면 입고 예정 · 예약배송에 바로 반영돼요</span></div>'+
-    '<div class="rvcards schcards">'+tab('none','일정 미입력',cnt.none,'확정 예정일 없음')+tab('new','최근 신규 오더',cnt.new,'오더일 2주 이내')+tab('first','초두만',cnt.first,'첫 오더 (초두 · 신상)')+tab('exist','기존 상품 오더',cnt.exist,'초두 · 선발주 제외')+tab('pre','선 오더 진행',cnt.pre,'캐리오버 등 선발주')+tab('all','진행 중 전체',cnt.all,'모든 미입고 오더')+'</div>'+
+    '<div class="rvcards schcards">'+tab('all','진행 중 전체',cnt.all,'모든 미입고 오더')+tab('none','일정 미입력',cnt.none,'확정 예정일 없음')+tab('exist','기존 상품 오더',cnt.exist,'초두 · 선오더 제외')+tab('pre','선 오더 진행',cnt.pre,'캐리오버 등 선발주')+tab('first','초두',cnt.first,'내년 신상 등 기획 오더')+'</div>'+
     '<div class="filters"><input type="search" id="schQ" placeholder="바코드 · 제작품명 · 컬러 · 공장 · 담당 검색" value="'+esc(X.q)+'">'+
     '<select id="schFac"><option value="">전체 공장</option>'+(extFacs().length ? activeFacs().filter(f=>extFacs().includes(String(f).replace(/\s/g,''))) : activeFacs()).map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
     (X.q||X.fac?'<button class="btn sm" data-act="schClear">‹ 검색 필터 해제</button>':'')+'<span class="note">'+nf(a.length)+'건</span>'+(a.length?'<button class="btn sm ghost" data-act="schSelAllB">'+(a.slice(0, X.n).every(o=>SEL[o.id])?'선택 해제':'모두 선택')+'</button>':'')+
     '<span class="right"><button class="btn pri" data-act="schSaveAll"'+(dirty&&!lock?'':' disabled')+'>입력한 '+dirty+'건 저장</button></span></div>';
+  const ssh = (k, label, cls) => '<th class="sortable'+(cls?' '+cls:'')+(X.sk===k?' sorted':'')+'" data-act="schSort" data-k="'+k+'" title="눌러서 정렬 (오름차순 → 내림차순 → 기본)'+(k==='fac'?' · 공장순으로 묶어서 보기':'')+'">'+label+'<span class="sarr">'+(X.sk===k?(X.sd===1?'▲':'▼'):'↕')+'</span></th>';
   const nSel = Object.keys(SEL).filter(id=>SEL[id]).length;
   if(nSel) h += '<div class="schbar" role="toolbar" aria-label="선택한 오더 한 번에 바꾸기"><span class="sbn"><b>'+nSel+'</b>건 선택</span>'+
-    '<span class="sbg"><em>분류</em>'+Object.entries(SCH_KIND).map(([k,t])=>'<button class="btn sm" data-act="schKind" data-k="'+k+'"'+(lock?' disabled':'')+'>'+t+'</button>').join('')+'</span>'+
+    '<span class="sbg"><em>태그</em>'+Object.entries(SCH_KIND).map(([k,t])=>'<button class="btn sm" data-act="schKind" data-k="'+k+'"'+(lock?' disabled':'')+'>'+t+'</button>').join('')+'<button class="btn sm ghost" data-act="schKind" data-k=""'+(lock?' disabled':'')+' title="초두 · 선오더 태그 빼기">태그 빼기</button></span>'+
     '<span class="sbg"><em>예정일</em><input type="date" id="schBkEta" value="'+esc(X.bkEta||'')+'"'+(lock?' disabled':'')+'><input id="schBkMemo" placeholder="메모 (선택)" value="'+esc(X.bkMemo||'')+'"'+(lock?' disabled':'')+'><button class="btn sm pri" data-act="schEtaBulk"'+(lock?' disabled':'')+'>'+nSel+'건 저장</button></span>'+
     '<button class="sbx" data-act="schSelClear">선택 해제</button></div>';
-  h += '<div class="panel tw"><table class="schtbl schpick"><thead><tr><th>상품 · 컬러,사이즈 · 바코드</th><th>공장 · 담당</th><th>차수 · 오더일</th><th class="num">오더 · 잔여</th><th>지금 예정일</th><th>새 예정일</th><th>메모 (사유)</th><th></th></tr></thead><tbody>';
+  h += '<div class="panel tw"><table class="schtbl schpick"><thead><tr>'+ssh('prod','상품 · 컬러,사이즈 · 바코드')+ssh('fac','공장 · 담당')+ssh('od','차수 · 오더일')+ssh('qty','오더 · 잔여','num')+ssh('eta','예정일')+'<th>새 예정일</th><th>메모 (사유)</th><th></th></tr></thead><tbody>';
   if(!a.length) h += '<tr><td colspan="8" class="empty">'+(X.view==='none'?'예정일이 비어 있는 오더가 없어요 👍':'조건에 맞는 오더가 없습니다.')+'</td></tr>';
+  let gPrev = null; const gCnt = {}; if(X.sk==='fac') a.forEach(o=>{ gCnt[o.f||''] = (gCnt[o.f||'']||0)+1; });
   for(const o of a.slice(0, X.n)){
     const e = X.edits[o.id] || {}; const p = o.p;
+    if(X.sk==='fac' && (o.f||'')!==gPrev){ gPrev = o.f||''; h += '<tr class="schgrp"><td colspan="8"><b>'+esc(gPrev||'공장 미정')+'</b><span>'+nf(gCnt[gPrev])+'건</span></td></tr>'; }
     const kd = schKind(o), kShow = kd==='pre' || schManual(o);
-    h += '<tr data-schrow="'+o.id+'" class="schrow'+(e.eta?' schdirty':'')+(SEL[o.id]?' schsel':'')+'" aria-selected="'+(!!SEL[o.id])+'" title="빈 곳을 누르면 선택돼요"><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><span class="pnl"><a class="plink" data-act="openOrder" data-id="'+o.id+'">'+esc(p.n||p.en)+'</a>'+(kShow?'<span class="schk k-'+kd+'" title="'+(schManual(o)?'직접 지정한 분류':'분류')+'">'+SCH_KIND[kd]+'</span>':'')+'</span><small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span></small></div></div></td>'+
+    h += '<tr data-schrow="'+o.id+'" class="schrow'+(e.eta?' schdirty':'')+(SEL[o.id]?' schsel':'')+'" aria-selected="'+(!!SEL[o.id])+'"><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><span class="pnl"><a class="plink" data-act="openOrder" data-id="'+o.id+'">'+esc(p.n||p.en)+'</a>'+(kShow?'<span class="schk k-'+kd+'" title="'+(kd==='first'?'초두 · 내년 신상 등 기획 오더 (예상일 없음)':'선오더 · 캐리오버 등 선발주 (예상일 없음)')+'">'+SCH_KIND[kd]+'</span>':'')+'</span><small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span></small></div></div></td>'+
       '<td>'+flink(o.f)+(p.contact?'<small class="odsub">'+esc(p.contact)+'</small>':'')+'</td>'+
       '<td style="white-space:nowrap">'+esc(o.round)+(isNew(o)?'<span class="schnew">신규</span>':'')+'<small class="odsub">'+(o.od?fmtD(o.od):'초두')+'</small></td>'+
       '<td class="num">'+nf(o.qty)+'<small class="odsub">잔여 '+nf(o.remain)+'</small></td>'+
@@ -3847,6 +3853,7 @@ async function act(a, el){
     case 'mEta': orderModal(id,'delay'); break;
     case 'mDelay': orderModal(id,'delay'); break;
     case 'schView': S.sched.view = el.dataset.k; S.sched.n = 150; render(); break;
+    case 'schSort': { const X = S.sched, k = el.dataset.k; if(X.sk!==k){ X.sk = k; X.sd = 1; } else if(X.sd===1) X.sd = -1; else { X.sk = ''; X.sd = 1; } render(); break; }
     case 'schClear': S.sched.q = ''; S.sched.fac = ''; render(); break;
     case 'schMore': S.sched.n += 300; render(); break;
     case 'schKind': await schKindBulk(el.dataset.k); break;
