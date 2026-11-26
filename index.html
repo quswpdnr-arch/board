@@ -1173,6 +1173,7 @@ function updGo(go){
 function stockUpdModal(){
   const L = [['sm','온라인 재고 (셀메이트 목록)','창고별 재고 · 미발송 · 안정재고 · 신규 상품', stockDoc], ['off','오프라인 재고','매장(오프라인) 재고 바코드 · 수량', offDoc]];
   if(BRAND==='tid') L.push(['shop','매장 재고 (지점별)','지점별 매장 재고 파일 (지점마다 디피 1장 제외)', shopDoc]);
+  if(BRAND==='frv') L.push(['shop','무신사 매장 재고','무신사 오프라인 매장 재고 파일 (위치 · 바코드 · 가용)', shopDoc]);
   const ids = L.map(x=>x[3]&&x[3].by).filter(Boolean); if(ids.some(id=>!nameCache[id])) resolveNames(ids);
   openModal('<div class="mh"><div><h2>재고 업데이트</h2><div class="muted" style="font-size:12.5px">어떤 재고를 올릴지 고르세요</div></div><button class="btn sm x" data-act="close">닫기</button></div><div class="updch">'+
     L.map(x=>'<button class="upc" data-act="updGo" data-go="'+x[0]+'"><b>'+x[1]+'</b><small>'+x[2]+'</small><span class="'+(x[3]&&x[3].at&&updOld(x[3].at)?'old':'')+'">'+(x[3]&&x[3].at ? '마지막 '+updFmt(x[3].at)+(x[3].by?' · '+esc(who(x[3].by)):'') : '아직 없음')+'</span></button>').join('')+'</div>');
@@ -1234,8 +1235,8 @@ const whList = p => { const L = []; const ln = (t, v, c) => L.push('<div class="
   if(p.trans!=null){ ln('트랜쇼', p.trans); ln('본사 창고', p.hq||0, p.hq>0?'hq':''); if(p.gj!=null) ln('곤지암', p.gj); }
   if(p.off!=null) ln('트랜쇼(오프라인)', p.off, 'offl');
   if(p.shop!=null){ const open = S.rv.shopOpen===p.b; const st = shopDoc && shopDoc.stores && shopDoc.names ? [p.b, ...p.origBs].map(b=>shopDoc.stores[b]).find(Boolean) : null;
-    L.push('<div class="whl offl'+(st?' shopc':'')+(open?' open':'')+'"'+(st?' data-act="shopOpen" data-b="'+esc(p.b)+'" title="눌러서 지점별 수량 보기"':'')+'><span>매장 (디피 제외)'+(st?'<i>'+(open?'▴':'▾')+'</i>':'')+'</span><b>'+nf(p.shop)+'개</b></div>');
-    if(open && st) L.push('<div class="shopl">'+shopDoc.names.map((n,i)=>[n, +st[i]||0]).filter(z=>z[1]>0).map(([n,q])=>'<div><span>'+esc(n)+'</span><b>'+(q>1?nf(q-1):'0')+'</b><small>'+nf(q)+'</small></div>').join('')+'<em>디피 제외 · 원래 수량</em></div>'); }
+    L.push('<div class="whl offl'+(st?' shopc':'')+(open?' open':'')+'"'+(st?' data-act="shopOpen" data-b="'+esc(p.b)+'" title="눌러서 지점별 수량 보기"':'')+'><span>'+(shopDoc && shopDoc.dp===0 ? (shopDoc.src==='musinsa'?'무신사 매장':'매장') : '매장 (디피 제외)')+(st?'<i>'+(open?'▴':'▾')+'</i>':'')+'</span><b>'+nf(p.shop)+'개</b></div>');
+    if(open && st) L.push('<div class="shopl">'+shopDoc.names.map((n,i)=>[n, +st[i]||0]).filter(z=>z[1]>0).map(([n,q])=>{ const dp = shopDoc.dp==null?1:shopDoc.dp; return '<div><span>'+esc(n)+'</span><b>'+nf(Math.max(0,q-dp))+'</b>'+(dp?'<small>'+nf(q)+'</small>':'')+'</div>'; }).join('')+((shopDoc.dp==null?1:shopDoc.dp)?'<em>디피 제외 · 원래 수량</em>':'')+'</div>'); }
   if(p.safe>0) ln('안정재고', p.safe, 'safe');
   return L.length ? '<div class="whls">'+L.join('')+'</div>' : ''; };
 const whTxt = p => p && p.trans!=null ? ['트랜쇼 '+nf(p.trans)].concat(p.gj!=null?['곤지암 '+nf(p.gj)]:[], ['본사 '+nf(p.hq)], p.off!=null?['오프라인 '+nf(p.off)]:[], p.shop!=null?['매장 '+nf(p.shop)]:[], p.safe>0?['안정 '+nf(p.safe)]:[]).map(x=>x.replace(' ','\u00a0')).join(' · ') : (p && (p.off!=null||p.shop!=null) ? [p.off!=null?'오프라인 '+nf(p.off):'', p.shop!=null?'매장 '+nf(p.shop):''].filter(Boolean).join(' · ') : '');
@@ -2366,6 +2367,7 @@ const REG_MENU = [
     {k:'sm', t:'셀메이트 목록', d:'셀메이트 목록 한 번 붙여넣기로 재고 업데이트와 신규 상품 등록', rec:true, perm:['stock','reg']},
     {k:'off', t:'오프라인 재고', d:'매장(오프라인) 재고를 바코드 · 수량으로 따로 입력', perm:['stock']},
     {k:'shop', t:'매장 재고 (지점별)', d:'지점별 매장 재고 파일 올리기 (지점마다 디피 1장 제외)', perm:['stock'], brand:'tid'},
+    {k:'shop', t:'무신사 매장 재고', d:'무신사 오프라인 매장 재고 파일 (바코드 · 가용)', perm:['stock'], brand:'frv'},
     {k:'new', t:'직접 입력', d:'상품 정보와 컬러별 바코드 · 초두 수량 입력', perm:['reg']}]},
   {k:'log', t:'변경 이력', d:'누가 언제 무엇을 바꿨는지', subs:[{k:'log', t:'변경 이력', d:''}]},
   {k:'team', t:'팀원 · 권한', d:'관리자 전용', admin:true, subs:[{k:'team', t:'팀원 · 권한', d:''}]}
@@ -2664,9 +2666,10 @@ function regOff(){
 function shopParse(text){
   const first = (text.split(/\r?\n/).find(l=>l.trim())||''); const d = first.includes('\t') ? '\t' : ',';
   const rows = parseDelim(text, d).map(r=>r.map(x=>unwrapX(String(x||'').trim())));
-  const hi = rows.findIndex(r=>r.some(x=>/바코드/.test(x))); if(hi<0) return {err:'바코드 칸이 있는 머리글을 찾지 못했어요.'};
+  const hi = rows.findIndex(r=>r.some(x=>/바코드/.test(x) && x.length<=12)); if(hi<0) return {err:'바코드 칸이 있는 머리글을 찾지 못했어요.'};   // 안내 문구 줄(… 바코드가 N개일 경우 …)은 건너뜀
   const H = rows[hi], top = hi>0 ? rows[hi-1] : [];
   const ib = H.findIndex(x=>/바코드/.test(x));
+  if(H.some(x=>/^위치$/.test(x)) && H.some(x=>/^가용$/.test(x))) return musinsaStockParse(rows, hi);
   const sc = H.map((h,i)=>i).filter(i=>i!==ib && /창고|매장|점|쇼룸/.test(H[i]) && !/합계|상품명|옵션/.test(H[i]));
   if(!sc.length) return {err:'지점 칸(…창고)을 찾지 못했어요.'};
   const names = sc.map(i=>(top[i]||'').trim() || H[i].replace(/\s*창고\s*$/,'').trim());
@@ -2682,6 +2685,76 @@ function shopParse(text){
   }
   if(!n) return {err:'매장 재고가 있는 바코드 줄을 찾지 못했어요.'};
   return {names, stores, items, n, notIn, tot, net, dpCut};
+}
+// 프리버 · 무신사 매장 재고 (위치 · SKU · 상품명 · 바코드 · 옵션 · 가용 · 출고예정 … · 스타일넘버): 바코드로 연결, 가용만 · 디피 제외 없음
+const musinsaStore = v => String(v||'').replace(/^\s*\d+\s*\(\s*/,'').replace(/\)\s*$/,'').replace(/무신사\s*메가스토어\s*/,'메가스토어 ').replace(/무신사\s*스토어\s*/,'스토어 ').replace(/아이파크몰\s*/,'').replace(/점$/,'').trim() || '매장';
+const msOpt = o => { const [c, z] = String(o||'').split('^'); return normK(c||'')+'|'+normK(({S:'SMALL',M:'MEDIUM',L:'LARGE',XL:'XLARGE'})[String(z||'').trim().toUpperCase()] || z || ''); };
+// 보드 상품 찾기 (무신사용): 스타일 코드([FRFA05NT02]) + 컬러 + 사이즈 → 딱 1개일 때만, 아니면 영문 상품명 전체 + 컬러 + 사이즈 → 딱 1개일 때만
+const MS_CODE = /([A-Z]{4}\d{2}[A-Z]{2}\d{2})/;
+function msIndex(){
+  const byCode = {}, byName = {}, byB = new Map();
+  for(const p of PRODS.values()){ if(!p.b || !/^1-\d{10}$/.test(p.b)) continue; byB.set(p.b, p); for(const ob of p.origBs) byB.set(ob, p);
+    const c = MS_CODE.exec(p.en||''); const [pc, pz] = String(p.opt||'').split(','); const ok = normK(pc||'')+'|'+normK(String(pz||'').replace(/\(.*\)/,''));
+    if(c) (byCode[c[1]+'|'+ok] = byCode[c[1]+'|'+ok] || new Set()).add(p.b); if(p.en) (byName[normK(p.en)+'|'+ok] = byName[normK(p.en)+'|'+ok] || new Set()).add(p.b); }
+  const one = s => s && s.size===1 ? [...s][0] : (s && s.size>1 ? '?' : '');
+  const find = (name, ok) => { const c = MS_CODE.exec(name||''); const a = c ? one(byCode[c[1]+'|'+ok]) : ''; if(a) return a; return one(byName[normK(name||'')+'|'+ok]); };
+  return {byB, find};
+}
+function musinsaStockParse(rows, hi){
+  const H = rows[hi].map(x=>x.replace(/\s/g,'')); const f = re => H.findIndex(x=>re.test(x));
+  const il = f(/^위치$/), ib = f(/바코드/), iq = f(/^가용$/), io = f(/^옵션$/), isn = f(/스타일넘버|스타일번호/), inm = f(/상품명/);
+  const IX = msIndex();
+  const names = [], ni = {}, per = {}, mmap = {}; let rowsN = 0, byBc = 0, byNm = 0; const miss = [], conflict = [];
+  for(const r of rows.slice(hi+1)){ if(!String(r[ib]||'').trim() && !String(r[inm]||'').trim()) continue; if(il>=0 && !String(r[il]||'').trim()) continue; rowsN++;
+    const nm = String(r[inm]||'').replace(/\s+\S+\^\S+\s*$/,'').trim(), ok = msOpt(r[io]), q = Math.max(0, parseInt(String(r[iq]||'0').replace(/[^\d-]/g,''),10)||0);
+    const b0 = normBc(r[ib]); let b = '';
+    if(/^1-\d{10}$/.test(b0) && IX.byB.has(b0)){   // 우리 바코드 → 그대로 쓰되, 상품명의 스타일 코드 · 컬러 · 사이즈가 맞는지 한 번 더 확인
+      const p = IX.byB.get(b0), c = MS_CODE.exec(nm), pc = MS_CODE.exec(p.en||''); const [oc, oz] = String(p.opt||'').split(',');
+      const optOk = (normK(oc||'')+'|'+normK(String(oz||'').replace(/\(.*\)/,'')))===ok;
+      if((c && pc && c[1]!==pc[1]) || !optOk){ conflict.push(nm+' · '+String(r[io]||'').replace('^',' ')+' → 바코드 '+b0+' ('+(p.n||p.en)+' '+p.opt+')'); continue; }
+      b = b0; byBc++;
+    } else { const fb = IX.find(nm, ok); if(fb && fb!=='?'){ b = fb; byNm++; } else { miss.push(nm+' · '+String(r[io]||'').replace('^',' ')+(fb==='?'?' (후보 여러 개)':'')+' · '+q+'장'); continue; } }
+    const st = musinsaStore(r[il]); if(!(st in ni)){ ni[st] = names.length; names.push(st); }
+    (per[b] = per[b] || {})[st] = (per[b][st]||0) + q;
+    if(isn>=0 && r[isn]) mmap[String(r[isn]).trim()+'|'+ok] = b;
+    mmap['n:'+normK(nm)+'|'+ok] = b; }
+  const stores = {}, items = {}; let n = 0, tot = 0;
+  for(const [b, m] of Object.entries(per)){ const qs = names.map(nm=>m[nm]||0); const t = qs.reduce((a,q)=>a+q,0); if(!t) continue; n++; stores[b] = qs; items[b] = t; tot += t; }
+  if(!rowsN) return {err:'무신사 매장 재고 줄을 찾지 못했어요.'};
+  return {names, stores, items, n, notIn:0, tot, net:tot, dpCut:0, dp:0, mmap, ms:true, rowsN, byBc, byNm, miss, conflict};
+}
+// 프리버 · 무신사 오프라인 판매 내역 (매장명 · 주문일시 · 상품명 · 옵션명 · 스타일번호 · 구매수량 · 클레임상태) → 바코드별 주차 판매
+function musinsaSalesParse(rows, hi){
+  const H = rows[hi].map(x=>x.replace(/\s/g,'')); const f = re => H.findIndex(x=>re.test(x));
+  const idt = f(/주문일시|주문일/), inm = f(/^상품명$/), io = f(/^옵션명$|^옵션$/), isn = f(/스타일번호|스타일넘버/), iq = f(/구매수량|수량/), icl = f(/클레임상태/), ist = f(/주문상태/);
+  const MM = (shopDoc && shopDoc.mmap) || {};
+  const IX = msIndex();
+  const recs = []; const miss = {}; let refund = 0, rowsN = 0;
+  for(const r of rows.slice(hi+1)){ const dt = String(r[idt]||'').slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(dt)) continue; rowsN++;
+    if(/환불|취소|반품/.test((icl>=0?r[icl]:'')+' '+(ist>=0?r[ist]:''))){ refund++; continue; }
+    const nm = String(r[inm]||''), op = String(r[io]||''), ok = msOpt(op);
+    const fb = IX.find(nm, ok); const b = MM[String(r[isn]||'').trim()+'|'+ok] || MM['n:'+normK(nm)+'|'+ok] || (fb!=='?' ? fb : '') || '';
+    const q = parseInt(String(r[iq]||'1').replace(/[^\d-]/g,''),10) || 1;
+    if(!b){ const k = nm+' · '+op.replace('^',' '); miss[k] = (miss[k]||0) + q; continue; }
+    recs.push({b, d:dt, q}); }
+  if(!rowsN) return {err:'주문일시가 있는 판매 줄을 찾지 못했어요.'};
+  const end = recs.reduce((m,x)=>x.d>m?x.d:m, ''); if(!end) return {err:'보드 상품과 연결된 판매가 없어요.'};
+  const wk = [2,1,0].map(k=>({f:addDays(end, -7*k-6), t:addDays(end, -7*k)}));
+  const items = {}; for(const x of recs){ const i = wk.findIndex(w=>x.d>=w.f && x.d<=w.t); if(i<0) continue; const it = items[x.b] || (items[x.b] = [0,0,0,0,0]); it[2+i] += x.q; if(i===2) it[0] += x.q; }
+  const n = Object.keys(items).length, mList = Object.entries(miss).sort((a,b)=>b[1]-a[1]);
+  return {items, shop:null, n, from:wk[2].f, to:wk[2].t, days:7, weeks:wk.map(w=>w.f+'~'+w.t), ms:true, sold:recs.length, refund, miss:mList, missQ:mList.reduce((t,x)=>t+x[1],0)};
+}
+// 업로드 파일 읽기: CSV · TSV(UTF-8 / EUC-KR) · 엑셀(.xlsx · .xls → 첫 시트를 탭 구분 텍스트로)
+let xlsxLib = null;
+function loadXlsx(){ if(window.XLSX) return Promise.resolve(window.XLSX); if(xlsxLib) return xlsxLib;
+  xlsxLib = new Promise((ok, no)=>{ const sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'; sc.onload = ()=>ok(window.XLSX); sc.onerror = ()=>{ xlsxLib = null; no(new Error('엑셀 읽기 도구를 못 불러왔어요')); }; document.head.appendChild(sc); }); return xlsxLib; }
+function readUpload(f, cb){
+  const fr = new FileReader();
+  if(/\.xlsx?$/i.test(f.name)){
+    fr.onload = async () => { try{ const X = await loadXlsx(); const wb = X.read(new Uint8Array(fr.result), {type:'array', cellDates:false}); const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = X.utils.sheet_to_json(ws, {header:1, raw:false, defval:''}); cb(rows.map(r=>r.map(c=>String(c==null?'':c).replace(/[\t\r\n]+/g,' ')).join('\t')).join('\n')); }catch(e){ toast(e.message||'엑셀 파일을 읽지 못했어요 · CSV로 저장하거나 복사해 붙여넣어 주세요'); } };
+  } else fr.onload = () => { const buf = fr.result; let text; try{ text = new TextDecoder('utf-8',{fatal:true}).decode(buf); }catch(e){ text = new TextDecoder('euc-kr').decode(buf); } cb(text.replace(/^\ufeff/,'')); };
+  fr.readAsArrayBuffer(f);
 }
 function shopRun(text, fileName){ if(!brandOk(text)) return; const r = shopParse(text); const t = fileName ? '' : text; S.shopIn = r.err ? {fileName, text:t, err:r.err} : {fileName, text:t, res:r}; render(); }
 // ---------- 예약배송 일괄 입력 (담당자 · 카테고리 · 바코드 · N차 출고일/수량 · 판매상태) ----------
@@ -2784,23 +2857,30 @@ async function rviApply(){
 function regShop(){
   const X = S.shopIn || (S.shopIn = {}); const R = X.res;
   const cur = shopDoc && shopDoc.stores ? '지금 보드: '+esc(shopDoc.file||'')+' · '+(()=>{ const d = new Date(shopDoc.at); return (d.getMonth()+1)+'.'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes()); })()+' 올림' : (shopDoc && shopDoc.items ? '지금 보드: POS 파일의 매장 재고 합계 (지점별 아님)' : '아직 올린 매장 재고가 없어요');
-  let h = '<div class="sec"><div class="sechead"><h2>매장 재고 (지점별)</h2><span class="sub">'+cur+'</span></div><div class="panel pad step">'+
+  const MS = BRAND==='frv';
+  let h = '<div class="sec"><div class="sechead"><h2>'+(MS?'무신사 매장 재고':'매장 재고 (지점별)')+'</h2><span class="sub">'+cur+'</span></div><div class="panel pad step">'+
+    (MS ? '<p class="note" style="margin:0">무신사 오프라인 매장 재고 파일(위치 · SKU · 상품명 · 바코드 · 옵션 · 가용 · 출고예정 · … · 스타일넘버)을 그대로 올리거나 머리글까지 복사해 붙여넣으세요. <b>바코드로 연결</b>하고, 수량은 <b>가용</b>만 써요 (디피 제외 없음).</p>'+
+      '<p class="note" style="margin:0">예약배송 재고 칸에 "무신사 매장"으로 보이고 눌러보면 매장별 수량이 나와요. 이 파일의 스타일넘버 · 옵션도 기억해 두었다가 <b>무신사 오프라인 판매 내역</b>(바코드 없음)을 올릴 때 바코드를 찾는 데 써요.</p>'+
+      '<textarea id="shopT" rows="4" placeholder="위치&#9;SKU&#9;상품명&#9;바코드&#9;옵션&#9;가용&#9;출고예정 …">'+esc(X.text||'')+'</textarea>' :
     '<p class="note" style="margin:0">지점별 매장 재고 시트(바코드 번호 · 상품명 · 옵션명 · 합계 · 지점별 창고)를 머리글까지 복사해 붙여넣거나 파일로 올리세요. 바코드 하이픈이 없어도 돼요.</p>'+
     '<p class="note" style="margin:0"><b>매장 재고 = 지점마다 1장(디피)을 뺀 합계</b>예요. 디피 상품은 RT로 뺄 수 없어서 제외해요. 예약배송 재고 칸의 "매장 재고"에 마우스를 올리면 지점별 수량이 보여요. 이 파일을 올린 뒤엔 POS 파일의 매장 재고 합계로 덮어쓰지 않아요.</p>'+
-    '<textarea id="shopT" rows="4" placeholder="시트에서 머리글(지점명 줄 · 바코드 번호 줄)까지 같이 복사해 붙여넣으세요&#10;&#9;&#9;&#9;&#9;신세계 강남&#9;커넥트현대 …&#10;바코드 번호&#9;상품명&#9;옵션명&#9;합계&#9;신세계 강남 창고&#9;커넥트현대 창고 …">'+esc(X.text||'')+'</textarea>'+
-    '<div class="filters"><button class="btn pri" data-act="shopCheck">붙여넣은 내용 확인</button><label class="btn" for="shopFile" style="cursor:pointer">파일 올리기</label><input type="file" id="shopFile" accept=".csv,.tsv,.txt" hidden>'+(X.fileName?'<span class="note">'+esc(X.fileName)+'</span>':'')+'</div>';
+    '<textarea id="shopT" rows="4" placeholder="시트에서 머리글(지점명 줄 · 바코드 번호 줄)까지 같이 복사해 붙여넣으세요&#10;&#9;&#9;&#9;&#9;신세계 강남&#9;커넥트현대 …&#10;바코드 번호&#9;상품명&#9;옵션명&#9;합계&#9;신세계 강남 창고&#9;커넥트현대 창고 …">'+esc(X.text||'')+'</textarea>')+
+    '<div class="filters"><button class="btn pri" data-act="shopCheck">붙여넣은 내용 확인</button><label class="btn" for="shopFile" style="cursor:pointer">파일 올리기</label><input type="file" id="shopFile" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden>'+(X.fileName?'<span class="note">'+esc(X.fileName)+'</span>':'')+'</div>';
   if(X.err) h += '<p class="note" style="margin:0;color:var(--bad)">'+esc(X.err)+'</p>';
   if(X.done) h += '<p class="note" style="margin:0;color:var(--ok)">매장 재고를 반영했습니다 ('+esc(X.done)+').</p>';
   if(R){
-    h += '<div class="stats"><span>지점 <b>'+R.names.length+'</b></span><span>재고 있는 바코드 <b>'+nf(R.n)+'</b></span><span>매장 재고 합계 <b>'+nf(R.tot)+'</b></span><span>디피 제외 <b style="color:var(--bad)">−'+nf(R.dpCut)+'</b></span><span>반영 수량 <b style="color:var(--accent)">'+nf(R.net)+'</b></span>'+(R.notIn?'<span>보드에 없는 바코드 <b>'+nf(R.notIn)+'</b></span>':'')+'</div>'+
-      '<p class="note" style="margin:0">지점: '+R.names.map(esc).join(' · ')+'</p>'+
+    h += '<div class="stats"><span>'+(R.ms?'매장':'지점')+' <b>'+R.names.length+'</b></span><span>재고 있는 바코드 <b>'+nf(R.n)+'</b></span><span>매장 재고 합계 <b>'+nf(R.tot)+'</b></span>'+(R.dpCut?'<span>디피 제외 <b style="color:var(--bad)">−'+nf(R.dpCut)+'</b></span>':'')+'<span>반영 수량 <b style="color:var(--accent)">'+nf(R.net)+'</b></span>'+(R.notIn?'<span>보드에 없는 바코드 <b>'+nf(R.notIn)+'</b></span>':'')+'</div>'+
+      '<p class="note" style="margin:0">'+(R.ms?'매장':'지점')+': '+R.names.map(esc).join(' · ')+'</p>'+
+      (R.ms ? '<p class="note" style="margin:0">연결: 전체 '+nf(R.rowsN)+'줄 중 <b>바코드 '+nf(R.byBc)+'</b> · <b>상품명 + 컬러 · 사이즈 '+nf(R.byNm)+'</b>'+(R.miss.length?' · <b style="color:var(--warn)">연결 안 됨 '+R.miss.length+'</b>':'')+(R.conflict.length?' · <b style="color:var(--bad)">바코드 · 상품명 불일치 '+R.conflict.length+'</b>':'')+' (연결 안 된 줄은 반영하지 않아요)</p>'+
+        (R.conflict.length?'<details open><summary class="note" style="cursor:pointer;color:var(--bad)">바코드와 상품명이 서로 다른 줄 '+R.conflict.length+'개</summary><div class="note" style="max-height:160px;overflow:auto">'+R.conflict.map(esc).join('<br>')+'</div></details>':'')+
+        (R.miss.length?'<details><summary class="note" style="cursor:pointer;color:var(--warn)">보드 상품과 연결 안 된 줄 '+R.miss.length+'개 보기</summary><div class="note" style="max-height:160px;overflow:auto">'+R.miss.map(esc).join('<br>')+'</div><p class="note" style="margin:4px 0 0">보드에 오더가 없는 상품이거나 컬러 · 사이즈 표기가 달라요.</p></details>':'') : '')+
       '<div class="filters"><button class="btn pri" data-act="shopApply"'+(canWrite()&&canDo('stock')?'':' disabled')+'>매장 재고 반영</button></div>';
   }
   return h+'</div></div>';
 }
 async function shopApply(){ if(!need('stock')) return;
   const X = S.shopIn; const R = X && X.res; if(!R) return;
-  const ok = await guard(async()=>{ await DB.doc('stock/shop').set({items:R.items, stores:R.stores, names:R.names, dp:1, src:'stores', file:X.fileName||'붙여넣기', at:new Date().toISOString(), by:MYID||''}); await writeLog('매장 재고(지점별) 반영: 바코드 '+R.n+'개 · 합계 '+R.tot+'장 → 디피 제외 '+R.net+'장'); }, '매장 재고를 반영했습니다');
+  const ok = await guard(async()=>{ await DB.doc('stock/shop').set(Object.assign({items:R.items, stores:R.stores, names:R.names, dp:R.ms?0:1, src:R.ms?'musinsa':'stores', file:X.fileName||'붙여넣기', at:new Date().toISOString(), by:MYID||''}, R.mmap?{mmap:R.mmap}:{})); await writeLog('매장 재고(지점별) 반영: 바코드 '+R.n+'개 · 합계 '+R.tot+'장 → 디피 제외 '+R.net+'장'); }, '매장 재고를 반영했습니다');
   if(ok){ S.shopIn = {done:'바코드 '+nf(R.n)+'개 · '+nf(R.net)+'장'}; render(); }
 }
 async function offApply(){ if(!need('stock')) return;
@@ -3467,6 +3547,7 @@ const normBc = v => { const x = String(v==null?'':v).replace(/\s/g,''); return /
 function salesParse(text){
   const first = (text.split(/\r?\n/)[0]||''); const delim = first.includes('\t') ? '\t' : (first.split(',').length > 3 ? ',' : '\t');
   const rows = parseDelim(text, delim).map(r=>r.map(x=>unwrapX(String(x||'').trim())));
+  { const mh = rows.findIndex(r=>r.some(x=>/^매장명$/.test(x)) && r.some(x=>/주문일시/.test(x)) && r.some(x=>/옵션/.test(x))); if(mh>=0) return musinsaSalesParse(rows, mh); }
   const hi = rows.findIndex(r=>r.some(x=>/바코드/.test(x)) && (r.some(x=>/주문수|판매\s*수량|판매량|^수량$|출고\s*수량/.test(x)) || r.some(x=>/^20\d{6}$/.test(x.replace(/[^\d]/g,'')))));
   if(hi<0) return {err:'머리글(바코드번호 · 주문수 · 날짜)을 찾지 못했습니다. 셀메이트 판매 DB를 머리글까지 복사하거나 CSV로 올려주세요.'};
   const H = rows[hi].map(x=>String(x).trim());
@@ -3493,13 +3574,15 @@ function rvSalesModal(){
   const X = S.rvs || (S.rvs = {}); const off = X.kind==='off';
   const kindSel = '<label class="f" style="max-width:260px">추이 종류<select id="rvsKind"><option value="on"'+(off?'':' selected')+'>온라인 추이현황</option><option value="off"'+(off?' selected':'')+'>오프라인 추이현황</option></select></label>';
   let h = '<div class="mh"><div><h2>판매 추이 업데이트</h2><div class="muted" style="font-size:12.5px">지금: 온라인 '+esc(salesLabel()||'없음')+' · 오프라인 '+esc(salesOffLabel()||'없음')+'</div></div><button class="btn sm x" data-act="close">닫기</button></div>'+kindSel+
-    (off ? '<div class="panel pad step"><p class="note" style="margin:0"><b>오프라인(매장) 판매 추이</b>를 올리는 곳이에요. 정식 양식은 받는 대로 맞출 예정이고, 지금은 <b>바코드번호</b> 칸과 <b>날짜별(YYYYMMDD) 수량</b> 또는 <b>판매수량 · 주문수</b> 칸이 있으면 읽어요.</p><p class="note" style="margin:0"><b>오프라인 주간 판매</b> = 날짜 칸 중 최근 7일 합계 (날짜 칸이 없으면 판매수량). 온라인 재고(트랜쇼 · 곤지암 · 본사)가 온라인 판매의 60% 아래인데, 매장에선 재고 대비 잘 안 팔리면(오프라인 주간 판매 ÷ 오프라인 재고 10% 미만) 예약배송에 <b>RT 오프→온</b>으로 떠요. 반대로 매장에선 잘 팔리는데 매장 재고가 1주 판매분도 안 되고 온라인에 여유가 있으면 <b>RT 온→오프</b>로 떠요. 매장엔 4주 판매분을 남기고 나머지를 가져올 수 있는 수량으로 보여드려요. POS 판매(바코드 하이픈 없음)도 그대로 올리면 돼요 · 실판매 수량을 주간 판매로, <b>매장 재고</b> 칸이 있으면 매장 재고로 같이 반영해요.</p>'+
+    (off ? '<div class="panel pad step">'+(BRAND==='frv'?'<p class="note" style="margin:0"><b>프리버는 무신사 오프라인 판매 내역</b>(매장명 · 주문일시 · 상품명 · 옵션명 · 스타일번호 · 구매수량 · 클레임상태) 엑셀을 그대로 올리면 돼요. 바코드가 없어서 <b>무신사 매장 재고 파일의 스타일넘버 · 옵션</b> → 상품명의 스타일 코드 · 컬러 · 사이즈 순서로 바코드를 찾아요. 환불 · 취소 건은 빼고, 마지막 주문일부터 7일씩 3주로 나눠요.</p>':'')+'<p class="note" style="margin:0"><b>오프라인(매장) 판매 추이</b>를 올리는 곳이에요. 정식 양식은 받는 대로 맞출 예정이고, 지금은 <b>바코드번호</b> 칸과 <b>날짜별(YYYYMMDD) 수량</b> 또는 <b>판매수량 · 주문수</b> 칸이 있으면 읽어요.</p><p class="note" style="margin:0"><b>오프라인 주간 판매</b> = 날짜 칸 중 최근 7일 합계 (날짜 칸이 없으면 판매수량). 온라인 재고(트랜쇼 · 곤지암 · 본사)가 온라인 판매의 60% 아래인데, 매장에선 재고 대비 잘 안 팔리면(오프라인 주간 판매 ÷ 오프라인 재고 10% 미만) 예약배송에 <b>RT 오프→온</b>으로 떠요. 반대로 매장에선 잘 팔리는데 매장 재고가 1주 판매분도 안 되고 온라인에 여유가 있으면 <b>RT 온→오프</b>로 떠요. 매장엔 4주 판매분을 남기고 나머지를 가져올 수 있는 수량으로 보여드려요. POS 판매(바코드 하이픈 없음)도 그대로 올리면 돼요 · 실판매 수량을 주간 판매로, <b>매장 재고</b> 칸이 있으면 매장 재고로 같이 반영해요.</p>'+
       '<textarea id="rvSalesT" rows="4" placeholder="바코드번호&#9;상품명&#9;옵션&#9;…&#9;20261110&#9;20261111 … (또는 판매수량)">'+esc(X.text||'')+'</textarea>' :
     '<div class="panel pad step"><p class="note" style="margin:0">셀메이트 <b>판매 DB</b>(대표이미지 · 바코드번호 · 상품명 · 옵션내용 · 사입상품명 · 공급처명 · 상품분류 · 미발송수 · 현재고 · 주문수 · 취소주문수 · 반품주문수 · 판매가 · 원가 · 날짜별 주문수) CSV를 올리거나 머리글까지 붙여넣으세요. 세 브랜드 모두 같은 양식이에요.</p><p class="note" style="margin:0"><b>주간 판매</b> = 날짜 칸 중 <b>최근 7일 합계</b> (마지막 날짜가 오늘이면 진행 중인 오늘은 빼고 그 전 7일) · <b>미발송</b> = 미발송수 칸.</p>'+
     '<textarea id="rvSalesT" rows="4" placeholder="대표이미지&#9;바코드번호&#9;상품명&#9;옵션내용&#9;…&#9;미발송수&#9;현재고&#9;주문수&#9;…&#9;20261104&#9;20261105 …">'+esc(X.text||'')+'</textarea>')+
-    '<div class="filters"><button class="btn pri" data-act="rvsCheck">읽기</button><label class="btn" for="rvSalesFile" style="cursor:pointer">CSV 파일 올리기</label><input type="file" id="rvSalesFile" accept=".csv,.tsv,.txt" hidden></div>'+
+    '<div class="filters"><button class="btn pri" data-act="rvsCheck">읽기</button><label class="btn" for="rvSalesFile" style="cursor:pointer">CSV 파일 올리기</label><input type="file" id="rvSalesFile" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></div>'+
     (X.err?'<p class="note" style="color:var(--bad);margin:0">'+esc(X.err)+'</p>':'')+
     (X.res && off && !X.res.days?'<div class="filters"><span class="note">이 파일엔 날짜가 없어요. 필터한 기간을 확인해 주세요</span><input type="date" id="rvsFrom" value="'+esc(X.res.from)+'"> ~ <input type="date" id="rvsTo" value="'+esc(X.res.to)+'"></div>':'')+
+    (X.res && X.res.ms ? '<p class="note" style="margin:0">무신사 오프라인 판매 내역으로 읽었어요 · 판매 <b>'+nf(X.res.sold)+'건</b>'+(X.res.refund?' (환불 · 취소 '+nf(X.res.refund)+'건 뺌)':'')+' · 최근 3주 '+esc(X.res.weeks.map(w=>w.split('~').map(d=>fmtD(d).slice(0,5)).join('~')).join(' / '))+'</p>'+
+      (X.res.miss.length ? '<details><summary class="note" style="cursor:pointer;color:var(--warn)">보드 상품과 연결 안 된 판매 '+nf(X.res.missQ)+'장 ('+X.res.miss.length+'개 옵션) 보기</summary><div class="note" style="max-height:180px;overflow:auto;margin-top:4px">'+X.res.miss.map(([k,q])=>esc(k)+' · '+q+'장').join('<br>')+'</div><p class="note" style="margin:4px 0 0">보드에 오더가 없는 상품이거나 컬러가 달라요. 무신사 매장 재고 파일을 먼저 올리면 더 많이 연결돼요.</p></details>' : '<p class="note" style="margin:0;color:var(--ok)">모든 판매가 보드 상품과 연결됐어요.</p>') : '')+
     (X.res && X.res.shop && off?'<p class="note" style="margin:0">매장 재고 칸이 있어서 <b>매장 재고 '+nf(Object.keys(X.res.shop).length)+'개 바코드</b>도 같이 반영해요 (이 파일을 올릴 때만 매장 재고가 바뀌어요).</p>':'')+
     (X.res?'<div class="stats"><span>읽은 바코드 <b>'+nf(X.res.n)+'</b></span><span>판매 · 미발송 있는 바코드 <b>'+nf(Object.keys(X.res.items).length)+'</b></span><span>기간 <b>'+esc(fmtD(X.res.from).slice(0,5)+' ~ '+fmtD(X.res.to).slice(0,5))+'</b></span></div><div><button class="btn pri" data-act="rvsApply"'+(canDo('resv')?'':' disabled')+'>'+(off?'오프라인':'온라인')+' 판매 추이 반영</button></div>':'')+'</div>';
   openModal(h);
@@ -4395,21 +4478,13 @@ document.addEventListener('change', e => {
     else rvQuick(b, {st:v}, '노출 상태 '+(x.auto?'(자동) ':'')+x.st+' → '+v); }
   if(t.id==='rvsKind'){ S.rvs = {kind:t.value}; rvSalesModal(); }
   if(t.id==='rviFile' && t.files && t.files[0]){ const f = t.files[0]; const fr = new FileReader(); fr.onload = () => { const buf = fr.result; let text; try{ text = new TextDecoder('utf-8',{fatal:true}).decode(buf); }catch(e){ text = new TextDecoder('euc-kr').decode(buf); } text = text.replace(/^\ufeff/,''); const ta = document.getElementById('rviT'); if(ta) ta.value = text; rviRun(text); }; fr.readAsArrayBuffer(f); t.value=''; return; }
-  if(t.id==='shopFile' && t.files && t.files[0]){
-    const f = t.files[0]; const fr = new FileReader();
-    fr.onload = () => { const buf = fr.result; let text; try{ text = new TextDecoder('utf-8',{fatal:true}).decode(buf); }catch(e){ text = new TextDecoder('euc-kr').decode(buf); } shopRun(text.replace(/^\ufeff/,''), f.name); };
-    fr.readAsArrayBuffer(f);
-  }
+  if(t.id==='shopFile' && t.files && t.files[0]){ const f = t.files[0]; readUpload(f, text=>shopRun(text, f.name)); t.value = ''; }
   if(t.id==='offFile' && t.files && t.files[0]){
     const f = t.files[0]; const fr = new FileReader();
     fr.onload = () => { const buf = fr.result; let text; try{ text = new TextDecoder('utf-8',{fatal:true}).decode(buf); }catch(e){ text = new TextDecoder('euc-kr').decode(buf); } offRun(text.replace(/^\ufeff/,''), f.name); };
     fr.readAsArrayBuffer(f);
   }
-  if(t.id==='rvSalesFile' && t.files && t.files[0]){
-    const f = t.files[0]; const fr = new FileReader();
-    fr.onload = () => { const buf = fr.result; let text; try{ text = new TextDecoder('utf-8',{fatal:true}).decode(buf); }catch(e){ text = new TextDecoder('euc-kr').decode(buf); } rvsRun(text.replace(/^\ufeff/,''), f.name); };
-    fr.readAsArrayBuffer(f);
-  }
+  if(t.id==='rvSalesFile' && t.files && t.files[0]){ const f = t.files[0]; readUpload(f, text=>rvsRun(text, f.name)); t.value = ''; }
   if(t.id==='findOpen'){ S.find.onlyOpen = t.checked; S.find.n = 300; render(); }
   if(t.dataset && t.dataset.pcountry){ setStyleCountry([t.dataset.pcountry], t.value); }
   if(t.dataset && t.dataset.sdeco){ const st = STYLES.get(t.dataset.sdeco); if(st) setStyleDeco(st.prods.map(p=>p.key), t.value); }
