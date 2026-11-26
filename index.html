@@ -2645,7 +2645,7 @@ function shopParse(text){
   if(!n) return {err:'매장 재고가 있는 바코드 줄을 찾지 못했어요.'};
   return {names, stores, items, n, notIn, tot, net, dpCut};
 }
-function shopRun(text, fileName){ if(!brandOk(text)) return; const r = shopParse(text); S.shopIn = r.err ? {fileName, err:r.err} : {fileName, res:r}; render(); }
+function shopRun(text, fileName){ if(!brandOk(text)) return; const r = shopParse(text); const t = fileName ? '' : text; S.shopIn = r.err ? {fileName, text:t, err:r.err} : {fileName, text:t, res:r}; render(); }
 // ---------- 예약배송 일괄 입력 (담당자 · 카테고리 · 바코드 · N차 출고일/수량 · 판매상태) ----------
 // 판매상태 규칙: 판매중 = 판매 플랫폼 전체 켬 (일반배송) · 판매중지 = 전체 끔 (품절) · 소량오픈 = 29CM · W컨셉만 켬 (일반배송) · 예약배송 = 예약 플랫폼 전체 켬 (예약배송)
 const RVI_ST = {'판매중':'일반배송', '판매중지':'품절', '소량오픈':'일반배송', '예약배송':'예약배송'};
@@ -2747,9 +2747,10 @@ function regShop(){
   const X = S.shopIn || (S.shopIn = {}); const R = X.res;
   const cur = shopDoc && shopDoc.stores ? '지금 보드: '+esc(shopDoc.file||'')+' · '+(()=>{ const d = new Date(shopDoc.at); return (d.getMonth()+1)+'.'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes()); })()+' 올림' : (shopDoc && shopDoc.items ? '지금 보드: POS 파일의 매장 재고 합계 (지점별 아님)' : '아직 올린 매장 재고가 없어요');
   let h = '<div class="sec"><div class="sechead"><h2>매장 재고 (지점별)</h2><span class="sub">'+cur+'</span></div><div class="panel pad step">'+
-    '<p class="note" style="margin:0">지점별 매장 재고 파일(바코드 번호 · 상품명 · 옵션명 · 합계 · 지점별 창고)을 그대로 올리세요. 바코드 하이픈이 없어도 돼요.</p>'+
+    '<p class="note" style="margin:0">지점별 매장 재고 시트(바코드 번호 · 상품명 · 옵션명 · 합계 · 지점별 창고)를 머리글까지 복사해 붙여넣거나 파일로 올리세요. 바코드 하이픈이 없어도 돼요.</p>'+
     '<p class="note" style="margin:0"><b>매장 재고 = 지점마다 1장(디피)을 뺀 합계</b>예요. 디피 상품은 RT로 뺄 수 없어서 제외해요. 예약배송 재고 칸의 "매장 재고"에 마우스를 올리면 지점별 수량이 보여요. 이 파일을 올린 뒤엔 POS 파일의 매장 재고 합계로 덮어쓰지 않아요.</p>'+
-    '<div class="filters"><label class="btn pri" for="shopFile" style="cursor:pointer">파일 올리기</label><input type="file" id="shopFile" accept=".csv,.tsv,.txt" hidden>'+(X.fileName?'<span class="note">'+esc(X.fileName)+'</span>':'')+'</div>';
+    '<textarea id="shopT" rows="4" placeholder="시트에서 머리글(지점명 줄 · 바코드 번호 줄)까지 같이 복사해 붙여넣으세요&#10;&#9;&#9;&#9;&#9;신세계 강남&#9;커넥트현대 …&#10;바코드 번호&#9;상품명&#9;옵션명&#9;합계&#9;신세계 강남 창고&#9;커넥트현대 창고 …">'+esc(X.text||'')+'</textarea>'+
+    '<div class="filters"><button class="btn pri" data-act="shopCheck">붙여넣은 내용 확인</button><label class="btn" for="shopFile" style="cursor:pointer">파일 올리기</label><input type="file" id="shopFile" accept=".csv,.tsv,.txt" hidden>'+(X.fileName?'<span class="note">'+esc(X.fileName)+'</span>':'')+'</div>';
   if(X.err) h += '<p class="note" style="margin:0;color:var(--bad)">'+esc(X.err)+'</p>';
   if(X.done) h += '<p class="note" style="margin:0;color:var(--ok)">매장 재고를 반영했습니다 ('+esc(X.done)+').</p>';
   if(R){
@@ -2761,7 +2762,7 @@ function regShop(){
 }
 async function shopApply(){ if(!need('stock')) return;
   const X = S.shopIn; const R = X && X.res; if(!R) return;
-  const ok = await guard(async()=>{ await DB.doc('stock/shop').set({items:R.items, stores:R.stores, names:R.names, dp:1, src:'stores', file:X.fileName||'', at:new Date().toISOString(), by:MYID||''}); await writeLog('매장 재고(지점별) 반영: 바코드 '+R.n+'개 · 합계 '+R.tot+'장 → 디피 제외 '+R.net+'장'); }, '매장 재고를 반영했습니다');
+  const ok = await guard(async()=>{ await DB.doc('stock/shop').set({items:R.items, stores:R.stores, names:R.names, dp:1, src:'stores', file:X.fileName||'붙여넣기', at:new Date().toISOString(), by:MYID||''}); await writeLog('매장 재고(지점별) 반영: 바코드 '+R.n+'개 · 합계 '+R.tot+'장 → 디피 제외 '+R.net+'장'); }, '매장 재고를 반영했습니다');
   if(ok){ S.shopIn = {done:'바코드 '+nf(R.n)+'개 · '+nf(R.net)+'장'}; render(); }
 }
 async function offApply(){ if(!need('stock')) return;
@@ -3937,6 +3938,7 @@ async function act(a, el){
     case 'offCheck': { const t = val('offT'); if(!t.trim()){ toast('바코드와 오프라인 재고를 붙여넣어 주세요'); break; } offRun(t, ''); break; }
     case 'offApply': await offApply(); break;
     case 'shopApply': await shopApply(); break;
+    case 'shopCheck': { const t = (document.getElementById('shopT')||{}).value||'';   /* trim 하면 첫 줄(지점명) 앞 빈 칸이 사라져 지점 이름이 밀림 */ if(!t.trim()){ toast('매장 재고 시트를 머리글까지 붙여넣어 주세요'); break; } shopRun(t, ''); break; }
     case 'rviRun': rviRun(val('rviT')); break;
     case 'rviApply': await rviApply(); break;
     case 'smCheck': { const t = (document.getElementById('smT')||{}).value||''; if(!t.trim()){ toast('셀메이트 목록을 붙여넣어 주세요'); break; } smRun(t, ''); break; }
