@@ -3268,7 +3268,7 @@ function offPendOf(p){ const OFFP = OFFPsrc(); if(!OFFP) return []; const out = 
 const RV_ACT = {
   toResv:   {t:'예약 전환 필요', d:'재고 0 · 입고 예정 있음', c:'kc-violet'},
   delay:    {t:'일정 지연',     d:'리오더 예정일 밀림 · 지연 예상', c:'kc-red'},
-  risk:     {t:'예약일 확인',   d:'출고일이 입고보다 빠름', c:'kc-orange'},
+  risk:     {t:'예약일 확인',   d:'출고일이 입고 예정일보다 빠름', c:'kc-orange'},
   noRound:  {t:'예약 차수 입력', d:'출고일 · 수량 없음', c:'kc-amber'},
   qc:       {t:'검수 필요',     d:'본사 재고 → 트랜쇼 이동', c:'kc-blue'},
   moveWh:   {t:'창고이동 필요', d:'곤지암>트랜쇼 재고 이동', c:'kc-cyan'},
@@ -3349,7 +3349,7 @@ function rvCalc(p){
     if((ast==='일반배송' || !ast) && known && rest<=0 && incOn>0) acts.push('toResv');
     if(isResvSt(ast)){
       if(!live.length && incOn>0) acts.push('noRound');
-      if(shipFrom && live.some(x=>x.d && x.d < shipFrom)) acts.push('risk');
+      if(next && next.eta && live.some(x=>x.d && x.d < next.eta)) acts.push('risk');   // 예약 출고일이 입고 예정일보다 앞일 때만 (입고일 이후면 괜찮음)
       // 가용재고(트랜쇼 · 본사 · 곤지암)가 일주일 판매의 40% 이상일 때만 · 판매가 없으면 1개 이상
       if(known && rest>0 && (s.wk>0 ? rest >= s.wk*0.4 : true)) acts.push('toNormal');
     }
@@ -3461,7 +3461,7 @@ function viewResv(){
       '<td class="rvsales">'+(()=>{ const w = wk3Html(x.s); return salesOffDoc&&salesOffDoc.items ? '<div class="whl"><span>온라인'+(w?' <small class="muted">('+(x.s.ws?x.s.ws.length:1)+'주)</small>':' <small class="muted">(1주)</small>')+'</span>'+(w?'':'<b>'+nf(x.s.wk)+'</b>')+'</div>'+w+'<div class="whl"><span>오프라인 <small class="muted">(1주)</small></span><b>'+nf(x.so.wk)+'</b></div>' : (w || (x.s.wk?'<b>'+nf(x.s.wk)+'</b>':'<span class="muted">0</span>')); })()+'</td>'+
       '<td class="rvstk">'+(x.known?'<div class="sk">'+(x.rq>0?'<div class="skl rv'+(x.ravail<=0?' bad':'')+'" title="실제 보관 가용 + 예약 차수 수량'+'"><span>예약 포함 가용</span><b>'+nf(x.ravail)+'</b></div>':'')+'<div class="skl'+(x.rest<=0?' bad':'')+'" title="트랜쇼 + 본사 창고 + 곤지암 − 미발송 − 안정재고 (오프라인 · 매장 재고 제외)"><span>실제 보관 가용</span><b>'+nf(x.rest)+'</b></div></div>'+whList(p):'<span class="muted">—</span>')+'</td>'+
       '<td class="rveta">'+(x.delay?'<span class="dlytag" title="'+esc(x.pushDays?'리오더 예정일이 '+x.pushDays+'일 밀렸어요':'예정일이 지났는데 아직 안 들어왔어요')+'">'+(x.pushDays?'일정 +'+x.pushDays+'일 밀림':'예정일 지남')+'</span>':'')+etaList(x)+(x.shipFrom?'<small class="odsub">출고 가능 '+fmtD(x.shipFrom).slice(0,5)+'~</small>':'')+'</td>'+
-      '<td class="rvrd'+(lock?'':' ed')+'"'+(lock?'':' data-act="rvEdit" data-b="'+esc(p.b)+'" title="눌러서 예약 차수 수정"')+'>'+(x.live.length ? x.live.map((o,i)=>{ const k = r.rounds.indexOf(o)+1, q = +o.q||0, left = q&&x.known ? Math.max(0, x.rleft[i]) : null, pct = q&&left!=null ? Math.round((q-left)/q*100) : 0, bad = x.shipFrom&&o.d&&o.d<x.shipFrom;
+      '<td class="rvrd'+(lock?'':' ed')+'"'+(lock?'':' data-act="rvEdit" data-b="'+esc(p.b)+'" title="눌러서 예약 차수 수정"')+'>'+(x.live.length ? x.live.map((o,i)=>{ const k = r.rounds.indexOf(o)+1, q = +o.q||0, left = q&&x.known ? Math.max(0, x.rleft[i]) : null, pct = q&&left!=null ? Math.round((q-left)/q*100) : 0, bad = x.next&&x.next.eta&&o.d&&o.d<x.next.eta;
           return '<div class="rr'+(i===0?' cur':'')+(bad?' bad':'')+(left===0?' out':'')+'" title="'+esc(k+'차 · 출고 '+(o.d?fmtD(o.d):'날짜 없음')+(q?' · 예약 '+q+'장'+(left!=null?' · 팔림 '+(q-left)+'장 ('+pct+'%) · 남은 '+left+'장':''):'')+(bad?' · 출고 가능일('+fmtD(x.shipFrom).slice(0,5)+')보다 빨라요':''))+'"><div class="rrh"><em>'+k+'차</em><span>'+(o.d?fmtD(o.d).slice(0,5):'날짜 없음')+'</span>'+(q?'<span class="dot">·</span><b>'+nf(q)+'</b>':'')+'</div>'+(left!=null?'<div class="rrb2"><div class="rrb"><i style="width:'+pct+'%"></i></div><small class="rp'+(left===0?' out':'')+'">'+(left===0?'소진':pct+'% 판매')+'</small></div>':'')+'</div>'; }).join('')+(r.rounds.some(o=>o.done)?'<small class="rrdone">마감 '+r.rounds.filter(o=>o.done).length+'차</small>':'') : (lock?'':'<span class="addr">+ 차수</span>'))+'</td>'+
       '<td><div class="rvchs"><span class="rvch"><em class="rvcl">예약</em><button class="rvc all'+(chList().every(c=>chOn(r,c))?' on':'')+'" data-act="rvChAll" data-b="'+esc(p.b)+'" data-tip="예약 설정 · 전체 반영 / 해제"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(chOn(r,c)?' on':'')+'" data-act="rvCh" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · 예약 '+(chOn(r,c)?'설정 완료':'미설정')+'" aria-label="'+esc(c)+' 예약 설정"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span>'+
         '<span class="rvch sell"><em class="rvcl">판매</em><button class="rvc all'+(chList().every(c=>sellOn(r,c))?' on':'')+'" data-act="rvSellAll" data-b="'+esc(p.b)+'" data-tip="판매 중 · 전체 켜기 / 끄기"'+(lock?' disabled':'')+'>전체</button>'+chList().map(c=>'<button class="rvc'+(sellOn(r,c)?' on':'')+'" data-act="rvSell" data-b="'+esc(p.b)+'" data-c="'+esc(c)+'" data-tip="'+esc(c)+' · '+(sellOn(r,c)?'판매 중':'판매 안 함')+'" aria-label="'+esc(c)+' 판매"'+(lock?' disabled':'')+'>'+esc(chShort(c))+'</button>').join('')+'</span></div></td>'+
