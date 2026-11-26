@@ -743,6 +743,10 @@ table.mcard tr.shrow{display:none}
 .rvtbl th.ck,.rvtbl td.ck{display:none!important}
 .rvtbl tbody tr[data-rvrow]{cursor:pointer}.rvtbl tr.rvsel-on td,.rvtbl tr.rvsel-on:hover td{background:var(--accent-soft)!important}.rvtbl tr.rvsel-on td.ck + td{box-shadow:inset 3px 0 0 var(--accent)}
 @media (max-width:640px){.rvtbl tr.rvsel-on td{background:transparent!important;box-shadow:none!important}.rvtbl tr.rvsel-on{background:var(--accent-soft)!important;box-shadow:0 0 0 2px var(--accent)!important}}
+.dashcols{align-items:start}.dashcols .dcol{min-width:0}.dashcols .dcol>.sec{margin-top:0}
+.factbl{width:100%}.factbl tbody tr{cursor:pointer}.factbl tbody tr:hover td{background:var(--bg)}.factbl td,.factbl th{white-space:nowrap}.factbl td small{margin-left:2px;font-size:11px;color:var(--muted)}.factbl td.num small{display:inline}
+.factbl .fbar{width:34%;min-width:160px}.factbl .fbar .tr{display:flex;height:10px;border-radius:5px;background:var(--sunk);overflow:hidden}.factbl .fbar .fi{display:block;height:100%;background:var(--accent)}.factbl .fbar .fi.late{background:var(--bad)}
+@media (max-width:640px){.factbl .fbar{min-width:90px}.factbl td:nth-child(4),.factbl td:nth-child(7),.factbl td:nth-child(9),.factbl td:nth-child(10){display:none!important}}
 </style>
 
 <script>(function(){ var t='light'; try{ t = localStorage.getItem('kb_theme') || 'light'; }catch(e){} document.documentElement.setAttribute('data-theme', t); })();</script>
@@ -1281,21 +1285,38 @@ function viewHome(){
   const horizon = addDays(TODAY,14);
   const up = open.filter(o=>o.eta && o.eta>=TODAY && o.eta<=horizon).sort((a,b)=>a.eta.localeCompare(b.eta));
   const attn = open.filter(o=>['late','over','none'].includes(o.status)).sort((a,b)=>(a.eta||'9').localeCompare(b.eta||'9'));
-  h += '<div class="grid2"><div class="sec"><div class="sechead"><h2>다가오는 입고</h2><span class="sub">오늘부터 14일 · 확정일 우선, 없으면 공장 평균 리드타임으로 예상</span></div><div class="panel dlist">'+
-    (up.length ? up.map(drow).join('') : '<div class="empty">14일 안에 예정된 입고가 없습니다.</div>')+'</div></div>';
-  h += '<div class="sec"><div class="sechead"><h2>확인 필요</h2><span class="sub">지연 · 예상일 경과 · 일정 미정</span></div><div class="panel dlist">'+
-    (attn.length ? attn.slice(0,12).map(drow).join('') + (attn.length>12?'<div class="drow" data-act="goDue" data-st="late"><span></span><span class="muted">외 '+(attn.length-12)+'건 더 보기</span><span></span></div>':'') : '<div class="empty">확인이 필요한 오더가 없습니다.</div>')+'</div></div></div>';
-  // factories
-  const byF = {};
-  for(const o of open){ const f=byF[o.f]||(byF[o.f]={q:0,late:0,n:0}); f.q+=o.remain; f.n++; if(o.status==='late'||o.status==='over') f.late+=o.remain; }
-  const fa = Object.entries(byF).sort((a,b)=>b[1].q-a[1].q);
-  const mx = Math.max(1,...fa.map(x=>x[1].q));
-  h += '<div class="grid2"><div class="sec"><div class="sechead"><h2>공장별 미입고</h2><span class="sub">막대 = 잔여 수량, 붉은 부분 = 지연·경과분 · 누르면 그 공장 조회로 이동</span></div><div class="panel bars">'+
-    (fa.length? fa.map(([f,v]) => '<div class="bar" data-act="goFac" data-f="'+esc(f)+'"><span>'+esc(f)+'</span><span class="tr" style="display:flex"><span class="fi late" style="width:'+(v.late/mx*100)+'%"></span><span class="fi" style="width:'+((v.q-v.late)/mx*100)+'%;border-radius:0 3px 3px 0"></span></span><span class="num">'+nf(v.q)+'</span></div>').join('') : '<div class="empty">미입고 오더가 없습니다.</div>')+'</div></div>';
-  // recent receipts
+  const more = (n, st) => '<div class="drow dmore" data-act="goDue" data-st="'+st+'"><span></span><span class="muted">외 '+n+'건 더 보기</span><span></span></div>';
   const rec = recentReceipts(14);
-  h += '<div class="sec"><div class="sechead"><h2>최근 입고 현황</h2><span class="sub">최근 14일</span></div><div class="panel dlist">'+
-    (rec.length ? rec.slice(0,12).map(rcvRow).join('') : '<div class="empty">최근 14일 입고 기록이 없습니다.</div>')+'</div></div></div>';
+  // 다가오는 입고 · 확인 필요 · 최근 입고 — 두 단에 높이를 맞춰 자동 배치 (빈칸 없이)
+  const S1 = '<div class="sec"><div class="sechead"><h2>다가오는 입고</h2><span class="sub">오늘부터 14일 · 확정일 우선, 없으면 공장 평균 리드타임으로 예상</span></div><div class="panel dlist">'+
+    (up.length ? up.slice(0,14).map(drow).join('') + (up.length>14 ? more(up.length-14,'soon') : '') : '<div class="empty">14일 안에 예정된 입고가 없습니다.</div>')+'</div></div>';
+  const S2 = '<div class="sec"><div class="sechead"><h2>확인 필요</h2><span class="sub">지연 · 예상일 경과 · 일정 미정</span></div><div class="panel dlist">'+
+    (attn.length ? attn.slice(0,8).map(drow).join('') + (attn.length>8 ? more(attn.length-8,'late') : '') : '<div class="empty">확인이 필요한 오더가 없습니다.</div>')+'</div></div>';
+  const S3 = '<div class="sec"><div class="sechead"><h2>최근 입고 현황</h2><span class="sub">최근 14일</span></div><div class="panel dlist">'+
+    (rec.length ? rec.slice(0,8).map(rcvRow).join('') + (rec.length>8 ? more(rec.length-8,'done') : '') : '<div class="empty">최근 14일 입고 기록이 없습니다.</div>')+'</div></div>';
+  // 세 목록을 두 단에 나눠 쌓기 — 줄 수로 높이를 어림해 두 단 높이가 가장 비슷한 배치를 고름 (빈칸 줄이기)
+  const hEst = n => 60 + Math.max(1, n) * 58;
+  const HS = [hEst(Math.min(up.length,14)+(up.length>14?1:0)), hEst(Math.min(attn.length,8)+(attn.length>8?1:0)), hEst(Math.min(rec.length,8)+(rec.length>8?1:0))], SS = [S1, S2, S3];
+  let best = null; for(let m=0; m<8; m++){ const L = [0,1,2].filter(x=>!(m>>x&1)), R = [0,1,2].filter(x=>m>>x&1); if(!L.length || !R.length || !L.includes(0)) continue; const d = Math.abs(L.reduce((t,x)=>t+HS[x],0) - R.reduce((t,x)=>t+HS[x],0)); if(!best || d<best.d) best = {d, L, R}; }
+  h += '<div class="grid2 dashcols"><div class="dcol">'+best.L.map(x=>SS[x]).join('')+'</div><div class="dcol">'+best.R.map(x=>SS[x]).join('')+'</div></div>';
+  // 공장별 미입고 — 가로로 넓게: 잔여 막대 + 오더 · 지연 · 7일 내 · 다음 입고 · 평균 리드타임 · 최근 30일 입고
+  const byF = {}; const in7 = addDays(TODAY, 7), r30 = addDays(TODAY, -30);
+  for(const o of open){ const f = byF[o.f] || (byF[o.f] = {q:0, late:0, lateN:0, n:0, soon:0, next:'', none:0, got:0});
+    f.q += o.remain; f.n++; if(o.status==='late'||o.status==='over'){ f.late += o.remain; f.lateN++; }
+    if(o.eta && o.eta>=TODAY && o.eta<=in7) f.soon += o.remain; if(o.eta && o.eta>=TODAY && (!f.next || o.eta<f.next)) f.next = o.eta; if(!o.eta) f.none++; }
+  for(const r of recentReceipts(30)){ if(byF[r.o.f]) byF[r.o.f].got += r.q; }
+  const fa = Object.entries(byF).sort((a,b)=>b[1].q-a[1].q);
+  const mx = Math.max(1,...fa.map(x=>x[1].q)); const totQ = fa.reduce((t,x)=>t+x[1].q,0);
+  h += '<div class="sec"><div class="sechead"><h2>공장별 미입고</h2><span class="sub">막대 = 잔여 수량, 붉은 부분 = 지연 · 경과분 · 누르면 그 공장 조회로 이동</span></div>'+
+    (fa.length ? '<div class="panel tw"><table class="factbl"><thead><tr><th>공장</th><th class="fbar">잔여 수량</th><th class="num">잔여</th><th class="num">비중</th><th class="num">오더</th><th class="num">지연 · 경과</th><th class="num">7일 내 입고</th><th>다음 입고</th><th class="num">평균 리드타임</th><th class="num">최근 30일 입고</th></tr></thead><tbody>'+
+      fa.map(([f,v]) => '<tr data-act="goFac" data-f="'+esc(f)+'"><td><b>'+esc(f||'공장 미정')+'</b></td>'+
+        '<td class="fbar"><span class="tr"><span class="fi late" style="width:'+(v.late/mx*100)+'%"></span><span class="fi" style="width:'+((v.q-v.late)/mx*100)+'%"></span></span></td>'+
+        '<td class="num"><b>'+nf(v.q)+'</b></td><td class="num muted">'+Math.round(v.q/Math.max(1,totQ)*100)+'%</td><td class="num">'+nf(v.n)+'<small>건</small></td>'+
+        '<td class="num">'+(v.lateN?'<b style="color:var(--bad)">'+v.lateN+'건</b><small>'+nf(v.late)+'장</small>':'<span class="muted">—</span>')+'</td>'+
+        '<td class="num">'+(v.soon?nf(v.soon)+'<small>장</small>':'<span class="muted">—</span>')+'</td>'+
+        '<td>'+(v.next?fmtD(v.next):'<span class="muted">'+(v.none?'미정':'—')+'</span>')+'</td>'+
+        '<td class="num">'+(f?leadFor(f)+'<small>일</small>':'—')+'</td><td class="num">'+(v.got?nf(v.got)+'<small>장</small>':'<span class="muted">—</span>')+'</td></tr>').join('')+
+      '</tbody></table></div>' : '<div class="panel"><div class="empty">미입고 오더가 없습니다.</div></div>')+'</div>';
   return h;
 }
 function rcvRow(r){
