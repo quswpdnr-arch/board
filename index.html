@@ -682,7 +682,8 @@ table.mcard tr.shrow{display:none}
 .rvtbl th.ck,.rvtbl td.ck{width:30px;text-align:center;padding-left:8px;padding-right:2px}
 .rvtbl th,.rvtbl td{padding-left:7px;padding-right:7px}
 .rvtbl th.ck,.rvtbl td.ck{padding-left:14px!important;padding-right:4px!important;width:34px}
-.rvtbl td.ck + td{min-width:0!important;width:196px;max-width:196px}
+.rvtbl td.ck + td{min-width:0!important;width:236px;max-width:236px;padding-left:16px!important}
+.rvtbl th.ck + th{padding-left:16px!important}
 .rvtbl .rvsel{width:92px;max-width:92px;font-size:12px;letter-spacing:-.2px;padding:4px 15px 4px 7px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23667' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;background-size:9px 6px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
 .rvtbl td:nth-child(3){padding-left:3px!important;padding-right:3px!important;width:96px;max-width:98px}
 .rvtbl td:nth-child(8){min-width:108px;max-width:126px}
@@ -728,11 +729,18 @@ table.mcard tr.shrow{display:none}
 .hrow .updbtn .dot{width:8px;height:8px;box-shadow:0 0 0 3px rgba(22,163,74,.15)}.hrow .updbtn.old .dot{box-shadow:0 0 0 3px rgba(220,38,38,.15)}
 .hrow .acctbtn:hover,.hrow .updbtn:hover{border-color:var(--muted)}
 @media (max-width:640px){ .hrow .acct{margin-left:auto} .hrow .acctbtn{padding:3px} .hrow .updbtn{padding:0 12px 0 10px} .hrow .bsw{height:26px;padding:0 4px;white-space:nowrap} .hrow .brandsw{order:3;width:auto;flex:1 1 calc(100% - 100px);min-width:0} .hrow .updsw{order:4;margin-left:0} .updpop{right:0} }
+.schbar{position:sticky;top:0;z-index:6;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 8px;padding:8px 12px;background:var(--panel);border:1px solid var(--accent);border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.schbar .sbn{font-size:13px;color:var(--accent);white-space:nowrap}.schbar .sbg{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;padding-left:14px;border-left:1px solid var(--line)}.schbar .sbg em{font-style:normal;font-size:12px;color:var(--muted);margin-right:2px}
+.schbar input[type=date]{width:140px}.schbar #schBkMemo{width:150px}.schbar .sbx{margin-left:auto;appearance:none;border:0;background:none;font:inherit;font-size:12.5px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+@media (max-width:640px){.schbar .sbg{padding-left:0;border-left:0;flex:1 1 100%}.schbar input[type=date],.schbar #schBkMemo{flex:1;width:auto;min-width:0}}
 .schtbl tr.schrow{cursor:pointer}.schtbl tr.schrow:hover td{background:var(--bg)}.schtbl tr.schsel td,.schtbl tr.schsel:hover td{background:var(--accent-soft)}.schtbl tr.schsel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 @media (max-width:640px){.schtbl tr.schrow td,.schtbl tr.schrow:hover td,.schtbl tr.schsel td{background:transparent!important;box-shadow:none!important}.schtbl tr.schsel{background:var(--accent-soft)!important;box-shadow:0 0 0 2px var(--accent)!important}}
 .schtbl .pnl{display:flex;align-items:baseline;gap:6px;min-width:0;flex-wrap:wrap}
 .schk{font-size:10.5px;font-weight:600;line-height:1;color:var(--muted);white-space:nowrap}.schk::before{content:'· '}.schk.k-first{color:var(--info)}.schk.k-pre{color:var(--warn)}
 .schnew{display:inline-block;margin-left:5px;font-size:10px;font-weight:600;color:var(--info);vertical-align:1px}.schnew::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--info);margin-right:3px;vertical-align:1px}.bulkbar .bkl{font-size:12px;opacity:.75;margin-left:4px}@media (max-width:640px){.bulkbar .bkl{display:none}.bulkbar .btn.sm[data-act=schKind]{padding:4px 8px}.bulkbar{gap:6px}}.schtbl th.ck,.schtbl td.ck{width:30px;padding-right:4px}
+.rvtbl th.ck,.rvtbl td.ck{display:none!important}
+.rvtbl tbody tr[data-rvrow]{cursor:pointer}.rvtbl tr.rvsel-on td,.rvtbl tr.rvsel-on:hover td{background:var(--accent-soft)!important}.rvtbl tr.rvsel-on td.ck + td{box-shadow:inset 3px 0 0 var(--accent)}
+@media (max-width:640px){.rvtbl tr.rvsel-on td{background:transparent!important;box-shadow:none!important}.rvtbl tr.rvsel-on{background:var(--accent-soft)!important;box-shadow:0 0 0 2px var(--accent)!important}}
 </style>
 
 <script>(function(){ var t='light'; try{ t = localStorage.getItem('kb_theme') || 'light'; }catch(e){} document.documentElement.setAttribute('data-theme', t); })();</script>
@@ -3332,7 +3340,7 @@ function viewResv(){
       '<select id="rvFac"><option value="">전체 공장</option>'+activeFacs().map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
       (anyF?'<button class="fclr" data-act="rvClear">필터 해제 ✕</button>':'')+
       '<span class="rvopt">'+(OFFPsrc()&&BRAND==='tid'?'<span class="oseg" title="오프라인(매장) 리오더를 입고 예정에 같이 보여줄지 (예약배송 계산은 항상 온라인 기준)"><em>오프라인 리오더</em><button data-act="rvOffSeg" data-v="0"'+(X.offEx?'':' class="on"')+'>포함</button><button data-act="rvOffSeg" data-v="1"'+(X.offEx?' class="on"':'')+'>제외</button></span>':'')+(X.act?'':'<label class="sw'+(X.all?' on':'')+'"><input type="checkbox" id="rvAll"'+(X.all?' checked':'')+'><i></i>전체 상품</label>')+'</span>'+
-      '<label class="chk mselall"><input type="checkbox" id="rvSelAll2"> 보이는 상품 모두 선택</label><span class="note">'+nf(a.length)+'개</span></div>';
+      '<span class="note">'+nf(a.length)+'개</span>'+(a.length?'<button class="btn sm ghost" data-act="rvSelAllB" title="보이는 상품 모두 선택 · 상품 줄의 빈 곳을 눌러도 하나씩 선택돼요">'+((X.sel&&a.slice(0, X.n).length&&a.slice(0, X.n).every(x=>X.sel[x.p.b]))?'선택 해제':'모두 선택')+'</button>':'')+'</div>';
   const SEL = X.sel || (X.sel = {}); const shownB = a.slice(0, X.n).map(x=>x.p.b); const selN = Object.keys(SEL).filter(b=>SEL[b]).length;
   const allOn = shownB.length && shownB.every(b=>SEL[b]);
   h += '<div class="panel tw"><table class="rvtbl"><thead><tr><th class="ck"><input type="checkbox" id="rvSelAll"'+(allOn?' checked':'')+' title="보이는 상품 모두 선택" aria-label="모두 선택"></th>'+sth('prod','상품 · 컬러,사이즈 · 바코드')+sth('st','노출 상태')+sth('act','할 일')+sth('un','미발송','ctr')+(()=>{ const S1 = salesSrc(); const L = S1 && S1.weeks ? wkLabels(S1) : []; return sth('wk','판매 추이 <small class="thn">('+(L.length>1?L.length:1)+'주)</small>','rvsalesh').replace('title="눌러서 정렬','title="'+esc(L.length>1?fmtD(L[0].f).slice(0,5)+' ~ '+fmtD(L[L.length-1].t).slice(0,5):salesLabel())+' · 눌러서 정렬'); })()+sth('stock','재고')+sth('eta','입고 예정','',(BRAND==='tid'&&OFFPsrc()&&!X.offEx)?'<small class="thsub" style="white-space:nowrap">온라인 <span style="color:#9a3412">+오프</span></small>':'')+sth('round','예약 차수')+sth('ch','플랫폼별 현황')+sth('memo','메모','',' <small class="thsub">MD · CS</small>')+'</tr></thead><tbody>';
@@ -3341,7 +3349,7 @@ function viewResv(){
   const lock = !canDo('resv'); const CATS = catList().map(c=>c.n);
   for(const x of a.slice(0, X.n)){
     const p = x.p, r = x.r;
-    h += '<tr class="'+(x.acts.length?'rvneed':'')+(x.delay?' rvdelay':'')+(SEL[p.b]?' rvsel-on':'')+'"><td class="ck"><input type="checkbox" data-rvselb="'+esc(p.b)+'"'+(SEL[p.b]?' checked':'')+' aria-label="선택"></td><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(p.key)+'">'+esc(p.n||p.en)+'</a>'+(p.n&&p.en?'<small class="pen" title="'+esc(p.en)+'">'+esc(p.en)+'</small>':'')+'<small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+flink(p.curFac)+'</small><select class="catsel" data-rvcat="'+esc(normK(p.n||p.b))+'" title="분류 (담당 분담)"'+(lock?' disabled':'')+'>'+CATS.map(c=>'<option'+(c===x.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="__new">+ 분류 관리…</option></select></div></div></td>'+
+    h += '<tr data-rvrow="'+esc(p.b)+'" class="'+(x.acts.length?'rvneed':'')+(x.delay?' rvdelay':'')+(SEL[p.b]?' rvsel-on':'')+'"><td class="ck"><input type="checkbox" data-rvselb="'+esc(p.b)+'"'+(SEL[p.b]?' checked':'')+' aria-label="선택"></td><td><div class="pc">'+thumb(p,'s')+'<div class="pname"><a class="plink" data-act="goProd" data-k="'+esc(p.key)+'">'+esc(p.n||p.en)+'</a>'+(p.n&&p.en?'<small class="pen" title="'+esc(p.en)+'">'+esc(p.en)+'</small>':'')+'<small>'+esc(p.opt)+' · <span class="mono">'+esc(p.b)+'</span> · '+flink(p.curFac)+'</small><select class="catsel" data-rvcat="'+esc(normK(p.n||p.b))+'" title="분류 (담당 분담)"'+(lock?' disabled':'')+'>'+CATS.map(c=>'<option'+(c===x.cat?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="__new">+ 분류 관리…</option></select></div></div></td>'+
       '<td><select class="rvsel st-'+(x.st==='예약배송'?'open':x.st==='임시예약배송'?'soon':x.st==='단종(예정)'?'over':x.st==='품절'?'late':x.st==='단종'?'none':'done')+'" data-rvst="'+esc(p.b)+'"'+(lock?' disabled':'')+'>'+RV_ST.map(s=>'<option'+(s===x.st?' selected':'')+'>'+s+'</option>').join('')+'</select>'+'</td>'+
       '<td class="rvacts">'+x.acts.map(k=>'<span class="chip '+RV_ACT[k].c+'" title="'+esc(RV_ACT[k].d+(k==='rt'?' · 오프라인 재고 '+x.offStk+'개 중 주간 판매 '+x.so.wk+'개 (소진율 '+Math.round(x.offRate*100)+'%) · 가져올 수 있는 수량 약 '+x.rtQty+'개':k==='rtOut'?' · 매장 주간 판매 '+x.so.wk+'개 · 매장 재고 '+x.offStk+'개 · 보낼 수량 약 '+x.rtOutQty+'개 (온라인엔 2주 판매분 남김)':k==='reorder'?' · 주간 판매 '+x.s.wk+'장 · 가용+예약 '+((x.rest||0)+x.rq)+'장 · 4주 판매분 기준 약 '+x.reQty+'장 리오더 제안':''))+'">'+RV_ACT[k].t+(k==='rt'?' <small>'+nf(x.rtQty)+'</small>':k==='rtOut'?' <small>'+nf(x.rtOutQty)+'</small>':'')+'</span>').join('')+(x.lvl?'<span class="chip '+(x.lvl==='긴급'?'st-late':'st-soon')+'">'+x.lvl+'</span>':'')+'</td>'+
       '<td class="ctr">'+(x.un?'<b>'+nf(x.un)+'</b>':'<span class="muted">0</span>')+'</td>'+
@@ -3646,18 +3654,24 @@ function schedRows(){
 const SCH_KIND = {first:'초두', exist:'기존 상품', pre:'선발주'};
 function schKindAuto(o){ if(/캐리|선오더|선발주/.test(o.round||'')) return 'pre'; if(!o.od || /초두|신상/.test(o.round||'')) return 'first'; return 'exist'; }
 function schKind(o){ const v = ovr[o.id]; if(v && SCH_KIND[v.kind]) return v.kind; if(v && v.pre) return 'pre'; return schKindAuto(o); }
-const schManual = o => { const v = ovr[o.id]; return !!(v && ((SCH_KIND[v.kind] && v.kind!==schKindAuto(o)) || (v.pre && !SCH_KIND[v.kind]))); };
+const schManual = o => { const v = ovr[o.id]; return !!(v && (SCH_KIND[v.kind] || v.pre)); };   // 직접 지정한 분류가 있으면 상품명 옆에 표시
 async function schKindBulk(k){
   if(!need('eta','recv','reorder')) return;
   const ids = Object.keys(S.sched.sel||{}).filter(id=>S.sched.sel[id] && BYID.get(id)); if(!ids.length){ toast('오더를 먼저 체크하세요'); return; }
   let n = 0;
   const ok = await guardN(async()=>{
     for(const id of ids){ const o = BYID.get(id); const from = schKind(o);
-      const patch = k ? {kind:k, pre:false} : {kind:'', pre:false};
-      const to = k || schKindAuto(o); if(from===to && !(k==='' && schManual(o))) continue;
-      await saveOvr(o, patch, {type:'tag', msg:'분류 '+SCH_KIND[from]+' → '+SCH_KIND[to]+(k?'':' (자동)')}, null, ['eta','recv','reorder']); n++; }
+      const v = ovr[o.id]||{}; if(v.kind===k && !v.pre) continue;   // 이미 그 분류로 지정돼 있음
+      await saveOvr(o, {kind:k, pre:false}, {type:'tag', msg:'분류 '+SCH_KIND[from]+' → '+SCH_KIND[k]}, null, ['eta','recv','reorder']); n++; }
     return 1; });
-  if(ok){ if(n) writeLog('일정 입력 분류 '+(k?SCH_KIND[k]:'자동')+'(으)로 '+n+'건 변경'); S.sched.sel = {}; toast(n ? n+'건 분류를 '+(k?SCH_KIND[k]:'자동')+'(으)로 바꿨어요' : '바뀐 게 없어요'); render(); }
+  if(ok){ if(n) writeLog('일정 입력 분류 '+SCH_KIND[k]+'(으)로 '+n+'건 지정'); S.sched.sel = {}; toast(n ? n+'건을 '+SCH_KIND[k]+'(으)로 지정했어요' : '이미 '+SCH_KIND[k]+'(으)로 지정돼 있어요'); render(); }
+}
+async function schEtaBulk(){
+  const ids = Object.keys(S.sched.sel||{}).filter(id=>S.sched.sel[id] && BYID.get(id)); if(!ids.length){ toast('오더를 먼저 선택하세요'); return; }
+  const d = (document.getElementById('schBkEta')||{}).value||''; if(!d){ toast('넣을 예정일을 고르세요'); return; }
+  const memo = ((document.getElementById('schBkMemo')||{}).value||'').trim();
+  ids.forEach(id=>{ S.sched.edits[id] = {eta:d, memo: memo || ((S.sched.edits[id]||{}).memo||'')}; });
+  await schSave(ids); S.sched.sel = {}; S.sched.bkEta = ''; S.sched.bkMemo = ''; render();
 }
 function viewSched(){
   const X = S.sched; const {a, cnt, isNew} = schedRows(); const SEL = X.sel || (X.sel = {}); S.__schRows = a;
@@ -3671,6 +3685,11 @@ function viewSched(){
     '<select id="schFac"><option value="">전체 공장</option>'+(extFacs().length ? activeFacs().filter(f=>extFacs().includes(String(f).replace(/\s/g,''))) : activeFacs()).map(f=>'<option'+(f===X.fac?' selected':'')+'>'+esc(f)+'</option>').join('')+'</select>'+
     (X.q||X.fac?'<button class="btn sm" data-act="schClear">‹ 검색 필터 해제</button>':'')+'<span class="note">'+nf(a.length)+'건</span>'+(a.length?'<button class="btn sm ghost" data-act="schSelAllB">'+(a.slice(0, X.n).every(o=>SEL[o.id])?'선택 해제':'모두 선택')+'</button>':'')+
     '<span class="right"><button class="btn pri" data-act="schSaveAll"'+(dirty&&!lock?'':' disabled')+'>입력한 '+dirty+'건 저장</button></span></div>';
+  const nSel = Object.keys(SEL).filter(id=>SEL[id]).length;
+  if(nSel) h += '<div class="schbar" role="toolbar" aria-label="선택한 오더 한 번에 바꾸기"><span class="sbn"><b>'+nSel+'</b>건 선택</span>'+
+    '<span class="sbg"><em>분류</em>'+Object.entries(SCH_KIND).map(([k,t])=>'<button class="btn sm" data-act="schKind" data-k="'+k+'"'+(lock?' disabled':'')+'>'+t+'</button>').join('')+'</span>'+
+    '<span class="sbg"><em>예정일</em><input type="date" id="schBkEta" value="'+esc(X.bkEta||'')+'"'+(lock?' disabled':'')+'><input id="schBkMemo" placeholder="메모 (선택)" value="'+esc(X.bkMemo||'')+'"'+(lock?' disabled':'')+'><button class="btn sm pri" data-act="schEtaBulk"'+(lock?' disabled':'')+'>'+nSel+'건 저장</button></span>'+
+    '<button class="sbx" data-act="schSelClear">선택 해제</button></div>';
   h += '<div class="panel tw"><table class="schtbl schpick"><thead><tr><th>상품 · 컬러,사이즈 · 바코드</th><th>공장 · 담당</th><th>차수 · 오더일</th><th class="num">오더 · 잔여</th><th>지금 예정일</th><th>새 예정일</th><th>메모 (사유)</th><th></th></tr></thead><tbody>';
   if(!a.length) h += '<tr><td colspan="8" class="empty">'+(X.view==='none'?'예정일이 비어 있는 오더가 없어요 👍':'조건에 맞는 오더가 없습니다.')+'</td></tr>';
   for(const o of a.slice(0, X.n)){
@@ -3685,10 +3704,7 @@ function viewSched(){
       '<td><input data-sch="'+o.id+'" data-k="memo" value="'+esc(e.memo||'')+'" placeholder="예: 원단 11/12 입고"'+(lock?' disabled':'')+'></td>'+
       '<td><button class="btn sm'+(e.eta?' pri':'')+'" data-act="schSave" data-id="'+o.id+'"'+(e.eta&&!lock?'':' disabled')+'>저장</button> <button class="btn sm ghost danger" data-act="schDel" data-id="'+o.id+'"'+(canDo('recv','reorder')?'':' disabled title="입고 처리 · 리오더 권한이 필요해요"')+' title="취소된 오더 · 잘못 들어간 오더를 목록에서 뺍니다">삭제</button></td></tr>';
   }
-  const nSel = Object.keys(SEL).filter(id=>SEL[id]).length;
-  h += '</tbody></table></div>'+(nSel ? '<div class="bulkbar"><span class="bkn"><b>'+nSel+'</b>건 선택</span><span class="bkl">분류 바꾸기</span>'+
-    Object.entries(SCH_KIND).map(([k,t])=>'<button class="btn sm" data-act="schKind" data-k="'+k+'"'+(lock?' disabled':'')+'>'+t+'</button>').join('')+'<button class="btn sm" data-act="schKind" data-k=""'+(lock?' disabled':'')+' title="직접 바꾼 분류를 지우고 차수 이름으로 자동 분류">자동</button>'+
-    '<span class="bkr"><button class="bkx" data-act="schSelClear" title="선택 해제" aria-label="선택 해제">✕</button></span></div>' : '')+(a.length>X.n?'<div class="more"><button class="btn" data-act="schMore">'+nf(a.length-X.n)+'건 더 보기</button></div>':'')+
+  h += '</tbody></table></div>'+(a.length>X.n?'<div class="more"><button class="btn" data-act="schMore">'+nf(a.length-X.n)+'건 더 보기</button></div>':'')+
     '<p class="note">저장하면 그 오더의 예정일이 <b>확정</b>으로 바뀌고 변경 이력에 남아요. 날짜를 여러 개 넣고 <b>입력한 n건 저장</b>으로 한 번에 저장해도 됩니다. 권한: 팀원 · 권한의 <b>일정 입력</b>(또는 입고 처리 · 리오더).</p></div>';
   return h;
 }
@@ -3834,7 +3850,9 @@ async function act(a, el){
     case 'schClear': S.sched.q = ''; S.sched.fac = ''; render(); break;
     case 'schMore': S.sched.n += 300; render(); break;
     case 'schKind': await schKindBulk(el.dataset.k); break;
+    case 'schEtaBulk': await schEtaBulk(); break;
     case 'schSelClear': S.sched.sel = {}; render(); break;
+    case 'rvSelAllB': { const sel = S.rv.sel || (S.rv.sel = {}); const rows = (S.__rvRows||[]).slice(0, S.rv.n); const all = rows.length && rows.every(x=>sel[x.p.b]); rows.forEach(x=>{ if(all) delete sel[x.p.b]; else sel[x.p.b] = true; }); const y = window.scrollY; render(); window.scrollTo(0, y); break; }
     case 'schSelAllB': { const sel = S.sched.sel || (S.sched.sel = {}); const rows = (S.__schRows||[]).slice(0, S.sched.n); const all = rows.every(o=>sel[o.id]); rows.forEach(o=>{ if(all) delete sel[o.id]; else sel[o.id] = true; }); const y = window.scrollY; render(); window.scrollTo(0, y); break; }
     case 'schSave': await schSave([el.dataset.id]); break;
     case 'schSaveAll': await schSave(Object.keys(S.sched.edits)); break;
@@ -4199,6 +4217,7 @@ themeSync();
 document.addEventListener('click', e => {
   if(S.updPop && !e.target.closest('#updSw')){ S.updPop = false; paintUpd(); }
   { const sm = e.target.closest('.mcat>summary'); if(sm) S.rv.catOpen = !sm.parentNode.open; else if(S.rv.catOpen && !e.target.closest('.mcat')){ S.rv.catOpen = false; const d = document.querySelector('details.mcat[open]'); if(d) d.open = false; } }
+  { const tr = e.target.closest('tr[data-rvrow]'); if(tr && !e.target.closest('input,button,a,select,textarea,label,summary,details,[data-act],.rvch,.mm') && !(window.getSelection && String(window.getSelection()).length)){ const sel = S.rv.sel || (S.rv.sel = {}); const b = tr.dataset.rvrow; if(sel[b]) delete sel[b]; else sel[b] = true; const y = window.scrollY; render(); window.scrollTo(0, y); return; } }
   { const tr = e.target.closest('tr[data-schrow]'); if(tr && !e.target.closest('input,button,a,select,textarea,label,[data-act]') && !(window.getSelection && String(window.getSelection()).length)){ const sel = S.sched.sel || (S.sched.sel = {}); const id = tr.dataset.schrow; if(sel[id]) delete sel[id]; else sel[id] = true; const y = window.scrollY; render(); window.scrollTo(0, y); return; } }
   const el = e.target.closest('[data-act]'); if(!el) return;
   if(el.dataset.act==='bg'){ if(e.target===el && downOnBg) closeModal(); return; }
@@ -4332,6 +4351,7 @@ document.addEventListener('change', e => {
   if(t.dataset && t.dataset.rvch && !t.checked){ const a = document.getElementById('rvChAllM'); if(a) a.checked = false; }
   if(t.dataset && t.dataset.rvcat){ if(t.value==='__new'){ S.catEdit = null; catModal(); render(); } else setStyleCat(t.dataset.rvcat, t.value); }
   if(t.id==='rvAll'){ S.rv.all = t.checked; render(); }
+  if(t.id==='schBkEta') S.sched.bkEta = t.value; if(t.id==='schBkMemo') S.sched.bkMemo = t.value;
   if(t.dataset && t.dataset.schsel){ const sel = S.sched.sel || (S.sched.sel = {}); if(t.checked) sel[t.dataset.schsel] = true; else delete sel[t.dataset.schsel]; const y = window.scrollY; render(); window.scrollTo(0, y); }
   if(t.id==='schSelAll'){ const sel = S.sched.sel || (S.sched.sel = {}); (S.__schRows||[]).slice(0, S.sched.n).forEach(o=>{ if(t.checked) sel[o.id] = true; else delete sel[o.id]; }); const y = window.scrollY; render(); window.scrollTo(0, y); }
   if(t.dataset && t.dataset.rvselb){ const sel = S.rv.sel || (S.rv.sel = {}); if(t.checked) sel[t.dataset.rvselb] = true; else delete sel[t.dataset.rvselb]; const y = window.scrollY; render(); window.scrollTo(0, y); }
