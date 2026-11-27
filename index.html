@@ -917,7 +917,8 @@ function rebuild(){
   const facs = new Set();
   CHG = new Map();
   for(const c of fchgs.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.at||'').localeCompare(b.at||''))){
-    for(const b of (c.bs||[])){ if(!CHG.has(b)) CHG.set(b,[]); CHG.get(b).push(c); }
+    for(const b of (c.bs||[])){ if(facKeep[b] && c.to===facKeep[b] && /리오더 시트/.test(c.note||'')) continue;   // MD가 아니라고 확인한 시트 공장 변경은 무시
+      if(!CHG.has(b)) CHG.set(b,[]); CHG.get(b).push(c); }
   }
   const ALIAS = {}; for(const [ob,d] of Object.entries(pfixDocs)) if(d && d.b) ALIAS[ob] = d.b;
   const AB = b => ALIAS[b] || b;
@@ -1089,7 +1090,7 @@ async function initCaps(){
   DB.doc('stock/offline').onSnapshot(d => { offDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
   DB.doc('stock/shop').onSnapshot(d => { shopDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
   DB.doc('cfg/upd').onSnapshot(d => { updDoc = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
-  DB.doc('cfg/fackeep').onSnapshot(d => { facKeep = d.exists ? (d.data().items||{}) : {}; }, ()=>{});
+  DB.doc('cfg/fackeep').onSnapshot(d => { facKeep = d.exists ? (d.data().items||{}) : {}; refresh(); }, ()=>{});
   if(BRAND==='tid') DB.doc('stock/offro').onSnapshot(d => { offroDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
   DB.doc('cfg/channels').onSnapshot(d => { cfgCh = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
   DB.doc('cfg/rvcat').onSnapshot(d => { cfgCat = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
@@ -1147,7 +1148,7 @@ function etaList(x){
 }
 // 데이터마다 마지막 업데이트 시각 · 담당자 (예약배송 제목 옆에 작게) · 하루 넘게 안 바뀐 건 날짜를 빨갛게
 let updDoc = null;
-let facKeep = {};   // 리오더 시트 공장과 달라도 보드 공장을 유지하기로 확인한 상품 {바코드: 시트 공장명} → 다시 '공장 다름'으로 안 띄움
+let facKeep = {};   // MD 확인: 리오더 시트 공장이 틀린 상품 {바코드: 시트 공장명} → '공장 다름'으로 안 띄우고, 그 공장으로 바꾼 시트 기록도 무시
 function updList(){
   const U = []; const add = (t, d, go) => { if(d && d.at) U.push({t, at:d.at, by:d.by, go}); };
   add('재고 (셀메이트)', stockDoc, 'sm'); add('온라인 판매 추이', salesDoc, 'rvs:on');
