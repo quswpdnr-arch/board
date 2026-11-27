@@ -1002,12 +1002,13 @@ function addOrder(o){
   const addQ = o.rcAdd.reduce((s,x)=>s+x.q,0);
   o.recv = o.recv0 + addQ;
   if(v.qty!=null && v.qty!==''){ o.qty = Number(v.qty); o.rem0 = Math.max(0, o.qty - o.recv0); }
+  const remBase = (v.qty!=null && v.qty!=='') ? o.qty - o.recv0 : o.rem0;   // 마이너스 입고 보정이 있을 때 수량 줄인 오더도 잔여가 맞게 (0 아래로 자르지 않은 값에서 계산)
   const inactive = INACTIVE.has(o.f) && !v.closed && o.src==='snap';
   const zero = !v.closed && o.qty===0 && o.recv===0;
   o.closed = !!v.closed || inactive || zero; o.closeReason = v.closeReason || (inactive ? '진행안함 시트' : (zero ? '수량 0' : ''));
   o.cancels = (Array.isArray(v.cancel) ? v.cancel : []).map(x=>({q:Number(x.q)||0, r:x.r||'', d:x.d||'', by:x.by}));
   const cq = o.cancels.reduce((s,x)=>s+x.q,0); o.cancelQ = cq;
-  o.remain = o.closed ? 0 : Math.max(0, o.rem0 - addQ - cq);
+  o.remain = o.closed ? 0 : Math.max(0, remBase - addQ - cq);
   if(!o.closed && cq>0 && o.remain===0 && o.recv===0){ o.closed = true; o.closeReason = '전량 취소 · '+(o.cancels[o.cancels.length-1].r||''); }
   o.f0 = o.f; o.f = facForOrder(o, o.remain>0);
   o.changes = Array.isArray(v.log) ? v.log : [];
@@ -2162,7 +2163,8 @@ function roPlan(text){
       let list = (Array.isArray((ovr[o.id]||{}).recv) ? ovr[o.id].recv : []).slice(), cut = over;
       for(let k=list.length-1; k>=0 && cut>0; k--){ const e = list[k]; if(e.src!=='sheet' || !(+e.q>0)) continue; const d = Math.min(cut, +e.q); cut -= d; if(d===+e.q) list.splice(k,1); else list[k] = Object.assign({}, e, {q:+e.q-d}); }
       if(cut>0) list.push({q:-cut, d:TODAY, by:MYID||'', src:'sheet-fix'});   // 시트 원본 입고에서 온 수량은 마이너스 보정으로
-      plan.push({type:'fixrecv', p, o, od, qty, patch:{recv:list}, logs:[{type:'recv', msg:'입고 보정 '+o.recv+' → '+target+'장 (리오더 시트 온라인 남은수량 '+(qty-target)+')'}], recvQ:0, label:'입고 보정', text:'보드 입고 '+nf(o.recv)+' → 시트 '+nf(target)+'장 (−'+nf(over)+') · 온라인 남은 '+nf(qty-target)+'장'+(g(r,'rst')?' ('+g(r,'rst')+')':'')+' → 다시 진행 중'});
+      const qp = qty!==o.qty ? {qty} : {}; const lg = [{type:'recv', msg:'입고 보정 '+o.recv+' → '+target+'장 (리오더 시트 온라인 남은수량 '+(qty-target)+')'}]; if(qp.qty!=null) lg.unshift({type:'qty', msg:'수량 '+o.qty+' → '+qty+' (리오더 시트 · 온라인 수량)'});
+      plan.push({type:'fixrecv', p, o, od, qty, patch:Object.assign({recv:list}, qp), logs:lg, recvQ:0, label:'입고 보정', text:(qp.qty!=null?'오더 '+nf(o.qty)+' → '+nf(qty)+'장 (시트 온라인) · ':'')+'보드 입고 '+nf(o.recv)+' → 시트 '+nf(target)+'장 (−'+nf(over)+') · 온라인 남은 '+nf(qty-target)+'장'+(g(r,'rst')?' ('+g(r,'rst')+')':'')+(qty-target>0?' → 다시 진행 중':' → 입고 완료')});
       continue; }
     let recvQ = 0; const etaX = eta || (o.etaKind==='fixed' ? o.eta : ''); const exp = TID && !REM && etaX && etaX < TODAY && isOpen(o) && o.remain>0;
     if(isOpen(o) && o.remain>0){
