@@ -1089,6 +1089,7 @@ async function initCaps(){
   DB.doc('stock/offline').onSnapshot(d => { offDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
   DB.doc('stock/shop').onSnapshot(d => { shopDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
   DB.doc('cfg/upd').onSnapshot(d => { updDoc = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
+  DB.doc('cfg/fackeep').onSnapshot(d => { facKeep = d.exists ? (d.data().items||{}) : {}; }, ()=>{});
   if(BRAND==='tid') DB.doc('stock/offro').onSnapshot(d => { offroDoc = d.exists ? d.data() : null; refresh(); }, ()=>{});
   DB.doc('cfg/channels').onSnapshot(d => { cfgCh = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
   DB.doc('cfg/rvcat').onSnapshot(d => { cfgCat = d.exists ? d.data() : null; lightRefresh(); }, ()=>{});
@@ -1146,6 +1147,7 @@ function etaList(x){
 }
 // 데이터마다 마지막 업데이트 시각 · 담당자 (예약배송 제목 옆에 작게) · 하루 넘게 안 바뀐 건 날짜를 빨갛게
 let updDoc = null;
+let facKeep = {};   // 리오더 시트 공장과 달라도 보드 공장을 유지하기로 확인한 상품 {바코드: 시트 공장명} → 다시 '공장 다름'으로 안 띄움
 function updList(){
   const U = []; const add = (t, d, go) => { if(d && d.at) U.push({t, at:d.at, by:d.by, go}); };
   add('재고 (셀메이트)', stockDoc, 'sm'); add('온라인 판매 추이', salesDoc, 'rvs:on');
@@ -2118,7 +2120,7 @@ function roPlan(text){
     const memo0 = g(r,'memo'); const sumRaw = g(r,'sum').replace(/[^\d]/g,'');
     const cancel = /취소/.test(memo0) || (sumRaw!=='' && /^0+$/.test(sumRaw)) || (TID && /캔슬|취소/.test(g(r,'eta')));
     if(TID && b && od && !cancel){
-      const sf = g(r,'f'); if(sf){ const L = lastFac.get(b); if(!L || od >= L.od) lastFac.set(b, {od, f:sf}); }
+      const sf = g(r,'f'); if(sf && onQ>0){ const L = lastFac.get(b); if(!L || od >= L.od) lastFac.set(b, {od, f:sf}); }   // 오프라인 전용 리오더는 공장 비교에서 뺌
       if(REM){ const offR = Math.max(0, Math.min(offQ, nn(g(r,'offRem')))); if(offR>0){ const e0 = parseEta(g(r,'eta'), od).eta; (offro[b] = offro[b]||[]).push({od, eta:e0||'', q:offR, rem:1}); offN++; if(!onQ) offOnly++; if(e0 && e0 < TODAY) offPast++; } }
       else if(offQ>0){ const e0 = parseEta(g(r,'eta'), od).eta; (offro[b] = offro[b]||[]).push({od, eta:e0||'', q:offQ}); offN++; if(!onQ) offOnly++; }
     }
@@ -2178,7 +2180,7 @@ function roPlan(text){
   }
   // 정보 보정: 시트의 가장 최근 리오더 공장이 보드 공장과 다르면 '공장 변경' 후보 (기본 꺼짐 · 확인하고 체크)
   if(TID) for(const [b, L] of lastFac){ const p = byB.get(b); if(!p || !p.curFac) continue; const nf0 = x => String(x||'').replace(/\s/g,'').toLowerCase();
-    if(nf0(L.f) !== nf0(p.curFac) && !nf0(p.curFac).startsWith(nf0(L.f)) && !nf0(L.f).startsWith(nf0(p.curFac)) && !plan.some(x=>x.type==='fac' && x.p===p))
+    if(nf0(L.f) !== nf0(p.curFac) && !nf0(p.curFac).startsWith(nf0(L.f)) && !nf0(L.f).startsWith(nf0(p.curFac)) && !plan.some(x=>x.type==='fac' && x.p===p) && ![b, ...p.origBs].some(x=>facKeep[x] && nf0(facKeep[x])===nf0(L.f)))
       plan.push({type:'fac', p, od:L.od, to:L.f, known: FACTORIES.includes(L.f), label:'공장 다름', text:'보드 '+p.curFac+' → 시트 '+L.f+(FACTORIES.includes(L.f)?'':' (보드에 없는 공장명)')+' · '+fmtDY(L.od)+' 리오더부터'}); }
   if(REM) plan.forEach(x=>{ if(x.recvQ>0 || (x.type==='new' && (x.done || x.part))) x.auto = true; });   // 시트 남은수량 기준 입고는 기본 체크
   return {plan, miss, same, skipped, dup, header, total: rows.length - start, offro, offN, offOnly, rem:REM, offPast, moreRecv};
@@ -3254,7 +3256,7 @@ function unifyFactories(){
       for(const o of p.orders) if(o.od && (!best || o.od > best.d)) best = {d:o.od, f:o.f};
       for(const c of (p.moves||[])){ const d = String(c.date||c.at||'').slice(0,10); if(d && c.to && (!best || d >= best.d)) best = {d, f:c.to}; }
     }
-    if(best) for(const p of ps) if(p.curFac !== best.f){ p.unifiedFrom = p.curFac; p.curFac = best.f; p.facs.add(best.f); }
+    if(best) for(const p of ps) if(p.curFac !== best.f && !(p.moves && p.moves.length)){ p.unifiedFrom = p.curFac; p.curFac = best.f; p.facs.add(best.f); }   // 컬러별로 공장을 직접 바꾼 상품은 그대로
   }
 }
 
