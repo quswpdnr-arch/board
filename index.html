@@ -73,7 +73,8 @@ h3{font-size:14px;margin:0;font-weight:700}
 .st-soon{background:var(--soon-soft);color:var(--soon)} .st-open{background:var(--info-soft);color:var(--info)}
 .st-none{background:var(--sunk);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
 .st-done{background:var(--ok-soft);color:var(--ok)} .st-closed{background:var(--sunk);color:var(--muted)}
-.kind{font-size:11px;color:var(--muted)} .kind.fixed{color:var(--fg);font-weight:600}
+.kind{display:inline-block;font-size:10.5px;font-weight:600;line-height:1;padding:3px 6px;border-radius:4px;color:var(--muted);border:1px dashed var(--line);vertical-align:1px;white-space:nowrap} .kind.fixed{color:#fff;background:var(--accent);border:1px solid var(--accent)}
+.kx{font-size:11px;color:var(--muted)}.etab{white-space:nowrap}.etab b{font-weight:700;font-variant-numeric:tabular-nums}.etab.es b{font-weight:500;color:var(--muted)}.etab .kind{margin-left:5px}.etab.no{color:var(--muted)}
 .mono{font-family:var(--mono);font-size:12.5px;letter-spacing:-.01em;white-space:nowrap}
 .num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .muted{color:var(--muted)}
@@ -1200,10 +1201,10 @@ function etaCell(o){
   if(!o.eta) return '<span class="muted">'+(o.etaText?esc(o.etaText):'미정')+'</span>';
   const k = o.etaKind==='fixed' ? '<span class="kind fixed">확정</span>' : '<span class="kind">예상</span>';
   let extra = '';
-  if(o.status==='late') extra = ' <span class="kind" style="color:var(--bad)">'+diffDays(TODAY,o.eta)+'일 지연</span>';
-  if(o.status==='over') extra = ' <span class="kind" style="color:var(--warn)">+'+diffDays(TODAY,o.eta)+'일</span>';
+  if(o.status==='late') extra = ' <span class="kx" style="color:var(--bad)">'+diffDays(TODAY,o.eta)+'일 지연</span>';
+  if(o.status==='over') extra = ' <span class="kx" style="color:var(--warn)">+'+diffDays(TODAY,o.eta)+'일</span>';
   const ch = o.changes.filter(c=>c.type==='eta').length;
-  return '<span class="num">'+fmtD(o.eta)+'</span> '+k+extra+(ch?' <span class="kind">· 변경 '+ch+'회</span>':'')+partTag(o);
+  return '<span class="num'+(o.etaKind==='fixed'?'':' muted')+'"'+(o.etaKind==='fixed'?' style="font-weight:600"':'')+'>'+fmtD(o.eta)+'</span> '+k+extra+(ch?' <span class="kx">· 변경 '+ch+'회</span>':'')+partTag(o);
 }
 // ---------- 상품 사진 (셀메이트 대표이미지 썸네일) ----------
 const IMG = SNAP.img || {}; const NCH = window.__IMGURL ? 0 : (SNAP.imgChunks || 0);
@@ -1332,7 +1333,7 @@ function rcvRow(r){
 }
 function drow(o){
   const d = o.eta ? fmtD(o.eta) : '';
-  return '<div class="drow" data-act="openOrder" data-id="'+o.id+'"><span class="d">'+(o.eta?d.slice(0,5)+'<small>'+d.slice(6)+' · '+(o.etaKind==='fixed'?'확정':'예상')+'</small>':'<small>미정</small>')+'</span><span>'+pcell(o)+'<span class="muted" style="font-size:12px">'+flink(o.f)+' · '+esc(o.round)+(o.od?' · 오더 '+fmtDY(o.od):'')+'</span></span><span class="num" style="display:grid;gap:3px;justify-items:end"><b>'+nf(o.remain)+'장</b>'+chip(o.status)+'</span></div>';
+  return '<div class="drow" data-act="openOrder" data-id="'+o.id+'"><span class="d">'+(o.eta?'<span'+(o.etaKind==='fixed'?'':' style="color:var(--muted);font-weight:500"')+'>'+d.slice(0,5)+'</span><small>'+d.slice(6)+' <span class="kind'+(o.etaKind==='fixed'?' fixed':'')+'">'+(o.etaKind==='fixed'?'확정':'예상')+'</span></small>':'<small>미정</small>')+'</span><span>'+pcell(o)+'<span class="muted" style="font-size:12px">'+flink(o.f)+' · '+esc(o.round)+(o.od?' · 오더 '+fmtDY(o.od):'')+'</span></span><span class="num" style="display:grid;gap:3px;justify-items:end"><b>'+nf(o.remain)+'장</b>'+chip(o.status)+'</span></div>';
 }
 function allReceipts(){
   const out = [];
@@ -1556,7 +1557,7 @@ function dueCards(a){
       '<span class="s">'+esc(p.curFac)+(x.n>1?' · 차수 '+x.n+'개':'')+'</span>'+
       '</span><dl class="dkv">'+
         kv('오더일', (x.od ? fmtDY(x.od) : '<span class="muted">초두</span>')+(x.round?' · '+esc(x.round):''))+
-        kv('입고 예정', x.eta ? '<b>'+fmtD(x.eta)+'</b> <small>'+(x.fixed?'확정':'예상')+'</small>' : '<span class="muted">미정</span>')+kv('입고 수량', '<b class="inq">'+nf(x.rem)+'장</b>')+
+        kv('입고 예정', x.eta ? '<span class="etab '+(x.fixed?'fx':'es')+'"><b>'+fmtD(x.eta)+'</b><span class="kind'+(x.fixed?' fixed':'')+'">'+(x.fixed?'확정':'예상')+'</span></span>' : '<span class="muted">미정</span>')+kv('입고 수량', '<b class="inq">'+nf(x.rem)+'장</b>')+
         kv('가용(오더 포함)', hasStock(p) ? '<b>'+nf(availIn(p))+'</b>' : '<span class="muted">—</span>')+kv('실 보유재고', hasStock(p) ? '<b>'+nf(p.stock)+'</b>' : '<span class="muted">—</span>')+'<dd class="dwh">'+(whTxt(p)||'&nbsp;')+'</dd>'+
       '</dl></button>'; }).join('')+'</div>';
 }
@@ -3831,7 +3832,7 @@ function viewSched(){
       '<td>'+flink(o.f)+(p.contact?'<small class="odsub">'+esc(p.contact)+'</small>':'')+'</td>'+
       '<td style="white-space:nowrap">'+esc(o.round)+'<small class="odsub">'+(o.od?fmtD(o.od):'초두')+'</small></td>'+
       '<td class="num">'+nf(o.qty)+'<small class="odsub">잔여 '+nf(o.remain)+'</small></td>'+
-      '<td style="white-space:nowrap">'+(o.etaKind==='fixed'?fmtD(o.eta)+' <span class="kind">확정</span>':o.eta?'<span class="muted">'+fmtD(o.eta)+' 예상</span>':'<span class="muted">미정</span>')+'</td>'+
+      '<td style="white-space:nowrap">'+(o.etaKind==='fixed'?'<span class="etab fx"><b>'+fmtD(o.eta)+'</b><span class="kind fixed">확정</span></span>':o.eta?'<span class="etab es" title="공장 평균 리드타임으로 계산한 예상일"><b>'+fmtD(o.eta)+'</b><span class="kind">예상</span></span>':'<span class="etab no">미정</span>')+'</td>'+
       '<td><input type="date" data-sch="'+o.id+'" data-k="eta" value="'+esc(e.eta||'')+'"'+(lock?' disabled':'')+'></td>'+
       '<td><input data-sch="'+o.id+'" data-k="memo" value="'+esc(e.memo||'')+'" placeholder="예: 원단 11/12 입고"'+(lock?' disabled':'')+'></td>'+
       '<td><button class="btn sm'+(e.eta?' pri':'')+'" data-act="schSave" data-id="'+o.id+'"'+(e.eta&&!lock?'':' disabled')+'>저장</button> <button class="btn sm ghost danger" data-act="schDel" data-id="'+o.id+'"'+(canDo('recv','reorder')?'':' disabled title="입고 처리 · 리오더 권한이 필요해요"')+' title="취소된 오더 · 잘못 들어간 오더를 목록에서 뺍니다">삭제</button></td></tr>';
